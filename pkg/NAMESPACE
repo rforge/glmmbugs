@@ -1,0 +1,3 @@
+export(binToBinom, checkChain, cholInvArray, getDesignMatrix, getRaggedSeq, getStartingValues,
+       glmmBUGS, glmmPQLstrings, restoreParams, startingFunction, summaryChain, 
+       winBugsRaggedArray, writeBugsModel, plotOne)
