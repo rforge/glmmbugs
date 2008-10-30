@@ -142,6 +142,7 @@ for(D in groups) {
 
 #     return(list(result, fixedEffects, SX, Sbeta))
 
+if(length(fixedEffects)){
      for(D in 1:length(fixedEffects)) {
         if(is.matrix(ragged[[SX[D]]])) {
           newnames = dimnames(ragged[[SX[D]]])[[2]]
@@ -150,7 +151,7 @@ for(D in groups) {
             dimnames(result[[Sbeta[D]]])[[3]] = newnames
         }
      } 
-     
+ }    
      # make one matrix of betas
      betanameIndex = grep("beta", names(result))
       betas = NULL

@@ -1,5 +1,6 @@
 addSpatial = function(map, raggedArray=NULL, effect=NULL) {
-  
+    library(spdep)  
+
   if(is.null(effect)) {
   # assume the effect is at the lowest level
   # the lowest effect should have an Neffect and Seffect component
@@ -15,10 +16,10 @@ addSpatial = function(map, raggedArray=NULL, effect=NULL) {
 
   # compute the adjancy matrix, if map is an sp object
   if(any(slotNames(map)=="polygons")) {
-    library(sp)
+
     map = poly2nb(map,row.names=map[[effect]])
   }
-  theregions = attributes(map)$region.id
+  theregions = as.character(attributes(map)$region.id)
 
   # names of the random effects
   effectNames = names(raggedArray[[paste("S", effect, sep="")]])
