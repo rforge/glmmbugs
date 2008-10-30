@@ -40,7 +40,7 @@ addSpatial = function(map, raggedArray=NULL, effect=NULL) {
     map = map[newOrder, newOrder]
 
 
-  raggedArray$adj = unlist(apply(map, 2, which))
+  raggedArray[[paste("adj", effect,  sep="")]] = unlist(apply(map, 2, which))
   raggedArray$num = apply(map, 2, sum)
   raggedArray$weights = rep(1, length(raggedArray$adj))
   raggedArray[[paste("N", effect, "Spatial", sep="")]] = length(raggedArray$num)

@@ -20,8 +20,10 @@ function(effects, covariates, observations, data=NULL,
     theresp = data[,observations[1]] 
   }
   theformula = theresp ~ 1
-  theformula = update(theformula, as.formula(paste("~ . +", 
-    paste(unlist(covariates), collapse="+"), sep="")))
+  if(length(covariates)) {
+    theformula = update(theformula, as.formula(paste("~ . +", 
+      paste(unlist(covariates), collapse="+"), sep="")))
+  }
   # add the offset
   if(length(observations) > 1)
     theformula = update(theformula, as.formula(paste("~  . + offset(", observations[2], ")", sep="")))  
