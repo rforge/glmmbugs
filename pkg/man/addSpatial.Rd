@@ -40,13 +40,19 @@ data(popdata)
 data(casedata)
 model <- getRates(casedata, popdata, ~age*sex, S=c("M","F"))
 popdatanew <- getSMR(model, popdata, casedata)
-ragged = winBugsRaggedArray(popdatanew@data, effects = "CSDUID")
-adjmat = poly2nb(popdatanew, row.names=popdatanew$CSDUID)
-raggedWithSpatial = addSpatial(adjmat, ragged, "CSDUID")
-raggedWithSpatial2 = addSpatial(popdatanew, ragged, "CSDUID")
+popRagged = glmmBUGS(cases + expected ~ 1, data=popdatanew@data, effects="CSDUID", family="poisson")
+ragged = popRagged$ragged
+
+raggedWithSpatial = addSpatial(popdatanew, ragged, "CSDUID")
+
+writeBugsModel("model.bug", "CSDUID", NULL, c("count", "expected"), "poisson", spatial="CSDUID")
+startingValues = popRagged$startingValues
+source("getInits.R")
+library(R2WinBUGS)
+popResult = bugs(raggedWithSpatial, getInits, parameters.to.save = names(getInits()), model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10, program="winbugs")   
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ }
+\keyword{ }% __ONLY ONE__ keyword per line
