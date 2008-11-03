@@ -6,7 +6,7 @@
   Given a list of effect groups, and the covariates associated with each level, a bugs model file is written using ragged arrays corresponding to output from \code{\link{winBugsRaggedArray}}
 }
 \usage{
-writeBugsModel(file, effects, covariates, observations, family = c("bernoulli", "binomial", "poisson", "normal", "other"))
+writeBugsModel(file, effects, covariates, observations, family = c("bernoulli", "binomial", "poisson", "normal", "other"), spatial=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
