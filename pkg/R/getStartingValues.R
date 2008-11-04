@@ -65,6 +65,14 @@ for(Deffect in seq(length(pql$effects), 1)) {
 ## covariate matrix
 startingValues$vars = lapply(pql$modelStruct$reStruct, function(x) pql$sigma^2 * as.matrix(x)) 
 #
+
+# spatial
+#spatialEffect = ?
+#if(length(spatialEffect)) {
+
+
+#}
+
 return(startingValues)
 
 }

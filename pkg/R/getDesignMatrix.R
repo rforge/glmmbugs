@@ -81,7 +81,11 @@ getCovList = function(covariates, data, effects) {
   covariates = gsub(":", "_", covariates)
   dimnames(designMatrix)[[2]] = covariates
   
-  data = cbind(data[,response, drop=FALSE], designMatrix, data[,effects, drop=FALSE])
+  stuff = merge(data[,response, drop=FALSE], designMatrix,
+    by="row.names", all=T)
+  data = merge(stuff, data[,effects, drop=FALSE], by.x="Row.names",
+    by.y="row.names", all=T)
+  rownames(data) = data[,"Row.names"]
 
   covList = getCovList(covariates, data, effects)
   

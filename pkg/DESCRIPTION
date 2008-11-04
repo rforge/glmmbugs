@@ -1,7 +1,7 @@
 Package: glmmBUGS
 Type: Package
 Title: Generalised Linear Mixed Models with WinBUGS
-Version: 1.0
+Version: 1.1
 Date: 2007-04-20
 Depends: MASS, R2WinBUGS, nlme, lattice, abind, spdep, sp
 Author: Patrick Brown

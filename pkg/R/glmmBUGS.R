@@ -9,8 +9,14 @@ spatial=NULL, spatialEffect = NULL) {
     warning("family must be a character string, ie \"poisson\" or \"binomial\" ")
   }
 
+
+
+
 # get design matrix
 data = getDesignMatrix(formula, data, effects)
+
+# get rid of missing values
+data = na.omit(data)
 
 covariates = attributes(data)$covariates
 observations = attributes(data)$response
