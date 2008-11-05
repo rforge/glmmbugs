@@ -70,12 +70,45 @@ data(Muscle)
 muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gaussian")
 startingValues = muscleRagged$startingValues
 source("getInits.R")
-# library(R2WinBUGS)
-# muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()), model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10, program="winbugs")   
+\dontrun{
+ library(R2WinBUGS)
+ muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()), model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10, program="winbugs")
+}
 data(muscleResult)
 muscleParams = restoreParams(muscleResult, muscleRagged$ragged)  
 summaryChain(muscleParams)
 checkChain(muscleParams)
+
+# a spatial example
+library(diseasemapping)
+data(popdata)
+data(casedata)
+
+model = getRates(casedata, popdata, ~age*sex)
+ontario = getSMR(model, popdata, casedata)
+
+\dontrun{
+popDataAdjMat = poly2nb(ontario,row.names=as.character(ontario[["CDSUID"]]))
+}
+data(popDataAdjMat)
+
+forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
+  effects="CSDUID",   family="poisson", spatial=popDataAdjMat,
+  data=ontario@data)
+
+startingValues = forBugs$startingValues
+
+source("getInits.R")
+\dontrun{
+ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
+    model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
+      program="winbugs", debug=T)
+}
+\data{ontarioResult}
+
+ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
+
+ontarioSummary = summaryChain(ontarioParams)
           
 }
 

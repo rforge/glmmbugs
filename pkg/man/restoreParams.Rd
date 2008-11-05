@@ -14,7 +14,11 @@ restoreParams(bugsResult, ragged = NULL)
   \item{ragged}{The ragged array used to call \code{\link[R2WinBUGS:bugs]{bugs}}}
 }
 \details{
-}
+If the model contains a spatial component, the result will have list entries with names
+ \code{Reffect}, \code{ReffectSpatial}, and \code{Fittedeffect} with the simulations of the
+ non-spatial random effect, the spatial random effect, and the sum of the two effects plus
+ the fixed effects.
+ }
 \value{
   A list where each element is a matrix or an array.  The first dimension is the number of realisations, the second the number of chains, and for vector-valued parameters and random effects, the third dimension is the length of the parameter..
 }

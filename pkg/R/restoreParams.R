@@ -47,7 +47,7 @@ parnames[matPars] = gsub(paste(",", maxcol, "\\]", sep=""), "\\]", parnames[matP
 dimnames(thearray)[[3]] = parnames
 # update vecPars to reflect these intercepts
 vecPars = grep("\\[[[:digit:]]+\\]$", parnames, value=TRUE)
-} 
+} #end matPars
 
 
 if(!length(scPars))
@@ -68,9 +68,7 @@ for(D in groups) {
   result[[D]] = thearray[,,thisGroup]
 }
 
-#return(list(result, groups))
-    
-  # if a ragged option is given, 
+  # if a ragged option is given,
   # undo the reparametrisation and add better names to parameters
   if(!is.null(ragged)) {
      groups = paste("S", substr(groups, 2, nchar(groups)), sep="")
@@ -83,7 +81,8 @@ for(D in groups) {
  
      if(!length(randomEffects))
       warning(paste(toString(groups), ": can't find random effects in ragged object"))
-      
+
+     # the reparametrised mean of the random effects (just the intercept for now)
      themeanOld = array(result[["intercept"]], 
         c(dim(result[["intercept"]]), 1))
      Nchain = dim(themeanOld)[2]
@@ -120,29 +119,53 @@ for(D in groups) {
             thebeta[,Dchain,] %*% theX
        }  
       } 
-
+      # the random effects (reparameterised) are the means of the next level
       themeanOld = result[[theR]]
-       result[[theR]] = result[[theR]] - themean
-       
-       
-       torep = diff(theS)
-       torep = rep(1:length(torep), torep) 
+      
+      # un-re-parametrise
+      result[[theR]] = result[[theR]] - themean
+      
+      torep = diff(theS)
+      torep = rep(1:length(torep), torep)
+     }
+     
+     # add names to the spatial bit
+     spatialEffects = paste("R", randomEffects, "Spatial", sep="")
+     spatialEffects = spatialEffects[spatialEffects %in% names(result)]
+     for(D in spatialEffects) {
+        Dsub = gsub("^R", "", D)
+        Dsub = gsub("Spatial$", "", Dsub)
 
- 
+        #names to the spatial bit
+       thenames = names(ragged[[paste("num", Dsub, sep="")]])
+       theID = dimnames(result[[D]])[[3]]
+       theID = gsub("[[:alnum:]]+\\[", "", theID)
+       theID = gsub("\\]$", "", theID)
+       dimnames(result[[D]])[[3]] = thenames[as.integer(theID)]
+       
+       # get the fitted risk, and add names
+       thefitted = grep(paste("^R", Dsub, "\\[[[:digit:]]+\\]$", sep=""),
+        dimnames(thearray)[[3]], value=T)
+       thefitted = thearray[,,thefitted]
+       thenames = names(ragged[[paste("S", Dsub, sep="")]])
+       dimnames(thefitted)[[3]] = thenames[thenames != "end"]
+
+       result[[paste("Fitted", Dsub, sep="")]] = thefitted
+       
+       
      }
      
      
      
      fixedEffects = grep("^X", names(ragged), value=TRUE)
+
+
+if(length(fixedEffects)){
      fixedEffects = substr(fixedEffects, 2, nchar(fixedEffects))
-     
+
      Sbeta = paste("beta", fixedEffects, sep="")
 
      SX = paste("X", fixedEffects, sep="")
-
-#     return(list(result, fixedEffects, SX, Sbeta))
-
-if(length(fixedEffects)){
      for(D in 1:length(fixedEffects)) {
         if(is.matrix(ragged[[SX[D]]])) {
           newnames = dimnames(ragged[[SX[D]]])[[2]]
@@ -165,13 +188,17 @@ if(length(fixedEffects)){
         }
           betas = abind(betas, result[[D]])
      }
-     result = result[-betanameIndex]
-     result$betas = betas
+     if(length(betanameIndex)) {
+      result = result[-betanameIndex]
+      result$betas = betas
+     }
+
+
     
   
   }
   
-  
+
   return(result)
 }
 

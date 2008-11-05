@@ -15,6 +15,7 @@ getStartingValues(pql, ragged)
 }
 \details{
   This function produces a list suitable for passing to \code{\link{startingFunction}} to generate random starting values for use with \code{\link[R2WinBUGS:bugs]{bugs}}.
+  If \code{ragged} has a spatial component, starting values for a spatial random effect will also be computed.
 }
 \value{
   A list of vectors, one for each set of parameters or random effects, and a list of estimated standard deviations.  
