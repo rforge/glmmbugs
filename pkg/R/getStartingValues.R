@@ -80,6 +80,13 @@ for(D in 1:length(spatialEffect)) {
     startingValues[[spatialEffectIndep[D]]] =
       startingValues[[spatialEffectIndep[D]]]/2
 
+  startingValues[[spatialEffect[D] ]] = c(
+      startingValues[[spatialEffect[D] ]],
+      rep(0, ragged[[paste("N", spatialEffectVar[D], sep="")]] -
+        ragged[[paste("N", spatialEffectIndepVar[D], sep="")]] )
+      )
+
+
   startingValues$vars[[spatialEffectIndepVar[D] ]] =
     startingValues$vars[[spatialEffectVar[D] ]] =
     startingValues$vars[[spatialEffectIndepVar[D] ]]/2
