@@ -39,6 +39,9 @@ data(popdata)
 data(casedata)
 model <- getRates(casedata, popdata, ~age*sex, S=c("M","F"))
 popdatanew <- getSMR(model, popdata, casedata)
+# if region ID's are stored as factors, make sure to convert
+# them to characters rather than the default of converting them
+# to integers
 ontarioNB = poly2nb(popdata,row.names=as.character(popdata[["CDSUID"]]) )
 
 popRagged = glmmBUGS(cases + expected ~ 1, data=popdatanew@data, effects="CSDUID",

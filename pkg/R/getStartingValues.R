@@ -67,7 +67,26 @@ startingValues$vars = lapply(pql$modelStruct$reStruct, function(x) pql$sigma^2 *
 #
 
 # spatial
-#spatialEffect = ?
+spatialEffect = grep("^N[[:alnum:]]+Spatial$" , names(ragged), value=T)
+spatialEffect = paste("R", gsub("^N", "", spatialEffect), sep="")
+  spatialEffectIndep = gsub("Spatial$", "", spatialEffect)
+  spatialEffectIndepVar = gsub("^R", "", spatialEffectIndep)
+  spatialEffectVar = paste(spatialEffectIndepVar, "Spatial", sep="")
+
+  
+for(D in 1:length(spatialEffect)) {
+
+  startingValues[[spatialEffect[D] ]] =
+    startingValues[[spatialEffectIndep[D]]] =
+      startingValues[[spatialEffectIndep[D]]]/2
+
+  startingValues$vars[[spatialEffectIndepVar[D] ]] =
+    startingValues$vars[[spatialEffectVar[D] ]] =
+    startingValues$vars[[spatialEffectIndepVar[D] ]]/2
+}
+
+
+
 #if(length(spatialEffect)) {
 
 
