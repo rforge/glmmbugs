@@ -68,6 +68,7 @@ startingValues$vars = lapply(pql$modelStruct$reStruct, function(x) pql$sigma^2 *
 
 # spatial
 spatialEffect = grep("^N[[:alnum:]]+Spatial$" , names(ragged), value=T)
+if(length(spatialEffect) ) {
 spatialEffect = paste("R", gsub("^N", "", spatialEffect), sep="")
   spatialEffectIndep = gsub("Spatial$", "", spatialEffect)
   spatialEffectIndepVar = gsub("^R", "", spatialEffectIndep)
@@ -75,29 +76,36 @@ spatialEffect = paste("R", gsub("^N", "", spatialEffect), sep="")
 
   
 for(D in 1:length(spatialEffect)) {
+# starting value for the proportion of spatial effect
+spatialFactor = 0.5
 
+  thenames = names(startingValues[[spatialEffectIndep]])
   startingValues[[spatialEffect[D] ]] =
-    startingValues[[spatialEffectIndep[D]]] =
-      startingValues[[spatialEffectIndep[D]]]/2
+      pql$coef$random[[spatialEffectIndepVar]][
+        thenames, ,drop=T ]*spatialFactor
 
+  
+  startingValues[[spatialEffectIndep[D]]] =
+    startingValues[[spatialEffectIndep[D]]] -  startingValues[[spatialEffect[D]]]
+
+  # if there are some regions without data, add zeros as their starting values
   startingValues[[spatialEffect[D] ]] = c(
       startingValues[[spatialEffect[D] ]],
       rep(0, ragged[[paste("N", spatialEffectVar[D], sep="")]] -
         ragged[[paste("N", spatialEffectIndepVar[D], sep="")]] )
       )
 
-
-  startingValues$vars[[spatialEffectIndepVar[D] ]] =
+  # starting values for variances
     startingValues$vars[[spatialEffectVar[D] ]] =
-    startingValues$vars[[spatialEffectIndepVar[D] ]]/2
+    startingValues$vars[[spatialEffectIndepVar[D] ]]*spatialFactor
+
+    startingValues$vars[[spatialEffectIndepVar[D] ]] =
+        startingValues$vars[[spatialEffectIndepVar[D] ]]*(1-spatialFactor)
+
 }
 
+}
 
-
-#if(length(spatialEffect)) {
-
-
-#}
 
 return(startingValues)
 
