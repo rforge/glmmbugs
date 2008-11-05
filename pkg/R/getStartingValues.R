@@ -98,7 +98,7 @@ spatialFactor = 0.5
   # starting values for variances
     startingValues$vars[[spatialEffectVar[D] ]] =
     sqrt(
-      startingValues$vars[[spatialEffectIndepVar[D] ]]^2)*spatialFactor
+      startingValues$vars[[spatialEffectIndepVar[D] ]]^2*spatialFactor
       )
 
     startingValues$vars[[spatialEffectIndepVar[D] ]] = sqrt(
