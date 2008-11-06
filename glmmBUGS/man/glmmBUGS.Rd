@@ -80,6 +80,7 @@ summaryChain(muscleParams)
 checkChain(muscleParams)
 
 # a spatial example
+\dontrun{
 library(diseasemapping)
 data(popdata)
 data(casedata)
@@ -87,9 +88,9 @@ data(casedata)
 model = getRates(casedata, popdata, ~age*sex)
 ontario = getSMR(model, popdata, casedata)
 
-\dontrun{
+
+
 popDataAdjMat = poly2nb(ontario,row.names=as.character(ontario[["CDSUID"]]))
-}
 data(popDataAdjMat)
 
 forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
@@ -99,7 +100,6 @@ forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
 startingValues = forBugs$startingValues
 
 source("getInits.R")
-\dontrun{
 ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
     model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
       program="winbugs", debug=T)
@@ -109,6 +109,14 @@ ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getIni
 ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
 
 ontarioSummary = summaryChain(ontarioParams)
-          
+
+\dontrun{
+ontario = mergeBugsData(ontario, ontarioSummary)
+
+# get rid of CSDUID 3551034 and 3551035 because they're only neighbours
+# of each other and they have no data
+ontario = ontario[! ontario$CSDUID %in% c("3551034", "3551035"),]
+spplot(ontario, "FittedCSDUID.mean")
+}
 }
 
