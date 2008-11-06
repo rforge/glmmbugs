@@ -117,6 +117,12 @@ ontario = mergeBugsData(ontario, ontarioSummary)
 # of each other and they have no data
 ontario = ontario[! ontario$CSDUID \%in\% c("3551034", "3551035"),]
 spplot(ontario, "FittedCSDUID.mean")
+
+# posterior probability of having 4x excess risk
+postProb = apply(exp(ontarioParams$FittedCSDUID), 3, function(x) mean(x>4))
+ontario = mergeBugsData(ontario, postProb, newcol="postProb4", by.x="CSDUID")
+spplot(ontario, "postProb4")
+
 }
 }
 
