@@ -102,7 +102,7 @@ for(D in groups) {
        DX =  paste("X", D, sep="")
        Dbeta = paste("beta", D, sep="")
 
-      
+
 
        themean = themeanOld[,,torep]
        

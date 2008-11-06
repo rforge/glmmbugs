@@ -115,7 +115,7 @@ ontario = mergeBugsData(ontario, ontarioSummary)
 
 # get rid of CSDUID 3551034 and 3551035 because they're only neighbours
 # of each other and they have no data
-ontario = ontario[! ontario$CSDUID %in% c("3551034", "3551035"),]
+ontario = ontario[! ontario$CSDUID \%in\% c("3551034", "3551035"),]
 spplot(ontario, "FittedCSDUID.mean")
 }
 }
