@@ -82,6 +82,7 @@ checkChain(muscleParams)
 # a spatial example
 \dontrun{
 library(diseasemapping)
+
 data(popdata)
 data(casedata)
 
