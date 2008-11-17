@@ -64,7 +64,7 @@ function(file, effects, covariates, observations,
   }   
   # spatial
   if(theE %in% spatial) {
-     cat("+ R", theE, "Spatial[", theD, "]", sep="")
+     cat("+ R", theE, "Spatial[Sspatial", theE, "[", theD, "]]", sep="")
   }
   cat("\n")
   
