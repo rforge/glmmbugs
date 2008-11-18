@@ -105,7 +105,7 @@ ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getIni
     model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
       program="winbugs", debug=T)
 }
-data{ontarioResult}
+'data(ontarioResult)
 
 ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
 

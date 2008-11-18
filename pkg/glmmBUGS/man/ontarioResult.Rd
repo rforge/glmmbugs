@@ -7,7 +7,7 @@ Results from running Winbugs on the ontario data
 }
 \usage{data(ontarioResult)}
 \format{
-A list, as produced by the \code{\link{R2WinBUGS::bugs}} function.
+A list, as produced by the \code{\link[R2WinBUGS]{bugs}} function.
 }
 \examples{
 data(ontarioResult)
