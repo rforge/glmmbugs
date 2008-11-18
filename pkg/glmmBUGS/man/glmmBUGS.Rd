@@ -104,14 +104,12 @@ source("getInits.R")
 ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
     model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
       program="winbugs", debug=T)
-}
 data(ontarioResult)
 
 ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
 
 ontarioSummary = summaryChain(ontarioParams)
 
-\dontrun{
 ontario = mergeBugsData(ontario, ontarioSummary)
 
 # get rid of CSDUID 3551034 and 3551035 because theyre only neighbours

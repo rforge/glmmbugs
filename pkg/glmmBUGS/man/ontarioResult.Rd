@@ -12,7 +12,7 @@ A list, as produced by the \code{\link[R2WinBUGS]{bugs}} function.
 \examples{
 data(ontarioResult)
 
-ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
+ontarioParams = restoreParams(ontarioResult)
 
 ontarioSummary = summaryChain(ontarioParams)
 }
