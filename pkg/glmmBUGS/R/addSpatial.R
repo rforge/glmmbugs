@@ -16,7 +16,6 @@ addSpatial = function(map, raggedArray=NULL, effect=NULL) {
 
   # compute the adjancy matrix, if map is an sp object
   if(any(slotNames(map)=="polygons")) {
-    library(sp)
     map = poly2nb(map,row.names=map[[effect]])
   } 
   if(class(map)=="nb") {

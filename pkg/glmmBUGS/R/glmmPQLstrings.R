@@ -35,7 +35,7 @@ function(effects, covariates, observations, data=NULL,
         family = binomial
 
 #return(list(theformula, therandom, data, theresp))
-library(MASS)
+
 thepql = glmmPQL(theformula, random = therandom, family=family, data=data, ...)
 
 thepql$effects = effects
