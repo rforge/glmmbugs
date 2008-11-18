@@ -105,7 +105,7 @@ ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getIni
     model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
       program="winbugs", debug=T)
 }
-'data(ontarioResult)
+data(ontarioResult)
 
 ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
 
@@ -114,7 +114,7 @@ ontarioSummary = summaryChain(ontarioParams)
 \dontrun{
 ontario = mergeBugsData(ontario, ontarioSummary)
 
-# get rid of CSDUID 3551034 and 3551035 because they're only neighbours
+# get rid of CSDUID 3551034 and 3551035 because theyre only neighbours
 # of each other and they have no data
 ontario = ontario[! ontario$CSDUID \%in\% c("3551034", "3551035"),]
 spplot(ontario, "FittedCSDUID.mean")
