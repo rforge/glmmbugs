@@ -9,14 +9,12 @@ addSpatial(map, raggedArray, effect = NULL)
 }
 
 \arguments{
-  \item{map}{ a spatialPolygonsDataFrame object, or an nb object. }
+  \item{map}{ a spatialPolygonsDataFrame object, or an nb object or a list of two vectors, adj and num}
   \item{raggedArray}{ the result from winBugsRaggedArray }
   \item{effect}{ a character vector listing the effect names }
 }
 \details{
 Computes the values need by the \code{car.normal} distribution in WinBUGS.
-If necessary, the regions are reordered to be in the same order as the ragged array,
-with any regions without observations put last.
 }
 \value{
  The ragged array is returned, with the following additional elements

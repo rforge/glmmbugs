@@ -4,7 +4,7 @@ addSpatial = function(map, raggedArray=NULL, effect=NULL) {
   if(is.null(effect)) {
   # assume the effect is at the lowest level
   # the lowest effect should have an Neffect and Seffect component
-    effect = grep("^(N|S)", names(ragged), value=T)
+    effect = grep("^(N|S)", names(raggedArray), value=T)
     effect = substr(effect, 2,  10000)
     effect = table(effect)
     effect = names(effect)[effect==2]

@@ -16,7 +16,7 @@ glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R
    \item{modelFile}{File for saving the bugs model}
   \item{initFile}{File for saving the function for generating initial values}
   \item{family}{distribution of responses}
-  \item{spatial}{spatial variable}
+  \item{spatial}{Spatial adj matrix, in forms of ploygon, nb object or a list of adj and num}
   \item{spatialEffect}{ spatial variable from data } 
 }
 \details{
