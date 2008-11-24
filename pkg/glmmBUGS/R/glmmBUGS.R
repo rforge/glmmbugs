@@ -41,8 +41,9 @@ startingValues = getStartingValues(pql=thepql, ragged=ragged)
 startingFunction(startingValues, initFile)
 
 # create the model
-spatialEffect = grep("Spatial$", names(ragged), value=T)
-#use substr to get the name of the effect 
+spatialEffect = grep("^N[[:alnum:]]+Spatial$", names(ragged), value=T)
+spatialEffect = gsub("^N", "", spatialEffect)
+spatialEffect = gsub("Spatial$", "", spatialEffect)
 
 writeBugsModel(modelFile, effects =effects,
     covariates = covariates, observations = observations,

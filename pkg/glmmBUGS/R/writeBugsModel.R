@@ -9,8 +9,10 @@ function(file, effects, covariates, observations,
     warning("family must be a character string, ie \"poisson\" or \"binomial\" ")
   }
   family = family[1]
-  if(!all(spatial %in% effects))
-    warning("spatial effects used which are not specified as random effects")
+  if(length(spatial)) {
+    if(!all(spatial %in% effects))
+      warning("spatial effects used which are not specified as random effects")
+  }
   
   offset = observations[-1]
   observations = observations[1]
