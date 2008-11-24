@@ -46,7 +46,7 @@ spatialEffect = grep("Spatial$", names(ragged), value=T)
 
 writeBugsModel(modelFile, effects =effects,
     covariates = covariates, observations = observations,
-     family=family, spatial = effects[!is.null(spatialEffect)] ) # add spatial            
+     family=family, spatial = spatialEffect ) # add spatial            
      
 return(list(ragged=ragged, startingValues = startingValues, pql=thepql))  
 }

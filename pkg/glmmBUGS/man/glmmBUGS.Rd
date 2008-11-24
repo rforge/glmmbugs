@@ -70,11 +70,10 @@ data(Muscle)
 muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gaussian")
 startingValues = muscleRagged$startingValues
 source("getInits.R")
-\dontrun{
- library(R2WinBUGS)
- muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()), model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10, program="winbugs")
-}
-data(muscleResult)
+
+library(R2WinBUGS)
+muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()), model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10, program="openbugs")
+
 muscleParams = restoreParams(muscleResult, muscleRagged$ragged)  
 summaryChain(muscleParams)
 checkChain(muscleParams)
@@ -106,7 +105,7 @@ source("getInits.R")
 \dontrun{
 ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
     model.file="model.bug", n.chain=3, n.iter=100, n.burnin=10, n.thin=2,
-      program="winbugs", debug=T)
+      program="openbugs", debug=T)
 }
 
 data(ontarioResult)
