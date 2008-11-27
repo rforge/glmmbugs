@@ -1,6 +1,4 @@
 import(MASS)
-import(R2WinBUGS)
-import(spdep)
 export(addSpatial)
 export( binToBinom)
 export( checkChain, cholInvArray, getDesignMatrix, getRaggedSeq,
