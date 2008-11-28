@@ -72,6 +72,7 @@ startingValues = muscleRagged$startingValues
 source("getInits.R")
 
 library(R2WinBUGS)
+library(BRugs)
 muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()), model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10, program="openbugs")
 
 muscleParams = restoreParams(muscleResult, muscleRagged$ragged)  
