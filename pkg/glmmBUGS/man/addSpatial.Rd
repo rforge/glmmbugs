@@ -40,7 +40,7 @@ popdatanew <- getSMR(model, popdata, casedata)
 # if region ID's are stored as factors, make sure to convert
 # them to characters rather than the default of converting them
 # to integers
-ontarioNB = poly2nb(popdata,row.names=as.character(popdata[["CDSUID"]]) )
+ontarioNB = poly2nb(popdata,row.names=as.character(popdata[["CSDUID"]]) )
 
 popRagged = glmmBUGS(cases + expected ~ 1, data=popdatanew@data, effects="CSDUID",
   family="poisson", spatial=ontarioNB)
