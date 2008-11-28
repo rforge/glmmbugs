@@ -14,7 +14,9 @@ addSpatial(map, raggedArray, effect = NULL)
   \item{effect}{ a character vector listing the effect names }
 }
 \details{
-Computes the values need by the \code{car.normal} distribution in WinBUGS.
+Computes the values need by the \code{car.normal} distribution in WinBUGS.  
+This function is called by \code{\link{glmmBUGS}} when a spatial argument is provided, \code{addSpatial} is 
+usually not called by a user.
 }
 \value{
  The ragged array is returned, with the following additional elements
@@ -29,28 +31,31 @@ Computes the values need by the \code{car.normal} distribution in WinBUGS.
 \seealso{   }
 \examples{
 
-\dontrun{
-library(diseasemapping)
-library(sp)
-library(spdep)
-data(popdata)
-data(casedata)
-model <- getRates(casedata, popdata, ~age*sex, S=c("M","F"))
-popdatanew <- getSMR(model, popdata, casedata)
+# get a winbugs model and data ready, without a spatial effect
+data(ontario)
+
+forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
+  effects="CSDUID",   family="poisson",
+  data=ontario)
+
+# now add a spatial effect.  
+# first, compute the adjacency matrix 
 # if region ID's are stored as factors, make sure to convert
 # them to characters rather than the default of converting them
 # to integers
-ontarioNB = poly2nb(popdata,row.names=as.character(popdata[["CSDUID"]]) )
+\dontrun{
+popDataAdjMat = poly2nb(popdata,row.names=as.character(popdata[["CSDUID"]]) )
+}
+data(popDataAdjMat)
 
-popRagged = glmmBUGS(cases + expected ~ 1, data=popdatanew@data, effects="CSDUID",
-  family="poisson", spatial=ontarioNB)
-ragged = popRagged$ragged
+# add the adjacency matrix to the ragged array  
+raggedWithSpatial = addSpatial(popDataAdjMat, forBugs$ragged, "CSDUID")
 
-raggedWithSpatial = addSpatial(popdatanew, ragged, "CSDUID")
-
+# write a new bugs model with a spatial effect
 writeBugsModel("model.bug", "CSDUID", NULL, c("count", "expected"), "poisson", spatial="CSDUID")
-startingValues = popRagged$startingValues
+startingValues = forBugs$startingValues
 source("getInits.R")
+\dontrun{
 library(R2WinBUGS)
 popResult = bugs(raggedWithSpatial, getInits, parameters.to.save = names(getInits()), model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10, program="winbugs")   
 }
