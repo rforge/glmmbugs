@@ -44,6 +44,9 @@ forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
 # them to characters rather than the default of converting them
 # to integers
 \dontrun{
+#library(spdep)
+#library(diseasemapping)
+#data(popdata)
 popDataAdjMat = poly2nb(popdata,row.names=as.character(popdata[["CSDUID"]]) )
 }
 data(popDataAdjMat)

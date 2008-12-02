@@ -88,9 +88,9 @@ data(casedata)
 
 model = getRates(casedata, popdata, ~age*sex)
 ontario = getSMR(model, popdata, casedata)
-ontario = ontario@data[,c("CSDUID","Observed","logExpected")]
+ontario@data = ontario@data[,c("CSDUID","Observed","logExpected")]
 library(spdep)
-popDataAdjMat = poly2nb(ontario,row.names=as.character(ontario[["CDSUID"]]))
+popDataAdjMat = poly2nb(ontario,row.names=as.character(ontario[["CSDUID"]]))
 }
 
 data(popDataAdjMat)
@@ -98,7 +98,7 @@ data(ontario)
 
 forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
   effects="CSDUID",   family="poisson", spatial=popDataAdjMat,
-  data=ontario)
+  data=ontario@data)
 
 startingValues = forBugs$startingValues
 
@@ -120,17 +120,17 @@ ontarioSummary = summaryChain(ontarioParams)
 
 \dontrun{
 
-popdata = mergeBugsData(popdata, ontarioSummary)
+ontario = mergeBugsData(ontario, ontarioSummary)
 
 # get rid of CSDUID 3551034 and 3551035 because theyre only neighbours
 # of each other and they have no data
-popdata = popdata[! popdata$CSDUID \%in\% c("3551034", "3551035"),]
-spplot(popdata, "FittedCSDUID.mean")
+ontario = ontario[! ontario$CSDUID \%in\% c("3551034", "3551035"),]
+spplot(ontario, "FittedCSDUID.mean")
 
 # posterior probability of having 4x excess risk
 postProb = apply(exp(ontarioParams$FittedCSDUID), 3, function(x) mean(x>4))
-popdata = mergeBugsData(popdata, postProb, newcol="postProb4", by.x="CSDUID")
-spplot(popdata, "postProb4")
+ontario = mergeBugsData(ontario, postProb, newcol="postProb4", by.x="CSDUID")
+spplot(ontario, "postProb4")
 
 }
 }
