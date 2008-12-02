@@ -89,6 +89,7 @@ data(casedata)
 model = getRates(casedata, popdata, ~age*sex)
 ontario = getSMR(model, popdata, casedata)
 ontario = ontario@data[,c("CSDUID","Observed","logExpected")]
+library(spdep)
 popDataAdjMat = poly2nb(ontario,row.names=as.character(ontario[["CDSUID"]]))
 }
 
@@ -104,9 +105,11 @@ startingValues = forBugs$startingValues
 source("getInits.R")
 
 \dontrun{
-ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
+library(R2WinBUGS)
+ontarioResult = bugs(forBugs$ragged, getInits, 
+  parameters.to.save = names(getInits()),
     model.file="model.bug", n.chain=3, n.iter=100, n.burnin=10, n.thin=2,
-      program="openbugs", debug=T)
+      program="winbugs", debug=T)
 }
 
 data(ontarioResult)
@@ -116,17 +119,18 @@ ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
 ontarioSummary = summaryChain(ontarioParams)
 
 \dontrun{
-ontario = mergeBugsData(ontario, ontarioSummary)
+
+popdata = mergeBugsData(popdata, ontarioSummary)
 
 # get rid of CSDUID 3551034 and 3551035 because theyre only neighbours
 # of each other and they have no data
-ontario = ontario[! ontario$CSDUID \%in\% c("3551034", "3551035"),]
-spplot(ontario, "FittedCSDUID.mean")
+popdata = popdata[! popdata$CSDUID \%in\% c("3551034", "3551035"),]
+spplot(popdata, "FittedCSDUID.mean")
 
 # posterior probability of having 4x excess risk
 postProb = apply(exp(ontarioParams$FittedCSDUID), 3, function(x) mean(x>4))
-ontario = mergeBugsData(ontario, postProb, newcol="postProb4", by.x="CSDUID")
-spplot(ontario, "postProb4")
+popdata = mergeBugsData(popdata, postProb, newcol="postProb4", by.x="CSDUID")
+spplot(popdata, "postProb4")
 
 }
 }
