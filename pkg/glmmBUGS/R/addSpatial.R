@@ -19,9 +19,10 @@ addSpatial = function(map, raggedArray=NULL, effect=NULL) {
     map = poly2nb(map,row.names=map[[effect]])
   } 
   if(class(map)=="nb") {
+    theregions = attributes(map)$region.id
     map = list(num = sapply(map, length),
       adj = unlist(map)  )
-    names(map$num) = theregions = attributes(map)$region.id
+    names(map$num) = theregions
 
   } else {
     if(!all(c("adj", "num") %in% names(map))) {

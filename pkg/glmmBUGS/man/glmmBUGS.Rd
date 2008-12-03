@@ -88,9 +88,9 @@ data(casedata)
 
 model = getRates(casedata, popdata, ~age*sex)
 ontario = getSMR(model, popdata, casedata)
-ontario@data = ontario@data[,c("CSDUID","Observed","logExpected")]
+ontario = ontario@data[,c("CSDUID","Observed","logExpected")]
 library(spdep)
-popDataAdjMat = poly2nb(ontario,row.names=as.character(ontario[["CSDUID"]]))
+popDataAdjMat = poly2nb(popdata,row.names=as.character(popdata[["CSDUID"]]))
 }
 
 data(popDataAdjMat)
@@ -98,7 +98,7 @@ data(ontario)
 
 forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
   effects="CSDUID",   family="poisson", spatial=popDataAdjMat,
-  data=ontario@data)
+  data=ontario)
 
 startingValues = forBugs$startingValues
 
@@ -120,7 +120,7 @@ ontarioSummary = summaryChain(ontarioParams)
 
 \dontrun{
 
-ontario = mergeBugsData(ontario, ontarioSummary)
+ontario = mergeBugsData(popdata, ontarioSummary)
 
 # get rid of CSDUID 3551034 and 3551035 because theyre only neighbours
 # of each other and they have no data
