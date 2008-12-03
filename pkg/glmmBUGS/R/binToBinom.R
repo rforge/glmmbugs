@@ -1,4 +1,14 @@
 binToBinom = function(obs, covariates) {
+# make sure covariates is a matrix
+if(is.vector(covariates))
+  covariates = matrix(covariates, ncol=1)
+
+# get rid of missings
+notNA = !is.na(obs)
+obs = obs[notNA]
+covariates = covariates[notNA,]
+
+
   covString = apply(covariates, 1, toString)
   tableCov = c(table(covString))
   

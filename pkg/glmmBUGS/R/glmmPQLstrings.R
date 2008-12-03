@@ -16,6 +16,7 @@ function(effects, covariates, observations, data=NULL,
     theresp = as.matrix(data[,observations[1:2] ])
     theresp[,2] = theresp[,2] - theresp[,1]
     dimnames(theresp) = list(NULL, c("ones", "zeros"))
+    observations = observations[-2]
   } else {
     theresp = data[,observations[1]] 
   }
@@ -25,7 +26,7 @@ function(effects, covariates, observations, data=NULL,
       paste(unlist(covariates), collapse="+"), sep="")))
   }
   # add the offset
-  if(length(observations) > 1)
+  if(length(observations) > 1 )
     theformula = update(theformula, as.formula(paste("~  . + offset(", observations[2], ")", sep="")))  
     
   therandom = as.formula(paste("~1|", paste(effects, collapse="/"), sep=""))
