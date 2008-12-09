@@ -149,7 +149,7 @@ for(D in groups) {
        thenames = names(ragged[[paste("S", Dsub, sep="")]])
        dimnames(thefitted)[[3]] = thenames[thenames != "end"]
 
-       result[[paste("Fitted", Dsub, sep="")]] = thefitted
+       result[[paste("FittedRate", Dsub, sep="")]] = exp(thefitted)
        
        
      }

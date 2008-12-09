@@ -14,13 +14,22 @@ restoreParams(bugsResult, ragged = NULL)
   \item{ragged}{The ragged array used to call \code{\link[R2WinBUGS:bugs]{bugs}}}
 }
 \details{
-If the model contains a spatial component, the result will have list entries with names
- \code{Reffect}, \code{ReffectSpatial}, and \code{Fittedeffect} with the simulations of the
- non-spatial random effect, the spatial random effect, and the sum of the two effects plus
- the fixed effects.
  }
 \value{
-  A list where each element is a matrix or an array.  The first dimension is the number of realisations, the second the number of chains, and for vector-valued parameters and random effects, the third dimension is the length of the parameter..
+  A list where each element is a matrix or an array.  
+  The first dimension is the number of realisations, 
+  the second the number of chains, and for vector-valued parameters and 
+  random effects, the third dimension is the length of the parameter.
+  
+  
+If the model contains a spatial component, 
+the result will have list entries the following:
+
+\item{ReffectSpatial}{The spatial random effect for each region}
+\item{Reffect}{The log relative risk, which is the sum of the spatial and non-spatial random effect}, 
+\item{FittedRateeffect}{The incidence rate for each region (if the offset in the model is total population), 
+or the incident rate relative to the population average (if the offset is an expected count).  Note that 
+these rates are on the natural scale rather than the log scale.}
 }
 \references{}
 \author{Patrick Brown \code{patrick.brown@utoronto.ca}}
