@@ -108,7 +108,7 @@ source("getInits.R")
 library(R2WinBUGS)
 ontarioResult = bugs(forBugs$ragged, getInits, 
   parameters.to.save = names(getInits()),
-    model.file="model.bug", n.chain=3, n.iter=100, n.burnin=10, n.thin=2,
+    model.file="model.bug", n.chain=3, n.iter=200, n.burnin=100, n.thin=2,
       program="winbugs", debug=T)
 }
 
@@ -125,12 +125,14 @@ ontario = mergeBugsData(popdata, ontarioSummary)
 # get rid of CSDUID 3551034 and 3551035 because theyre only neighbours
 # of each other and they have no data
 ontario = ontario[! ontario$CSDUID \%in\% c("3551034", "3551035"),]
-spplot(ontario, "FittedCSDUID.mean")
+spplot(ontario, "FittedRateCSDUID.mean")
 
 # posterior probability of having 4x excess risk
 postProb = apply(exp(ontarioParams$FittedCSDUID), 3, function(x) mean(x>4))
 ontario = mergeBugsData(ontario, postProb, newcol="postProb4", by.x="CSDUID")
 spplot(ontario, "postProb4")
+
+
 
 }
 }
