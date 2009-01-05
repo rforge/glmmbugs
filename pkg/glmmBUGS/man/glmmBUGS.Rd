@@ -10,17 +10,17 @@ glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-\item{formula}{A formula for the fixed effects portion of the model.} 
-   \item{data}{A data frame containing the response, covariates, and group membership.}
-  \item{effects}{A vector of character strings containing the grouping levels, from most general to most specific}
+   \item{formula}{A formula for the fixed effects portion of the model} 
+   \item{data}{A data frame containing the response, covariates, and group membership}
+   \item{effects}{A vector of character strings containing the grouping levels, from most general to most specific}
    \item{modelFile}{File for saving the bugs model}
-  \item{initFile}{File for saving the function for generating initial values}
-  \item{family}{distribution of responses}
-  \item{spatial}{Spatial adj matrix, in forms of ploygon, nb object or a list of adj and num}
-  \item{spatialEffect}{ spatial variable from data } 
+   \item{initFile}{File for saving the function for generating initial values}
+   \item{family}{distribution of responses}
+   \item{spatial}{Spatial adj matrix, in forms of ploygon, nb object or a list of adj and num}
+   \item{spatialEffect}{ spatial variable from data } 
 }
 \details{
-\code{glmmBUGS} calls the following functions:
+\item{\code{glmmBUGS}} calls the following functions:
 \item{\code{\link{getDesignMatrix}}}{to convert factors and interactions to indicator variables and find which covariates apply at which levels}
 \item{\code{\link{winBugsRaggedArray}}}{ to prepare the ragged array}
 \item{\code{\link{glmmPQLstrings}}}{ estimate starting values}
