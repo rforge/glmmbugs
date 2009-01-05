@@ -36,7 +36,7 @@ An array with the third dimension's precision matrix entries changed to
   thetri = lower.tri(lmat)
   lmat[thetri] = rnorm(sum(thetri), 0, 2)
 #  precmat = solve(lmat \%*\% t(lmat))
-  precmat = solve(lmat %*% t(lmat))
+  precmat = solve(lmat \%*\% t(lmat))
  
 # put this matrix into an array 
   precarray = array(c(precmat), dim=c(1,1,length(precmat)))
