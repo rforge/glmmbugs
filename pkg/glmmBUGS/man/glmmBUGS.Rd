@@ -23,10 +23,10 @@ glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R
 \code{glmmBUGS} calls the following functions:
 \item{\code{\link{getDesignMatrix}}}{to convert factors and interactions to indicator variables and find which covariates apply at which levels}
 \item{\code{\link{winBugsRaggedArray}}}{ to prepare the ragged array}
-\item{ \code{\link{glmmPQLstrings}}}{ estimate starting values}
-\item{ \code{\link{writeBugsModel}}}{ to create a model file}
-\item{ \code{\link{getStartingValues}} }{to extract starting values from the glmmPQL result}
-\item{ \code{\link{startingFunction}} }{to write a function to generate random starting values}
+\item{\code{\link{glmmPQLstrings}}}{ estimate starting values}
+\item{\code{\link{writeBugsModel}}}{ to create a model file}
+\item{\code{\link{getStartingValues}} }{to extract starting values from the glmmPQL result}
+\item{\code{\link{startingFunction}} }{to write a function to generate random starting values}
 Type \code{glmmBUGS} on the R command line to see the source code, it provides a good summary of the roles of the various functions in the \code{glmmBUGS} package.
 
 
