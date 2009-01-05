@@ -20,7 +20,7 @@ glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R
    \item{spatialEffect}{ spatial variable from data } 
 }
 \details{
-\item{\code{glmmBUGS}} calls the following functions:
+\item{\code{glmmBUGS}}{ calls the following functions: }
 \item{\code{\link{getDesignMatrix}}}{to convert factors and interactions to indicator variables and find which covariates apply at which levels}
 \item{\code{\link{winBugsRaggedArray}}}{ to prepare the ragged array}
 \item{\code{\link{glmmPQLstrings}}}{ estimate starting values}
