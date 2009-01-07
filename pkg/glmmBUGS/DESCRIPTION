@@ -3,8 +3,9 @@ Type: Package
 Title: Generalised Linear Mixed Models and Spatial Models with BUGS
 Version: 1.4
 Date: 2008-11-26
-Depends: MASS,  abind,   
-Suggests: R2WinBUGS, spdep, BRugs  
+Depends: MASS,  abind   
+Suggests: spdep
+Enhances: R2WinBUGS, BRugs
 Author: Patrick Brown
 Maintainer: Patrick Brown <patrick.brown@utoronto.ca>
 Description: Write bugs model files for hierarchical and spatial models, arranges unbalanced data in ragged arrays, and creates starting values.
