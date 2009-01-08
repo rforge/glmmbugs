@@ -20,14 +20,6 @@ glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R
    \item{spatialEffect}{ spatial variable from data } 
 }
 \details{
-\item{\code{glmmBUGS}}{ calls the following functions: }
-\item{\code{\link{getDesignMatrix}}}{to convert factors and interactions to indicator variables and find which covariates apply at which levels}
-\item{\code{\link{winBugsRaggedArray}}}{ to prepare the ragged array}
-\item{\code{\link{glmmPQLstrings}}}{ estimate starting values}
-\item{\code{\link{writeBugsModel}}}{ to create a model file}
-\item{\code{\link{getStartingValues}} }{to extract starting values from the glmmPQL result}
-\item{\code{\link{startingFunction}} }{to write a function to generate random starting values}
-Type \code{glmmBUGS} on the R command line to see the source code, it provides a good summary of the roles of the various functions in the \code{glmmBUGS} package.
 
 
 Consider the following model, where \eqn{Y_{ijk}}{Y_ijk} is the number of absences from individual k from class j in school k.  
@@ -51,6 +43,17 @@ To aid in convergence, the bugs model is actually the following:
 
 and the funciton \code{\link{restoreParams}} subtracts the means from the random effects to restore the original set of equations.
 
+\code{glmmBUGS} calls the following functions: 
+\describe{
+\item{\code{\link{getDesignMatrix}}}{to convert factors and interactions to indicator variables and find which covariates apply at which levels}
+\item{\code{\link{winBugsRaggedArray}}}{ to prepare the ragged array}
+\item{\code{\link{glmmPQLstrings}}}{ estimate starting values}
+\item{\code{\link{writeBugsModel}}}{ to create a model file}
+\item{\code{\link{getStartingValues}} }{to extract starting values from the glmmPQL result}
+\item{\code{\link{startingFunction}} }{to write a function to generate random starting values}
+}
+Type \code{glmmBUGS} on the R command line to see the source code, it provides a good summary of the roles of the various functions in the \code{glmmBUGS} package.
+
 
 }
 \value{
@@ -72,15 +75,21 @@ muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gau
 startingValues = muscleRagged$startingValues
 source("getInits.R")
 
-library(R2WinBUGS)
-if(require("BRugs",quietly=TRUE)){
-muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),                model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,                             program="openbugs")
-} else {
-data(muscleResult)
+
+if(require(BRugs, quiet=TRUE) & require(R2WinBUGS, quiet=TRUE) ) {
+  muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
+                model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
+                             program="openbugs") 
+ } else{
+	data(muscleResult)
 }
+  muscleParams = restoreParams(muscleResult, muscleRagged$ragged)  
+  summaryChain(muscleParams)
+  checkChain(muscleParams)
 muscleParams = restoreParams(muscleResult, muscleRagged$ragged)  
 summaryChain(muscleParams)
 checkChain(muscleParams)
+
 
 
 # a spatial example
