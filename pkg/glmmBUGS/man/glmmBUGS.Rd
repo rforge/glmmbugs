@@ -73,19 +73,18 @@ library(nlme)
 data(Muscle)
 muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gaussian")
 startingValues = muscleRagged$startingValues
+
+\dontrun{
 source("getInits.R")
-
-
-if(require(BRugs, quiet=TRUE) & require(R2WinBUGS, quiet=TRUE) ) {
-  muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
+require(BRugs)
+require(R2WinBUGS)  
+muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
                 model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
                              program="openbugs") 
- } else{
-	data(muscleResult)
 }
-  muscleParams = restoreParams(muscleResult, muscleRagged$ragged)  
-  summaryChain(muscleParams)
-  checkChain(muscleParams)
+ 
+data(muscleResult)
+
 muscleParams = restoreParams(muscleResult, muscleRagged$ragged)  
 summaryChain(muscleParams)
 checkChain(muscleParams)
@@ -118,7 +117,6 @@ startingValues = forBugs$startingValues
 source("getInits.R")
 
 \dontrun{
-library(R2WinBUGS)
 ontarioResult = bugs(forBugs$ragged, getInits, 
   parameters.to.save = names(getInits()),
     model.file="model.bug", n.chain=3, n.iter=50, n.burnin=10, n.thin=2,
