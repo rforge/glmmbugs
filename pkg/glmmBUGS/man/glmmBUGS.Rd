@@ -121,7 +121,7 @@ source("getInits.R")
 library(R2WinBUGS)
 ontarioResult = bugs(forBugs$ragged, getInits, 
   parameters.to.save = names(getInits()),
-    model.file="model.bug", n.chain=3, n.iter=200, n.burnin=100, n.thin=2,
+    model.file="model.bug", n.chain=3, n.iter=50, n.burnin=10, n.thin=2,
       program="winbugs", debug=T)
 }
 
