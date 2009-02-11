@@ -137,6 +137,15 @@ for(D in groups) {
 
         #names to the spatial bit
        thenames = names(ragged[[paste("num", Dsub, sep="")]])
+       if(is.null(thenames)) {
+          # if there were no names in the adjacency bit, take them from Sspatial
+          thenames = paste("noname", 
+            1:ragged[[paste("N", Dsub, "Spatial",sep="")]], sep="")
+            
+          thenames[ ragged[[paste("Sspatial", Dsub, sep="")]] ] = 
+            names(ragged[[paste("Sspatial", Dsub, sep="")]])
+       }
+        
        theID = dimnames(result[[D]])[[3]]
        theID = gsub("[[:alnum:]]+\\[", "", theID)
        theID = gsub("\\]$", "", theID)
