@@ -8,23 +8,141 @@
 \evensidemargin 0.5 true in
 
 \title{An Introduction to glmmBUGS Package}
-\def\ffmc{\mbox{ffmc}}
-\def\wind{\mbox{wind}}
-\def\ROS{\mbox{ROS}}
-\def\ISI{\mbox{ISI}}
-\def\BUI{\mbox{BUI}}
 \begin{document}
 \maketitle
 
 \large
 \section{Introduction}
+ 
 
 
-\section{Key Functions}
+\section{Key Functions and Examples}
 The primary function defined in package \textit{glmmBUGS} is the model-fitting function of the same time.
-This function is 
+This function is \textit{glmmBUGS}. 
 
-\section{Example}
+Consider the non-spatial model. We took the bacteria data from library \textit{MASS} as an example: 
+Here is how the data looks like : 
+\begin{verbatim}
+  y ap hilo week  ID     trt
+1 y  p   hi    0 X01 placebo
+2 y  p   hi    2 X01 placebo
+3 y  p   hi    4 X01 placebo
+4 y  p   hi   11 X01 placebo
+5 y  a   hi    0 X02   drug+
+6 y  a   hi    2 X02   drug+
+\end{verbatim}
+\begin{itemize}
+\item y : presence or absence: a factor with levels n and y. 
+\item ap : active/placebo: a factor with levels a and p. 
+\item hilo : hi/low compliance: a factor with levels hi amd lo. 
+\item week : numeric: week of test. 
+\item ID : subject ID: a factor. 
+item trt: a factor with levels placebo, drug and drug+, a re-coding of ap and hilo. 
+\end{itemize} 
+
+We could fit a glmmBUGS model as: 
+\begin{verbatim}
+bacrag <- glmmBUGS(y ~ trt + week , data=bacteria, effects = "ID", family= "bernoulli") 
+\end{verbatim}
+
+The response variable \textit{y} is a facter, but in order to fit it into the glmmBUGS model , it need to be a number. Therefore, we change it to numeric named yInt, it will be a column contains 1 and 0. 1 denotes ''y'' and 0 denotes ''n''. There are three 
+levels of treatment, one of them is ''drug+'', we change it to ''drugplus'' for fitting the glmmBUGS model.
+
+After the above changes, the data set looks like: 
+
+<<thedata>>=
+head(bacteria)
+@
+
+
+\begin{verbatim}
+ y ap hilo week  ID      trt yInt
+ y  p   hi    0 X01  placebo    1
+ y  p   hi    2 X01  placebo    1
+ y  p   hi    4 X01  placebo    1
+ y  p   hi   11 X01  placebo    1
+ y  a   hi    0 X02 drugplus    1
+ y  a   hi    2 X02 drugplus    1
+\end{verbatim}
+
+We fit the glmmBUGS model using: 
+\begin{verbatim}
+bacrag <- glmmBUGS(yInt ~ trt + week , data=bacteria, effects = "ID", family= "bernoulli") 
+\end{verbatim}
+
+
+<<raggedArray>>=
+names(bacrag$ragged)
+@
+
+We will get three set of values from glmmBUGS fuction as: ragged, startingValues and pql. 
+\textit{ragged} is a matrix that contains the data which can be used in winBUGS. 
+\textit{startingValues} provides the starting values of the mcmc simulation runs by winBUGS. 
+\textit{pql} used the method of \textit{glmmPQL} function in the \textit{MASS}, it fits a generalized linear mixed model via PQL.
+
+After running \textit{glmmBUGS} function, we will use \texit{bugs} function in \textit{R2WinBUGS} package
+to call the winBUGS as: 
+\begin{verbatim}
+library(R2WinBUGS)
+bacResult = bugs(bacrag$ragged, getInits, parameters.to.save = names(getInits()),
+ model.file="model.bug", n.chain=3, 
+n.iter=1000, n.burnin=100, n.thin=10, program="winbugs", debug=T)
+\end{verbatim}
+
+
+A winbugs window will open and starts simulating the posterior distribution after running the \textit{bugs} command in R. 
+
+All the infomation are now stored in the bacResult, but it is hard to get out, we need to use  \textit{restoreParams} function to restore the parameters as: 
+
+\begin{verbatim}
+bacParams = restoreParams(bacResult, bacrag$ragged) 
+\end{verbatim}
+
+Then we used \textit{checkChain(bacParams)} to do the chain plot we get from the mcmc simulation as:
+\begin{verbatim}
+checkChain(bacParams)
+\end{verbatim}
+
+The plot is like: 
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=0.3]{chain.pdf}
+\caption{A chain plot of the posterial distribution from mcmc simulation.}\label{singleellipse}
+\end{center}
+\end{figure}
+
+The three lines are converges, this means the simulation result are stable. 
+
+
+
+
+
+
+
+Consider the following model, where $Y_{ijk}$ is the number of cancer cases from individual i from class j in school k.  
+
+\[Y_{ijk} \sim  Poisson(\lambda_i)\]
+\[\log(\lambda_i) = \mu + U_i + V_{ij}\]
+\[U_i \sim GMRF(0, \sigma_U^2)\]
+\[V_{i} \sim iid N(0, \sigma_V^2)\] 
+
+Here there are covariates which apply to each of the three levels, and random effects at the school and class level. 
+If \code{data} is a data frame with one line per individual, the following would impliment this model: 
+\begin{verbatim}
+forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
+  effects="CSDUID",   family="poisson", spatial=popDataAdjMat,
+  data=ontario)
+\end{verbatim}
+To aid in convergence, the bugs model is actually the following:
+
+\deqn{\log(\mu_i) = age_{ijk} \beta + V_{ij}}{log(mu_i) = age_ijk beta +  V_ij }
+
+\deqn{V_{ij} \sim N(U_i + classSize_{ij} \alpha , \nu^2)}{V_ij ~ N(U_i + classSize_ij alpha , nu^2)}
+
+\deqn{U_i \sim N(\delta + schoolCategory_i \gamma, \sigma^2)}{U_i ~ N(intercept + schoolCategory_i gamma, sigma^2)}
+
+
 
 \section{Summary}
 
