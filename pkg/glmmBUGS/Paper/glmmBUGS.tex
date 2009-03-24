@@ -17,10 +17,11 @@
 
 
 \section{Key Functions and Examples}
-The primary function defined in package \textit{glmmBUGS} is the model-fitting function of the same time.
+The primary function defined in package \textit{glmmBUGS} is the model-fitting function of the same name.
 This function is \textit{glmmBUGS}. 
 
-Consider the non-spatial model. We took the bacteria data from library \textit{MASS} as an example: 
+We will consider two types of data set in this paper: non-spatial data set and spatial data set. 
+We took the bacteria data from library \textit{MASS} as an example of non-spatial data set: 
 Here is how the data looks like : 
 \begin{verbatim}
   y ap hilo week  ID     trt
@@ -40,13 +41,29 @@ Here is how the data looks like :
 item trt: a factor with levels placebo, drug and drug+, a re-coding of ap and hilo. 
 \end{itemize} 
 
-We could fit a glmmBUGS model as: 
+We fit a generalized linear mixed model as: 
+
+\[Y_{ij} \sim  Bernoulli(p_{ij})\]
+\[logit(p_{ij}) = x_{ij}\beta + V_{i}\]
+\[V_{i} \sim iid N(0, \sigma^2)\] 
+
+where $Y_{ij}$ is the presence or absence of bacteria with covariates $x_{ij}$ (treatment and week).  
+$p_{ij}$ denotes the patient $i$ of treatment and week effect $j$ has bacteria.
+$V_i$ is the random intercept for $ith$ patient, which follows an identical independent normal distribution with mean equals 0 and variance of $\sigma_V^2$.
+
+Base on the theoretical model above, we could fit a glmmBUGS model as: 
 \begin{verbatim}
 bacrag <- glmmBUGS(y ~ trt + week , data=bacteria, effects = "ID", family= "bernoulli") 
 \end{verbatim}
+To aid in convergence, the bugs model is actually the following:
 
-The response variable \textit{y} is a facter, but in order to fit it into the glmmBUGS model , it need to be a number. Therefore, we change it to numeric named yInt, it will be a column contains 1 and 0. 1 denotes ''y'' and 0 denotes ''n''. There are three 
-levels of treatment, one of them is ''drug+'', we change it to ''drugplus'' for fitting the glmmBUGS model.
+\[Y_{ij} \sim  Bernoulli(p_{ij})\]
+\[logit(p_{ij}) = R_{ij}\]
+\[R_{ij} \sim N(x_{ij}\beta, \sigma^2})\]
+\[V_{i} = R_{ij} - x_{ij}\beta \] 
+
+The response variable \textit{y} is a factor variable, but winBUGS can only handle numerical variable. Therefore, we change it to numerics 0 and 1.$1$ denotes ''y'' and 0 denotes ''n''. We named the new column ''yInt''.  In the ''trt'' column, there are three 
+levels of treatments, one of them is ''drug+'', we change it to ''drugplus'' for fitting the glmmBUGS model.
 
 After the above changes, the data set looks like: 
 
@@ -65,38 +82,60 @@ head(bacteria)
  y  a   hi    2 X02 drugplus    1
 \end{verbatim}
 
-We fit the glmmBUGS model using: 
+We fit the glmmBUGS model as: 
 \begin{verbatim}
 bacrag <- glmmBUGS(yInt ~ trt + week , data=bacteria, effects = "ID", family= "bernoulli") 
+Loading required package: nlme
+iteration 1
+iteration 2
+iteration 3
+iteration 4
+iteration 5
+iteration 6
 \end{verbatim}
 
-
+The ''effects'' arguments specified the random intercept term.
 <<raggedArray>>=
 names(bacrag$ragged)
 @
 
-We will get three set of values from glmmBUGS fuction as: ragged, startingValues and pql. 
-\textit{ragged} is a matrix that contains the data which can be used in winBUGS. 
-\textit{startingValues} provides the starting values of the mcmc simulation runs by winBUGS. 
-\textit{pql} used the method of \textit{glmmPQL} function in the \textit{MASS}, it fits a generalized linear mixed model via PQL.
+
+We will get three sets of results from glmmBUGS fuction as: ragged, startingValues and pql. 
+\textit{ragged} is a matrix that contains the data which can be used in winBUGS in the future step. 
+\textit{pql} is the results from the \textit{glmmPQL} function in the \textit{MASS} package.
+\textit{startingValues} provides the starting values of the MCMC simulation runs by winBUGS, which is obtained using penalized-quasi-likelihood from \verb!glmmPQL! function.  
+
 
 After running \textit{glmmBUGS} function, we will use \texit{bugs} function in \textit{R2WinBUGS} package
 to call the winBUGS as: 
 \begin{verbatim}
 library(R2WinBUGS)
 bacResult = bugs(bacrag$ragged, getInits, parameters.to.save = names(getInits()),
- model.file="model.bug", n.chain=3, 
-n.iter=1000, n.burnin=100, n.thin=10, program="winbugs", debug=T)
+                 model.file="model.bug", n.chain=3, 
+                 n.iter=1000, n.burnin=100, n.thin=10, program="winbugs", debug=T)
 \end{verbatim}
+The data used for \textit{bugs} function is the \verb!ragged! from the \textit{glmmBUGS} function. The \verb!getInits! is generated from the \textit{glmmBUGS} function and it gives the starting values for the simulation. \verb!n.chain! denotes how many chains the user want to ran for the simulation, it is $3$ as default. \verb!n.iter!
+denotes the number of total iterations per chain; \verb!n.burnin! denotes number of iterations to discard at the beginning; \verb!n.thin! denotes the thinning rate. So for our example, we will get $270$ simulation results.
 
+As we run the \verb!bugs! function, a winbugs window will open and do the simulation of the posterior distribution.
 
-A winbugs window will open and starts simulating the posterior distribution after running the \textit{bugs} command in R. 
-
-All the infomation are now stored in the bacResult, but it is hard to get out, we need to use  \textit{restoreParams} function to restore the parameters as: 
+All the results are now stored in the bacResult, but it is hard to get them out, we need to use  \textit{restoreParams} function to restore the parameters as: 
 
 \begin{verbatim}
 bacParams = restoreParams(bacResult, bacrag$ragged) 
+names(bacParams)
+[1] "intercept" "SDID"      "deviance"  "RID"       "betas"    
 \end{verbatim}
+
+After all the results are stored properly, we need to do a summary on all the results, that will be easier for us to grab information from the simulation results. \verb!summarychain! function will be used for this purpose.
+\begin{verbatim}
+bacsummary = summaryChain(bacParams)
+> names(bacsummary)
+[1] "scalars" "RID"     "betas"  
+
+\end{verbatim}
+
+\verb!bacsummary! contains the 
 
 Then we used \textit{checkChain(bacParams)} to do the chain plot we get from the mcmc simulation as:
 \begin{verbatim}
@@ -112,22 +151,19 @@ The plot is like:
 \end{center}
 \end{figure}
 
-The three lines are converges, this means the simulation result are stable. 
+The three lines (red, green and black lines) are converges, this means the simulation result are stable. 
 
 
+We then introduce the spatial model. We use the cancer data set from the \textit{diseasemapping} package. 
 
+Consider the following model, where $Y_{ijk}$ is the number of cancer cases from individual i from class j in census k.  
 
-
-
-
-Consider the following model, where $Y_{ijk}$ is the number of cancer cases from individual i from class j in school k.  
-
-\[Y_{ijk} \sim  Poisson(\lambda_i)\]
-\[\log(\lambda_i) = \mu + U_i + V_{ij}\]
+\[Y_{ij} \sim  Poisson(\lambda_i)\]
+\[\log(\lambda_i) = \mu + U_i + V_{ij}+ \log{O_i}\]
 \[U_i \sim GMRF(0, \sigma_U^2)\]
 \[V_{i} \sim iid N(0, \sigma_V^2)\] 
 
-Here there are covariates which apply to each of the three levels, and random effects at the school and class level. 
+Here are covariates which apply to each of the three levels, and random effects at the school and class level. 
 If \code{data} is a data frame with one line per individual, the following would impliment this model: 
 \begin{verbatim}
 forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
@@ -136,12 +172,11 @@ forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
 \end{verbatim}
 To aid in convergence, the bugs model is actually the following:
 
-\deqn{\log(\mu_i) = age_{ijk} \beta + V_{ij}}{log(mu_i) = age_ijk beta +  V_ij }
-
-\deqn{V_{ij} \sim N(U_i + classSize_{ij} \alpha , \nu^2)}{V_ij ~ N(U_i + classSize_ij alpha , nu^2)}
-
-\deqn{U_i \sim N(\delta + schoolCategory_i \gamma, \sigma^2)}{U_i ~ N(intercept + schoolCategory_i gamma, sigma^2)}
-
+\[Y_{ij} \sim  Poisson(\lambda_i)\]
+\[\log(\lambda_i) = R_i+ \log{O_i}\]
+\[R_i \sim N(U_i + \mu, \sigma_U^2)\]
+\[U_i \sim GMRF(0, \sigma_U^2)\]
+\[V_{i} = R_i - U_i \sim iid N(0, \sigma_V^2)\] 
 
 
 \section{Summary}
