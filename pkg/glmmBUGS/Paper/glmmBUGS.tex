@@ -174,32 +174,23 @@ checkChain(bacParams)
 The plot is shown in Figure \ref{chain}. The three lines (red, green and black lines) are converges, this means the simulation result are stable. 
 
 \subsection{Spatial Model} 
-We then introduce the spatial model. The data sets are from the \textit{diseasemapping} package. 
-The case data set is the cases of Hepatitis Z in Ontario. 
-<<thedata>>=
-head(casedata)
-@
+We then introduce the spatial model. The data set is built in the \textit{glmmBUGS} package. 
 
-
-
-
- The population data is from the 2006 Census of canada offering by Statistics Canada web site, \code {www12.statcan.gc.ca/english/census06/data/highlights/agesex/Index_PR.cfm?Lang=E&Geo=CSD&Table=1
- 
 <<thedata>>
-head(popdata@data)
+head(ontario)
 @
 
-
+$CSDUID$ is the census tract number; $Observed$ is the number of cancer cases; $logExpected$ is the predicted number of cancer cases on the \log scale.
 
 Consider the following model, where $Y_{ijk}$ is the number of cancer cases from individual i from age and sex group j in census k.  
 
 \[Y_{ij} \sim  Poisson(\lambda_i)\]
 \[\log(\lambda_i) = \mu + U_i + V_{ij}+ \log{O_i}\]
 \[U_i \sim GMRF(0, \sigma_U^2)\]
-\[V_{i} \sim iid N(0, \sigma_V^2)\] 
+\[V_i \sim iid N(0, \sigma_V^2)\] 
 
-where $\lambda$ is the rate of disease; $\mu$ is the average of disease rate when other effects were not in the consideration.
-$U_i$ denotes the spatial term; $V_{ij}$ denotes the non-spatial term; $\log{O_i}$ is the offset.
+where $Y_i$ denotes the number of cancer cases;  $\lambda$ is the rate of disease, it is the mean and variance of the poisson distribution; $\mu$ is the average of disease rate when other effects were not in the consideration.
+$U_i$ denotes the spatial term, it follows a gussian markov random field with mean equals $0$ and variance $\sigma_U^2$; $V_{ij}$ denotes the non-spatial term, it follows an identical independent distribution with mean equals $0$ and variance equals $\sigma_V^2$; $\log{O_i}$ is the offset, .
 
 The spatial term $U_i$ in the model relects the effects from neighbours. We use a adjancy matrix to denote this relationship by using the \verb!poly2nb! function from the \verb!spdep! library. 
 
@@ -208,19 +199,27 @@ library(spdep)
 popDataAdjMat = poly2nb(popdata, as.character(popdata[["CSDUID"]]))
 \end{verbatim}
 
-Then we fit a glmmBUGS model with spatial terms equals the adjancy matrix.
+Then we fit a glmmBUGS model with spatial terms equals the adjancy matrix and logExpected values as offset.
 \begin{verbatim}
 forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
   effects="CSDUID",   family="poisson", spatial=popDataAdjMat,
   data=ontario)
 \end{verbatim}
-To aid in convergence, the bugs model is actually the following:
 
+To aid in convergence, the bugs model is actually the following:
 \[Y_{ij} \sim  Poisson(\lambda_i)\]
 \[\log(\lambda_i) = R_i+ \log{O_i}\]
 \[R_i \sim N(U_i + \mu, \sigma_U^2)\]
 \[U_i \sim GMRF(0, \sigma_U^2)\]
 \[V_{i} = R_i - U_i \sim iid N(0, \sigma_V^2)\] 
+
+Then we use the \verb!bugs! function to do the MCMC simulation as: 
+
+\begin{verbatim}
+
+
+
+\end{verbatim}
 
 
 \section{Summary}
