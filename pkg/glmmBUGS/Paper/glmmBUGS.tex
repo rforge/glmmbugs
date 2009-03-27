@@ -20,7 +20,9 @@
 The primary function defined in package \textit{glmmBUGS} is the model-fitting function of the same name.
 This function is \textit{glmmBUGS}. 
 
-We will consider two types of data set in this paper: non-spatial data set and spatial data set. 
+We will consider two types of data set in this paper: non-spatial data set and spatial data set.
+
+\subsection{Non-spatial Model} 
 We took the bacteria data from library \textit{MASS} as an example of non-spatial data set: 
 Here is how the data looks like : 
 \begin{verbatim}
@@ -127,6 +129,9 @@ names(bacParams)
 [1] "intercept" "SDID"      "deviance"  "RID"       "betas"    
 \end{verbatim}
 
+The ''intercept'' column contains $270$ values of simulated intercept values. ''SDID'' is the standard deviation of patient's ID. 
+''betas'' are the simulated estimators of the coefficients of treatment and number of weeks. 
+
 After all the results are stored properly, we need to do a summary on all the results, that will be easier for us to grab information from the simulation results. \verb!summarychain! function will be used for this purpose.
 \begin{verbatim}
 bacsummary = summaryChain(bacParams)
@@ -135,36 +140,75 @@ bacsummary = summaryChain(bacParams)
 
 \end{verbatim}
 
-\verb!bacsummary! contains the 
 
-Then we used \textit{checkChain(bacParams)} to do the chain plot we get from the mcmc simulation as:
+\verb!bacsummary! contains the three results: scalars, RID and betas. Each result has the mean values, standard deviation values, p-values and the confidence interval values on different scale levels for the parameters stored in the \verb!restoreParams! function. 
+For example, the ''betas'' gives the following results:
+\begin{verbatim}
+> bacsummary$betas
+                   mean       pval         sd      0.5%      2.5%        5%      50%
+observations -0.1633777 0.00000000 0.05213974 -0.282689 -0.263855 -0.249555 -0.16685
+trtdrug      -1.5128799 0.04074074 0.93333991 -4.236200 -3.558175 -3.213950 -1.42100
+trtdrugplus  -0.9720788 0.11851852 0.84176339 -3.129370 -2.697575 -2.389500 -0.91915
+                    95%      97.5%       99.5%
+observations -0.0753595 -0.0611485 -0.03385445
+trtdrug      -0.0980510  0.2515025  0.64842200
+trtdrugplus   0.5102300  0.6130100  0.83561500
+
+\end{verbatim}
+ 
+
+In order to check the convergency of the simulation, we use \textit{checkChain(bacParams)} function to do the chain plot:
 \begin{verbatim}
 checkChain(bacParams)
 \end{verbatim}
 
-The plot is like: 
+
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[scale=0.3]{chain.pdf}
-\caption{A chain plot of the posterial distribution from mcmc simulation.}\label{singleellipse}
+\caption{A chain plot of the posterial distribution from MCMC simulation.}\label{chain}
 \end{center}
 \end{figure}
 
-The three lines (red, green and black lines) are converges, this means the simulation result are stable. 
+The plot is shown in Figure \ref{chain}. The three lines (red, green and black lines) are converges, this means the simulation result are stable. 
+
+\subsection{Spatial Model} 
+We then introduce the spatial model. The data sets are from the \textit{diseasemapping} package. 
+The case data set is the cases of Hepatitis Z in Ontario. 
+<<thedata>>=
+head(casedata)
+@
 
 
-We then introduce the spatial model. We use the cancer data set from the \textit{diseasemapping} package. 
 
-Consider the following model, where $Y_{ijk}$ is the number of cancer cases from individual i from class j in census k.  
+
+ The population data is from the 2006 Census of canada offering by Statistics Canada web site, \code {www12.statcan.gc.ca/english/census06/data/highlights/agesex/Index_PR.cfm?Lang=E&Geo=CSD&Table=1
+ 
+<<thedata>>
+head(popdata@data)
+@
+
+
+
+Consider the following model, where $Y_{ijk}$ is the number of cancer cases from individual i from age and sex group j in census k.  
 
 \[Y_{ij} \sim  Poisson(\lambda_i)\]
 \[\log(\lambda_i) = \mu + U_i + V_{ij}+ \log{O_i}\]
 \[U_i \sim GMRF(0, \sigma_U^2)\]
 \[V_{i} \sim iid N(0, \sigma_V^2)\] 
 
-Here are covariates which apply to each of the three levels, and random effects at the school and class level. 
-If \code{data} is a data frame with one line per individual, the following would impliment this model: 
+where $\lambda$ is the rate of disease; $\mu$ is the average of disease rate when other effects were not in the consideration.
+$U_i$ denotes the spatial term; $V_{ij}$ denotes the non-spatial term; $\log{O_i}$ is the offset.
+
+The spatial term $U_i$ in the model relects the effects from neighbours. We use a adjancy matrix to denote this relationship by using the \verb!poly2nb! function from the \verb!spdep! library. 
+
+\begin{verbatim}
+library(spdep)
+popDataAdjMat = poly2nb(popdata, as.character(popdata[["CSDUID"]]))
+\end{verbatim}
+
+Then we fit a glmmBUGS model with spatial terms equals the adjancy matrix.
 \begin{verbatim}
 forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
   effects="CSDUID",   family="poisson", spatial=popDataAdjMat,
