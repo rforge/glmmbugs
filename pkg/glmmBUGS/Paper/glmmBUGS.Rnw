@@ -33,6 +33,7 @@ We took the bacteria data from library \textit{MASS} as an example of non-spatia
 Here is how the data looks like : 
 <<thedata1>>=
 library(MASS)
+data(bacteria)
 head(bacteria)
 @
 
@@ -55,11 +56,10 @@ where $Y_{ij}$ is the presence or absence of bacteria with covariates $x_{ij}$ (
 $p_{ij}$ denotes the patient $i$ of treatment and week effect $j$ has bacteria.
 $V_i$ is the random intercept for $ith$ patient, which follows an identical independent normal distribution with mean equals 0 and variance of $\sigma_V^2$.
 
-
-Base on the theoretical model above, we could fit a glmmBUGS model as: 
-<<thecode>>=
-bacrag <- glmmBUGS(y ~ trt + week , data=bacteria, effects = "ID", family= "bernoulli") 
-
+%Base on the theoretical model above, we could fit a glmmBUGS model as: 
+%<<thecode>>=
+%bacrag <- glmmBUGS(y ~ trt + week , data=bacteria, effects = "ID", family= "bernoulli") 
+%@
 
 To aid in convergence, the bugs model is actually the following:
 
@@ -70,10 +70,12 @@ To aid in convergence, the bugs model is actually the following:
 
 The response variable \textit{y} is a factor variable, but winBUGS can only handle numerical variable. Therefore, we change it to numerics 0 and 1.$1$ denotes ''y'' and 0 denotes ''n''. We named the new column ''yInt''.  In the ''trt'' column, there are three 
 levels of treatments, one of them is ''drug+'', we change it to ''drugplus'' for fitting the glmmBUGS model.
-<<>>=
+
+<<thechange>>=
 bacterianew <- bacteria
 bacterianew$yInt = as.integer(bacteria$y=="y")
 levels(bacterianew$trt) <- c("placebo", "drug", "drugplus")
+@
 
 After the above changes, the data set looks like: 
 <<newdata>>=
@@ -82,7 +84,8 @@ head(bacterianew)
 
 We fit the glmmBUGS model using the above data set as: 
 <<bacrag>>=
-bacrag <- glmmBUGS(yInt ~ trt + week , data=bacteria, effects = "ID", 
+library(glmmBUGS)
+bacrag <- glmmBUGS(yInt ~ trt + week , data=bacterianew, effects = "ID", 
                                                  family= "bernoulli") 
 @
 
@@ -91,7 +94,7 @@ The \verb!trt + week! are the prediction values
 The \verb!effects! arguments specified the random intercept term.
 
 <<raggedArray>>=
-names(bacrag$ragged)
+names(bacrag)
 @
 
 We get three sets of results from glmmBUGS fuction: ragged, startingValues and pql. 
@@ -104,11 +107,13 @@ After running \textit{glmmBUGS} function, we will use \textit{bugs} function in 
 to call the winBUGS do the MCMC simulation as: 
 
 <<thebug>>=
+startingValues = bacrag$startingValues
+source("getInits.R")
 library(R2WinBUGS)
 bacResult = bugs(bacrag$ragged, getInits, parameters.to.save = names(getInits()),
                  model.file="model.bug", n.chain=3, 
                  n.iter=1000, n.burnin=100, n.thin=10, program="winbugs", debug=T)
-
+@
 
 The data used for \textit{bugs} function is the \verb!ragged! from the \textit{glmmBUGS} function. 
 The \verb!getInits! is generated from the \textit{glmmBUGS} function and it gives the starting values for the simulation. 
@@ -155,7 +160,7 @@ bacsummary$betas
 In order to check the convergency of the simulation, we use \textit{checkChain(bacParams)} function to do the chain plot:
 <<thechain>>=
 checkChain(bacParams)
-
+@
 
 
 
@@ -206,26 +211,35 @@ To aid in convergence, the bugs model is actually the following:
 
 The spatial term $U_i$ in the model relects the effects from neighbours. We use a adjancy matrix to denote this effects by using the \verb!poly2nb! function from the \verb!spdep! library. 
 
-<<thepopadj>>=
+\begin{verbatim}
 library(spdep)
+data(popdata)
 popDataAdjMat = poly2nb(popdata, as.character(popdata[["CSDUID"]]))
+\end{verbatim}
 
 Then we fit a glmmBUGS model: 
 <<theragged>>=
+data(ontario)
+data(popDataAdjMat)
 forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
   effects="CSDUID", family="poisson", spatial=popDataAdjMat,
   data=ontario)
+@
 
 The $\log$ of the expected values of cancer cases as offset value; The spatial terms equals the adjancy matrix. The random effects is the region code.
 
 Then we use the \verb!bugs! function to do the MCMC simulation as: 
 <<thebugs>>=
+startingValues = forBugs$startingValues
+source("getInits.R")
+library(R2WinBUGS)
 ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
    model.file="model.bug", n.chain=3, n.iter=6000, n.burnin=100, n.thin=50,
        program="winbugs")
-
+@
 
 <<theparams>>=
+ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
 names(ontarioParams)
 @     
 
