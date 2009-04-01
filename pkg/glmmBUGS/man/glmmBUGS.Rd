@@ -99,7 +99,7 @@ data(popdata)
 data(casedata)
 
 model = getRates(casedata, popdata, ~age*sex)
-ontario = getSMR(model, popdata, casedata)
+ontario = getSMR(popdata, model, casedata)
 ontario = ontario@data[,c("CSDUID","Observed","logExpected")]
 library(spdep)
 popDataAdjMat = poly2nb(popdata,row.names=as.character(popdata[["CSDUID"]]))
