@@ -1,13 +1,9 @@
-`glmmBUGS` <-
-function(formula, data, effects, 
-  modelFile = "model.bug", initFile = "getInits.R", 
-  family=c("bernoulli", "binomial", "poisson", "gaussian"),
-spatial=NULL, spatialEffect = NULL) {
 
-  family = family[1]
-  if(!is.character(family)) {
-    warning("family must be a character string, ie \"poisson\" or \"binomial\" ")
-  }
+library(MASS)
+data(bacteria)
+bacteria$group = substr(bacteria$ID, 1,2)
+
+forBugs = glmmBUGS(????, effects = c("group", "ID"), ?????)
 
 
 
@@ -41,18 +37,9 @@ thepql = glmmPQLstrings(effects=effects, covariates = covariates,
 # extract properly formatted starting values from the pql
 startingValues = getStartingValues(pql=thepql, ragged=ragged) 
 
-# write a function to generate starting values
-startingFunction(startingValues, initFile)
 
-# create the model
-spatialEffect = grep("^N[[:alnum:]]+Spatial$", names(ragged), value=T)
-spatialEffect = gsub("^N", "", spatialEffect)
-spatialEffect = gsub("Spatial$", "", spatialEffect)
 
-writeBugsModel(modelFile, effects =effects,
-    covariates = covariates, observations = observations,
-     family=family, spatial = spatialEffect ) # add spatial            
-     
-return(list(ragged=ragged, startingValues = startingValues, pql=thepql))  
-}
+# a spatial example
+
+# change a few region's observed to NA
 
