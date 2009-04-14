@@ -47,17 +47,25 @@ for(Deffect in seq(length(pql$effects), 1)) {
   # get one row of data for each different value of the effect
   theS = ragged[[paste("S", theE, sep="")]]
   theS = theS[-length(theS)]
-  thedata = thedata[theS,]
+ # thedata = thedata[theS,]
 
   # get predicted values
   thepred = predict(pql, newdata=thedata, level=Deffect)
+  # names(thepred) = ?????
   
   # strip white space to make sure everything's compatible
   names(theS) = gsub(" ", "", names(theS))
   names(thepred) = gsub(" ", "", names(thepred))
   
   # put them in the same order as the ragged array
-  startingValues[[paste("R", theE, sep="")]] = thepred[names(theS)]  
+  theseStartingValues = rep(0, length(theS) )
+  names(theseStartingValues) = names(theS)
+  
+  theseStartingValues[names(thepred)] = thepred
+  
+    
+  startingValues[[paste("R", theE, sep="")]] = theseStartingValues
+
   # set covariates at this level to zero
   thedata[,covariates[[theE]] ] = 0
 }
