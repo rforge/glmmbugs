@@ -71,6 +71,7 @@ Returns a list with the ragged array, from  \code{\link{winBugsRaggedArray}}, an
 \examples{ 
 library(nlme)
 data(Muscle)
+
 muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gaussian")
 startingValues = muscleRagged$startingValues
 
