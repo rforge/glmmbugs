@@ -50,7 +50,7 @@ for(Deffect in seq(length(pql$effects), 1)) {
  # thedata = thedata[theS,]
 
   # get predicted values
-  thepred = predict(pql, newdata=thedata, level=Deffect)
+  thepred = predict(pql, level=Deffect)[theorder]
   # names(thepred) = ?????
   
   # strip white space to make sure everything's compatible
@@ -87,22 +87,29 @@ for(D in 1:length(spatialEffect)) {
 # starting value for the proportion of spatial effect
 spatialFactor = 0.5
 
-  thenames = names(startingValues[[spatialEffectIndep]])
-  startingValues[[spatialEffect[D] ]] =
-      pql$coef$random[[spatialEffectIndepVar]][
-        thenames, ,drop=T ]*spatialFactor
+  # create a vector of zeros for starting values for the spatial component
+  # getting names from the Sspatial index in the ragged array
+  theStart = rep(0, ragged[[gsub("^R", "N", spatialEffect[D])]])
+  spatialSeqName = gsub("^R", "Sspatial", spatialEffect[D])
+  spatialSeqName = gsub("Spatial$", "", spatialSeqName)
+  names(theStart) = names(ragged[[spatialSeqName]])
 
+  # replace those zeros with spatialFactor times the random effect
+  # from the pql model
   
-  startingValues[[spatialEffectIndep[D]]] =
-    startingValues[[spatialEffectIndep[D]]] -  startingValues[[spatialEffect[D]]]
-
-  # if there are some regions without data, add zeros as their starting values
-  startingValues[[spatialEffect[D] ]] = c(
-      startingValues[[spatialEffect[D] ]],
-      rep(0, ragged[[paste("N", spatialEffectVar[D], sep="")]] -
-        ragged[[paste("N", spatialEffectIndepVar[D], sep="")]] )
-      )
-
+  # find the names of spatial regions included in the pql model
+  thenames = rownames(pql$coef$random[[spatialEffectIndepVar[D] ]])
+  #names(startingValues[[spatialEffectIndep[D] ]])
+  thenames = names(theStart)[names(theStart) %in% thenames]
+  theStart[thenames] =  pql$coef$random[[spatialEffectIndepVar[D] ]][
+        thenames, ,drop=TRUE]
+  
+  startingValues[[spatialEffect[D] ]] = theStart
+  
+  startingValues[[spatialEffectIndep[D]]][thenames] =
+    startingValues[[spatialEffectIndep[D]]][thenames] -  
+      theStart[thenames]
+  
   # starting values for variances
     startingValues$vars[[spatialEffectVar[D] ]] =
     sqrt(

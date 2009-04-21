@@ -15,12 +15,17 @@ spatial=NULL, spatialEffect = NULL) {
 # get design matrix
 data = getDesignMatrix(formula, data, effects)
 
-# get rid of rows where there are NA's in covariates
-# but NA's in response are ok.
-data = data[, !apply(data[,covariates], 1, function(qq) any(is.na(qq))) ]
-
 covariates = attributes(data)$covariates
 observations = attributes(data)$response
+
+
+# get rid of rows where there are NA's in covariates
+# but NA's in response are ok.
+if(length(covariates)) {
+  data = data[!apply(data[,unlist(covariates), drop=F], 1, 
+    function(qq) any(is.na(qq))), ]
+}
+
 
  # create the ragged array
 ragged = winBugsRaggedArray(data, effects =effects,

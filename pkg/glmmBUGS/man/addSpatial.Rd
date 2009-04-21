@@ -34,7 +34,7 @@ usually not called by a user.
 # get a winbugs model and data ready, without a spatial effect
 data(ontario)
 
-forBugs = glmmBUGS(formula=Observed + logExpected ~ 1,
+forBugs = glmmBUGS(formula=observed + logExpected ~ 1,
   effects="CSDUID",   family="poisson",
   data=ontario)
 

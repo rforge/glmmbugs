@@ -92,11 +92,11 @@ getCovList = function(covariates, data, effects) {
   attr(data, "covariates") = covList
   attr(data, "response") = response
 
-	if(is.logical(data[[response]]))
-		data[[response]] = as.numeric(data[[response]])
-	if(is.factor(data[[response]]))
+	if(is.logical(data[[response[1]]]))
+		data[[response]] = as.numeric(data[[response[1]]])
+	if(is.factor(data[[response[1]]]))
 		warning("response can't be specified as a factor")
-	if(is.character(data[[response]]))
+	if(is.character(data[[response[1]]]))
 		warning("response can't be specified as a character string")
 
 
