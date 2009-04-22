@@ -1,18 +1,17 @@
-\documentclass{article}
-\usepackage{graphicx}
-\textwidth 6.0 true in
-\textheight 9 true in
-\topmargin -1.0 true in
-\headsep 0.375 true in
-\oddsidemargin 0.0 true in
-\evensidemargin 0.5 true in
-
-\title{An Introduction to glmmBUGS Package}
+\documentclass[a4paper]{report}
+\usepackage{graphicx,amsmath}
+\usepackage{RJournal}
+\usepackage[round]{natbib}
+\bibliographystyle{abbrvnat}
 \usepackage{Sweave}
 \begin{document}
+
+\begin{article}
+\title{An Introduction to glmmBUGS Package}
+\author{lutong and patrick}
 \maketitle
 
-\large
+%\large
 \section{Introduction}
 The \verb!glmmBUGS! package, is a bridging tool between glmm (Generalized Linear Mixed Model) and BUGS (WinBUGS).
 Generalized Linear Mixed Model is an extension to Generalized Linear Model (glm) in which the linear predictor contains random effects
@@ -63,10 +62,11 @@ Here is how the data looks like :
 \end{itemize} 
 
 We fit the above dataset using a generalized linear mixed model as follows:
-
-\[Y_{ij} \sim  Bernoulli(p_{ij})\]
-\[logit(p_{ij}) = x_{ij}\beta + V_{i}\]
-\[V_{i} \sim iid N(0, \sigma^2)\] 
+\begin{align*}
+Y_{ij} \sim & Bernoulli(p_{ij})
+logit(p_{ij}) = &x_{ij}\beta + V_{i}
+V_{i} \sim iid &N(0, \sigma^2) 
+\end{align*}
 
 where $Y_{ij}$ is the presence or absence of bacteria of $ith$ person at week $j$ with covariates $x_{ij}$ (treatment and week).
 $p_{ij}$ denotes the probability if bacteria presence of patient $i$ at week $j$.
@@ -147,9 +147,15 @@ to call the winBUGS do the MCMC simulation as:
 > startingValues = bacrag$startingValues
 > source("getInits.R")
 > library(R2WinBUGS)
-> bacResult = bugs(bacrag$ragged, getInits, parameters.to.save = names(getInits()), 
-+     model.file = "model.bug", n.chain = 3, n.iter = 1000, n.burnin = 100, 
-+     n.thin = 10, program = "winbugs", debug = T)
+> doSims = F
+> if (doSims) {
++     bacResult = bugs(bacrag$ragged, getInits, parameters.to.save = names(getInits()), 
++         model.file = "model.bug", n.chain = 3, n.iter = 1000, 
++         n.burnin = 100, n.thin = 10, program = "winbugs", debug = T)
++     save(bacResult, file = "bacResult.RData")
++ } else {
++     load("bacResult.RData")
++ }
 \end{Sinput}
 \end{Schunk}
 
@@ -201,14 +207,14 @@ For example, the ''betas'' gives the following results:
 > bacsummary$betas
 \end{Sinput}
 \begin{Soutput}
-                   mean       pval         sd       0.5%       2.5%       5%
-observations -0.1574366 0.00000000 0.05511219 -0.2918435 -0.2612825 -0.24682
-trtdrug      -1.4662361 0.01851852 0.84390002 -4.3422900 -3.2321750 -2.79575
-trtdrugplus  -0.8611073 0.14074074 0.78408035 -2.7885850 -2.4846250 -2.07690
-                 50%       95%      97.5%       99.5%
-observations -0.1587 -0.065248 -0.0485150 -0.03103385
-trtdrug      -1.4580 -0.180630 -0.0755310  0.30390050
-trtdrugplus  -0.9277  0.445640  0.6658175  1.30121600
+                   mean       pval         sd      0.5%      2.5%        5%
+observations -0.1671241 0.00000000 0.05209394 -0.292341 -0.273955 -0.248595
+trtdrug      -1.4834295 0.03333333 0.89318522 -4.087620 -3.535525 -3.159600
+trtdrugplus  -0.8488842 0.13333333 0.82200404 -2.749410 -2.382500 -2.166350
+                  50%       95%       97.5%       99.5%
+observations -0.17180 -0.077294 -0.05930800 -0.04688535
+trtdrug      -1.40350 -0.244195  0.08907125  0.36595300
+trtdrugplus  -0.87545  0.420960  0.77233750  1.23830000
 \end{Soutput}
 \end{Schunk}
 
@@ -221,9 +227,7 @@ In order to check the convergency of the simulation, we use \verb!checkChain! fu
 
 \begin{figure}[ht]
 \begin{center}
- <<fig=TRUE, echo = FALSE, width=12, height=6>>=
- chechChain(bacParams)
- @
+\includegraphics{glmmBUGS-checkChainFig}
  \caption{A chain plot of the posterial distribution from MCMC simulation for the non-spatial model.}\label{chain}
  \end{center}
 \end{figure}
@@ -239,7 +243,7 @@ We then introduce the spatial model. The data set is built in the \textit{glmmBU
 head(ontario)
 
 $CSDUID$ is the census tract number; 
-$Observed$ is the number of cancer cases; 
+$observed$ is the number of cancer cases; 
 $logExpected$ is the predicted number of cancer cases on the $\log$ scale.
 
 Consider the following model:
@@ -277,7 +281,7 @@ Then we fit a glmmBUGS model:
 \begin{Sinput}
 > data(ontario)
 > data(popDataAdjMat)
-> forBugs = glmmBUGS(formula = Observed + logExpected ~ 1, effects = "CSDUID", 
+> forBugs = glmmBUGS(formula = observed + logExpected ~ 1, effects = "CSDUID", 
 +     family = "poisson", spatial = popDataAdjMat, data = ontario)
 \end{Sinput}
 \end{Schunk}
@@ -290,9 +294,14 @@ Then we use the \verb!bugs! function in the \verb!R2 WindBUGS! package to do the
 > startingValues = forBugs$startingValues
 > source("getInits.R")
 > library(R2WinBUGS)
-> ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()), 
-+     model.file = "model.bug", n.chain = 3, n.iter = 6000, n.burnin = 100, 
-+     n.thin = 50, program = "winbugs")
+> if (doSims) {
++     ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()), 
++         model.file = "model.bug", n.chain = 3, n.iter = 6000, 
++         n.burnin = 100, n.thin = 50, program = "winbugs")
++     save(ontarioResult, file = "ontarioResult.RData")
++ } else {
++     load("ontarioResult.RData")
++ }
 \end{Sinput}
 \end{Schunk}
 
@@ -342,7 +351,7 @@ Together with the \verb!mergeBugsData! function in the \verb!diseasemapping! pac
 
 
 \section{Bibliography}
-
+\end{article}
 \end{document}
 
 
