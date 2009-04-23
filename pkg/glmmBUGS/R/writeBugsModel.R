@@ -41,11 +41,11 @@ function(file, effects, covariates, observations,
   }
   
   
-#if(is.null(file)) {
+if(!is.null(file)) {
   sink(file)
   
   cat("model{\n\n")
-#}  
+}  
 
   # the first effect
   Deffect=1
@@ -177,7 +177,7 @@ function(file, effects, covariates, observations,
        cat("SD", Deffect, "Spatial ~ dunif(0, 100)\n", sep="")
   }
   
-if(is.null(file)) {
+if(!is.null(file)) {
   cat("\n} # model\n") 
 
   sink()
