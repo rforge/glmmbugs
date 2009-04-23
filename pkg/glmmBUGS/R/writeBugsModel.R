@@ -1,7 +1,7 @@
 `writeBugsModel` <-
 function(file, effects, covariates, observations, 
   family=c("bernoulli", "binomial", "poisson", "normal",  "other"),
-  spatial=NULL) {
+  spatial=NULL, prefix="") {
 
 # spatial is a character string of names of random effects
 
@@ -41,16 +41,17 @@ function(file, effects, covariates, observations,
   }
   
   
-
+if(is.null(file)) {
   sink(file)
   
   cat("model{\n\n")
-  
+}  
+
   # the first effect
   Deffect=1
   indent = encodeString(" ", width=2*Deffect)
-  theE = effects[Deffect]
-  theD =  paste("D", theE, sep="") 
+  theE = paste(prefix, effects[Deffect], sep="")
+  theD =  paste( "D", theE, sep="") 
   cat("for(", theD, " in 1:N", theE, ") {\n\n", sep="")
   cat(indent, "R", effects[Deffect], "[", theD, "] ~ dnorm(mean", 
    theE, "[", theD, "], T", theE, ")\n",sep="")
@@ -176,8 +177,10 @@ function(file, effects, covariates, observations,
        cat("SD", Deffect, "Spatial ~ dunif(0, 100)\n", sep="")
   }
   
+if(is.null(file)) {
   cat("\n} # model\n") 
 
   sink()
 }
 
+}
