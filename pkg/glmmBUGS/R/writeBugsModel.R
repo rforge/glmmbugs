@@ -51,11 +51,11 @@ if(!is.null(file)) {
   Deffect=1
   indent = encodeString(" ", width=2*Deffect)
   theE = paste(prefix, effects[Deffect], sep="")
-  theD =  paste("D", theE, sep="") 
+  theD = paste("D", theE, sep="") 
   cat("for(", theD, " in 1:N", theE, ") {\n\n", sep="")
-  cat(indent, "R", effects[Deffect], "[", theD, "] ~ dnorm(mean", 
+  cat(indent, "R", prefix, effects[Deffect], "[", theD, "] ~ dnorm(mean", 
    theE, "[", theD, "], T", theE, ")\n",sep="")
-  cat(indent, "mean", theE, "[", theD, "] <- intercept", sep="")
+  cat(indent, "mean", theE, "[", theD, "] <- intercept", prefix,  sep="")
   
   # the covariates
   # check to see if there's more than one
@@ -74,10 +74,10 @@ if(!is.null(file)) {
   # subsequent effects, if any
   if(length(effects)>1) {
     for(Deffect in seq(2, length(effects))) {
-      theE = effects[Deffect]
+      theE = paste(prefix, effects[Deffect], sep="")
       theD = paste("D", theE, sep="")
-      thePastD = paste("D", effects[Deffect-1], sep="")
-      thePastS = paste("S", effects[Deffect-1], sep="")
+      thePastD = paste("D", prefix, effects[Deffect-1], sep="")
+      thePastS = paste("S", prefix, effects[Deffect-1], sep="")
       cat("\n", indent, "for(", theD, " in ", thePastS, "[",
         thePastD, "]:(", thePastS, "[", thePastD, "+1]-1)){\n\n", sep="")
       indent = encodeString(" ", width=2*Deffect)
@@ -106,10 +106,10 @@ if(!is.null(file)) {
     }
 
   # the observations
-      theE = "observations"
+      theE = paste(prefix, "observations", sep="")
       theD = paste("D", theE, sep="")
-      thePastD = paste("D", effects[length(effects)], sep="")
-      thePastS = paste("S", effects[length(effects)], sep="")
+      thePastD = paste("D", prefix, effects[length(effects)], sep="")
+      thePastS = paste("S", prefix, effects[length(effects)], sep="")
       
       # the loop
       cat("\n", indent, "for(", theD, " in ", thePastS, "[",
@@ -126,7 +126,7 @@ if(!is.null(file)) {
         cat(", Tobservations")  
       cat(")\n",sep="")
       # mean of observations  
-      cat(indent, link, "mean", theE, "[", theD, "]", endlink, " <- R",  
+      cat(indent, link, "mean", theE, "[", theD, "]", endlink, " <- R", prefix,  
         effects[length(effects)], "[", thePastD, "]", sep="")
     
       if(length(covariates[[theE]])==1) {
@@ -149,13 +149,13 @@ if(!is.null(file)) {
   
   # the spatial distributions
   for(Deffect in spatial) {  
-    cat("R", Deffect, "Spatial[1:N", Deffect, "Spatial] ~ car.normal(adj", Deffect, 
-        "[], weights", Deffect, "[], num", Deffect, "[], T", Deffect, "Spatial)\n", sep="")  
+    cat("R", prefix, Deffect, "Spatial[1:N", prefix, Deffect, "Spatial] ~ car.normal(adj", prefix, Deffect, 
+        "[], weights", prefix, Deffect, "[], num", prefix, Deffect, "[], T", prefix, Deffect, "Spatial)\n", sep="")  
   }  
   
   # the priors
   cat("\n\n# priors\n\n")
-  cat("intercept ~ dflat()\n")
+  cat(paste("intercept", prefix, sep=""), "~ dflat()\n")
   for(Deffect in effects) {
     thiscov = covariates[[Deffect]]
     if(length(thiscov)==1) {
@@ -169,12 +169,12 @@ if(!is.null(file)) {
   if(! family %in% c("normal", "gaussian"))
     effects = effects[-length(effects)]
   for(Deffect in effects) {
-    cat("T", Deffect, " <- pow(SD", Deffect, ", -2)\n", sep="")
-    cat("SD", Deffect, " ~ dunif(0, 100)\n", sep="")
+    cat("T", prefix, Deffect, " <- pow(SD", prefix, Deffect, ", -2)\n", sep="")
+    cat("SD", prefix, Deffect, " ~ dunif(0, 100)\n", sep="")
   }
   for(Deffect in spatial) {
-       cat("T", Deffect, "Spatial <- pow(SD", Deffect, "Spatial, -2)\n", sep="")
-       cat("SD", Deffect, "Spatial ~ dunif(0, 100)\n", sep="")
+       cat("T", prefix, Deffect, "Spatial <- pow(SD", prefix, Deffect, "Spatial, -2)\n", sep="")
+       cat("SD", prefix, Deffect, "Spatial ~ dunif(0, 100)\n", sep="")
   }
   
 if(!is.null(file)) {
