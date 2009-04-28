@@ -3,7 +3,7 @@ function(data,
     effects = names(data)[-length(names(data))], 
     covariates=NULL, 
     observations=names(data)[length(names(data))],
-    returnData=FALSE) {
+    returnData=FALSE, prefix=NULL) {
 
   # if a vector of covariates is specified, assume they're all observation level
   if(!is.list(covariates)) covariates = list(observations = covariates)
@@ -46,16 +46,17 @@ function(data,
   Sfull = seq(1, dim(data)[1])
 
   # observations
-  result[[paste("S", effects[Neffects], sep="")]] =
+  result[[paste("S", prefix, effects[Neffects], sep="")]] =
     getRaggedSeq(cbind(data[,effects[Neffects]], Sfull)) 
   for(Dobservation in observations)
-    result[[Dobservation]] = data[,Dobservation] 
+    result[[paste(prefix,Dobservation, sep="")]] = data[,Dobservation] 
 
    # get covariates
  
   # obseration level covariates
   Dlevel = "observations"
-
+      Dlevel = paste(prefix, Dlevel, sep="")
+      
   # change data dataframe to a matrix
   data = as.matrix(data[,unlist(covariates), drop=FALSE])
 
@@ -67,7 +68,7 @@ function(data,
 
   # the other levels  
   for(Dlevel in rev(effects)) {
-
+     Dlevel = paste(prefix, Dlevel, sep="")
     # extract the covariates at this level
     Sfull = Sfull[result[[paste("S", Dlevel, sep="")]]]
     Sfull = Sfull[-length(Sfull)] 
@@ -87,9 +88,12 @@ function(data,
     }
   }
 
-   if(returnData) 
-    list(data=data, result=result)
-  else
+attributes(result)$prefix = prefix
+
+ if(returnData) 
+    result=list(data=data, result=result)
+  
+  
     return(result)
 }
 

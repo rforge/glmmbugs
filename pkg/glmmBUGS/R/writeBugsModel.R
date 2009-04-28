@@ -1,7 +1,15 @@
 `writeBugsModel` <-
 function(file, effects, covariates, observations, 
   family=c("bernoulli", "binomial", "poisson", "normal",  "other"),
-  spatial=NULL, prefix="") {
+  spatial=NULL, prefix="", reparam=NULL) {
+
+ # reparam="observations"
+# reparam = effects[2]
+if(is.null(reparam)) {
+ interceptString = "intercept"
+} else {
+
+}
 
 # spatial is a character string of names of random effects
 
@@ -55,7 +63,7 @@ if(!is.null(file)) {
   cat("for(", theD, " in 1:N", theE, ") {\n\n", sep="")
   cat(indent, "R", prefix, effects[Deffect], "[", theD, "] ~ dnorm(mean", 
    theE, "[", theD, "], T", theE, ")\n",sep="")
-  cat(indent, "mean", theE, "[", theD, "] <- intercept", prefix,  sep="")
+  cat(indent, "mean", theE, "[", theD, "] <- ", interceptString, prefix,  sep="")
   
   # the covariates
   # check to see if there's more than one
@@ -116,12 +124,12 @@ if(!is.null(file)) {
         thePastD, "]:(", thePastS, "[", thePastD, "+1]-1)){\n\n", sep="")
       indent = encodeString(" ", width=2*length(effects)+2)
       # distribution of observations
-      cat(indent, observations, "[", theD, "] ~ ", ddist, "(mean", 
+      cat(indent, observations, prefix,  "[", theD, "] ~ ", ddist, "(mean", 
         theE, "[", theD, "]", sep="")
       # if binomial, add offsets
       if( family=="binomial" & length(offset)) {
         cat(", ")
-        cat(toString(paste(offset, "[", theD, "]", sep="")))  
+        cat(toString(paste(offset, prefix, "[", theD, "]", sep="")))  
       } else if(family %in% c("normal", "gaussian"))
         cat(", Tobservations")  
       cat(")\n",sep="")
@@ -135,7 +143,7 @@ if(!is.null(file)) {
         cat(" + inprod2(betaobservations[] , Xobservations[", theD, ",])", sep="")
       }
       if(family!="binomial" & length(offset)) {
-           cat("+", gsub(",", "+", toString(paste(offset, "[", theD, "]", sep="")))) 
+           cat("+", gsub(",", "+", toString(paste(offset, prefix, "[", theD, "]", sep="")))) 
       }   
   cat("\n\n")
     
@@ -156,6 +164,15 @@ if(!is.null(file)) {
   # the priors
   cat("\n\n# priors\n\n")
   cat(paste("intercept", prefix, sep=""), "~ dflat()\n")
+ 
+  if(length(covariates[[theE]])==1) {  
+  cat(paste("interceptUnparam", prefix, sep=""), "<-") 
+        cat(paste("intercept", prefix, sep=""), " + betaobservations * Xobservations[", theD, "]", sep="")
+      } else if (length(covariates[["observations"]]) > 1) {
+        cat(paste("intercept", prefix, sep=""), " + inprod2(betareparam[] , Xreparam[", theD, ",])", sep="")
+      }
+  
+  
   for(Deffect in effects) {
     thiscov = covariates[[Deffect]]
     if(length(thiscov)==1) {
@@ -176,6 +193,9 @@ if(!is.null(file)) {
        cat("T", prefix, Deffect, "Spatial <- pow(SD", prefix, Deffect, "Spatial, -2)\n", sep="")
        cat("SD", prefix, Deffect, "Spatial ~ dunif(0, 100)\n", sep="")
   }
+  
+  
+  
   
 if(!is.null(file)) {
   cat("\n} # model\n") 
