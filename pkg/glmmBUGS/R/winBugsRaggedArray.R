@@ -33,13 +33,13 @@ function(data,
     theorder = order(data[,effects])
   data=data[theorder,]
 
-  result[[paste("N", effects[1], sep="")]] = length(unique(data[,effects[1]]))
+  result[[paste("N", prefix, effects[1], sep="")]] = length(unique(data[,effects[1]]))
 
   # get the ragged array sequences
   if(Neffects>1) {
     for(D in 2:Neffects) {
       data[,effects[D]] = paste(data[,effects[D-1]], data[,effects[D]], sep="/")  
-      result[[paste("S", effects[D-1], sep="")]] = 
+      result[[paste("S", prefix, effects[D-1], sep="")]] = 
         getRaggedSeq(data[,effects[c(D-1, D)]])
     }
   }
@@ -49,7 +49,7 @@ function(data,
   result[[paste("S", prefix, effects[Neffects], sep="")]] =
     getRaggedSeq(cbind(data[,effects[Neffects]], Sfull)) 
   for(Dobservation in observations)
-    result[[paste(prefix,Dobservation, sep="")]] = data[,Dobservation] 
+    result[[paste(prefix, Dobservation, sep="")]] = data[,Dobservation] 
 
    # get covariates
  
