@@ -1,5 +1,5 @@
 `getStartingValues` <-
-function(pql, ragged) {
+function(pql, ragged, prefix=NULL) {
 # make a vector of starting values
 # observations and effects are character strings
 # covariates is a covariate list given to winBugsRaggedArray
@@ -10,6 +10,8 @@ function(pql, ragged) {
 startingValues = list(
   intercept = pql$coef$fixed["(Intercept)"]  
 )
+
+names(startingValues)[1]<-paste(prefix,names(startingValues)[1],sep="")
 
 covariates = pql$covariates
 effects = pql$effects
@@ -26,7 +28,7 @@ if(is.list(covariates)) {
    startingValues$betas = pql$coef$fixed[names(pql$coef$fixed) != "(Intercept)"] 
 }
 
-# random effects
+# random effects                                                                         
 # data in the same order as the ragged array
   subdata = pql$data[,pql$effects]
   if(length(pql$effects)==1) {
@@ -43,7 +45,8 @@ if(is.list(covariates)) {
 
 for(Deffect in seq(length(pql$effects), 1)) {
   theE = pql$effects[Deffect]
-
+  theE = paste(prefix, theE, sep="")
+  
   # get one row of data for each different value of the effect
   theS = ragged[[paste("S", theE, sep="")]]
   theS = theS[-length(theS)]
@@ -71,6 +74,7 @@ for(Deffect in seq(length(pql$effects), 1)) {
 }
 #
 ## covariate matrix
+names(pql$modelStruct$reStruct)<-paste(prefix,names(pql$modelStruct$reStruct),sep="")
 startingValues$vars = lapply(pql$modelStruct$reStruct, function(x) pql$sigma^2 * as.matrix(x)) 
 #
 
