@@ -1,4 +1,4 @@
-addSpatial = function(map, raggedArray=NULL, effect=NULL) {
+addSpatial = function(map, raggedArray=NULL, effect=NULL, prefix=NULL) {
 
   
   if(is.null(effect)) {
@@ -32,7 +32,7 @@ addSpatial = function(map, raggedArray=NULL, effect=NULL) {
   }
   
   # names of the random effects
-  effectNames = names(raggedArray[[paste("S", effect, sep="")]])
+  effectNames = names(raggedArray[[paste("S", prefix, effect, sep="")]])
   effectNames = effectNames[effectNames != "end"]
   if(!length(effectNames))
     effectNames = theregions
@@ -45,17 +45,17 @@ addSpatial = function(map, raggedArray=NULL, effect=NULL) {
 
 Sspatial = seq(1, length(theregions))
 names(Sspatial) = theregions
-raggedArray[[paste("Sspatial", effect, sep="")]] = Sspatial[effectNames]
+raggedArray[[paste("Sspatial", prefix, effect, sep="")]] = Sspatial[effectNames]
 
 
-  raggedArray[[paste("adj", effect,  sep="")]] = map$adj
-  raggedArray[[paste("num", effect, sep="")]] = map$num
+  raggedArray[[paste("adj", prefix, effect,  sep="")]] = map$adj
+  raggedArray[[paste("num", prefix, effect, sep="")]] = map$num
   if(is.null(map$weights)) {
-    raggedArray[[paste("weights", effect, sep="")]]= rep(1, length(map$adj))
+    raggedArray[[paste("weights", prefix, effect, sep="")]]= rep(1, length(map$adj))
   } else {
-    raggedArray[[paste("weights", effect, sep="")]] = map$weights
+    raggedArray[[paste("weights", prefix, effect, sep="")]] = map$weights
   }
-  raggedArray[[paste("N", effect, "Spatial", sep="")]] = length(map$num)
+  raggedArray[[paste("N", prefix, effect, "Spatial", sep="")]] = length(map$num)
 
   raggedArray
 
