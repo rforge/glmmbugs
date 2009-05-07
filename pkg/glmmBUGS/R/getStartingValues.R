@@ -7,11 +7,11 @@ function(pql, ragged, prefix=NULL) {
 
 # fixed effects  
 
-startingValues = list(
-  intercept = pql$coef$fixed["(Intercept)"]  
-)
+startingValues = list()
+startingValues[[paste("intercept",prefix, sep="")]]=  pql$coef$fixed["(Intercept)"]  
 
-names(startingValues)[1]<-paste(prefix,names(startingValues)[1],sep="")
+
+#names(startingValues)[1]<-paste(prefix,names(startingValues)[1],sep="")
 
 covariates = pql$covariates
 effects = pql$effects
