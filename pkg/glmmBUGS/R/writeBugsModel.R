@@ -170,6 +170,15 @@ if(!is.null(file)) {
           cat("beta", Deffect, "[", Dpar,  "] ~ dflat()\n",sep="")
     }
   }
+  
+  if(length(covariates[[theE]])==1) {  
+    cat(paste("interceptUnparam", prefix, sep=""), "<-") 
+        cat(paste("intercept", prefix, sep=""), " + betaobservations * Xobservations[",    theD, "]", sep="")
+      } else if (length(covariates[["observations"]]) > 1) {
+        cat(paste("intercept", prefix, sep=""), " + inprod2(betareparam[] , Xreparam[",    theD, ",])", sep="")
+      }
+
+  
   cat("\n")
   if(! family %in% c("normal", "gaussian"))
     effects = effects[-length(effects)]
