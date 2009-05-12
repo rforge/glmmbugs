@@ -171,11 +171,15 @@ if(!is.null(file)) {
     }
   }
   
-  if(length(covariates[[theE]])==1) {  
-    cat(paste("interceptUnparam", prefix, sep=""), "<-") 
-        cat(paste("intercept", prefix, sep=""), " + betaobservations * Xobservations[",    theD, "]", sep="")
-      } else if (length(covariates[["observations"]]) > 1) {
-        cat(paste("intercept", prefix, sep=""), " + inprod2(betareparam[] , Xreparam[",    theD, ",])", sep="")
+  Deffect=1
+  indent = encodeString(" ", width=2*Deffect)
+  theEE = paste(effects[Deffect], sep="")
+  theDD =  paste( "D", theEE, sep="") 
+  if(length(covariates[[theEE]])==1) {  
+    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "+ betareparam * Xreparam[]", sep="")
+     } else if(length(covariates[[theEE]]) > 1) {
+       cat(paste("intercept", prefix, sep=""), " + inprod2(betareparam[] ,
+ Xreparam[",    theDD, ",])", sep="")
       }
 
   

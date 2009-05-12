@@ -55,13 +55,13 @@ function(data,
  
   # obseration level covariates
   Dlevel = "observations"
-      Dlevel = paste(prefix, Dlevel, sep="")
+  
       
   # change data dataframe to a matrix
   data = as.matrix(data[,unlist(covariates), drop=FALSE])
 
   if(!is.null(covariates[[Dlevel]])) {
-      result[[paste("X", Dlevel, sep="")]] =  
+      result[[paste("X", prefix, Dlevel, sep="")]] =  
         data[Sfull,covariates[[Dlevel]]] 
   }
   
