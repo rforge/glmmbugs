@@ -129,7 +129,7 @@ if(!is.null(file)) {
       # if binomial, add offsets
       if( family=="binomial" & length(offset)) {
         cat(", ")
-         cat(toString(paste( prefix, offset,"[", theD, "]", sep="")))   
+        cat(toString(paste( prefix, offset,"[", theD, "]", sep="")))   
       } else if(family %in% c("normal", "gaussian"))
         cat(", Tobservations")  
       cat(")\n",sep="")
@@ -186,9 +186,9 @@ if(!is.null(file)) {
   theEE = paste(effects[Deffect], sep="")
   theDD =  paste( "D", theEE, sep="")  
   if(length(covariates[[theEE]])==1) {
-    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "-", paste("beta", theEE, "reparam",sep=""),   "*", paste("X", theEE, "reparam[]", sep=""))
+    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "-", paste("beta", theEE, sep=""),   "*", paste("X", theEE, "reparam", sep=""))
   } else if(length(covariates[[theEE]]) > 1) {         
-    cat(paste("intercept", prefix, sep=""), "- inprod2(", paste("X", theEE, "reparamBase[]", sep=""),"," , paste("beta", theEE, "reparam[]", sep=""), ")")
+    cat(paste("intercept", prefix, sep=""), "- inprod2(", paste("beta", theEE, "Base[]", sep=""),"," , paste("X", theEE, "reparam[]", sep=""), ")")
   }   
 
 
