@@ -1,7 +1,7 @@
 `writeBugsModel` <-
 function(file, effects, covariates, observations, 
   family=c("bernoulli", "binomial", "poisson", "normal",  "other"),
-  spatial=NULL, prefix="", reparam=NULL) {
+  spatial=NULL, prefix="", reparam=NULL, brugs=FALSE) {
 
 # spatial is a character string of names of random effects
  if(is.null(reparam)) {
@@ -9,6 +9,9 @@ function(file, effects, covariates, observations,
 } else {
 
 }
+
+if (brugs) inprod="inprod" else inprod="inprod2"
+
 
   if(!is.character(family)) {
     warning("family must be a character string, ie \"poisson\" or \"binomial\" ")
@@ -133,12 +136,19 @@ if(!is.null(file)) {
       # mean of observations  
       cat(indent, link, "mean", theE, "[", theD, "]", endlink, " <- R",  
         effects[length(effects)], "[", thePastD, "]", sep="")
-    
+
       if(length(covariates[[theE]])==1) {
-        cat(" + betaobservations * Xobservations[", theD, "]", sep="")
-      } else if (length(covariates[["observations"]]) > 1) {
-        cat(" + inprod2(betaobservations[] , Xobservations[", theD, ",])", sep="")
-      }
+         cat(" + beta", theE, " * X", theE, "[", theD, "]", sep="")
+      } else if (length(covariates[[theE]]) > 1) {
+        cat(" + inprod2(beta", theE, "[] , X", theE, "[", theD, ",])", sep="")
+      }   
+
+    
+#      if(length(covariates[[theE]])==1) {
+#        cat(" + betaobservations * Xobservations[", theD, "]", sep="")
+#      } else if (length(covariates[["observations"]]) > 1) {
+#        cat(" + inprod2(betaobservations[] , Xobservations[", theD, ",])", sep="")
+#      }
        if(family!="binomial" & length(offset)) {
            cat("+", gsub(",", "+", toString(paste(prefix,offset,  "[", theD, "]", sep="")))) 
       }   
@@ -174,13 +184,20 @@ if(!is.null(file)) {
   Deffect=1
   indent = encodeString(" ", width=2*Deffect)
   theEE = paste(effects[Deffect], sep="")
-  theDD =  paste( "D", theEE, sep="") 
-  if(length(covariates[[theEE]])==1) {  
-    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "+ betareparam * Xreparam[]", sep="")
-     } else if(length(covariates[[theEE]]) > 1) {
-       cat(paste("intercept", prefix, sep=""), " + inprod2(betareparam[] ,
- Xreparam[",    theDD, ",])", sep="")
-      }
+  theDD =  paste( "D", theEE, sep="")  
+  if(length(covariates[[theEE]])==1) {
+    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "-", paste("beta", theEE, "reparam",sep=""),   "*", paste("X", theEE, "reparam[]", sep=""))
+  } else if(length(covariates[[theEE]]) > 1) {         
+    cat(paste("intercept", prefix, sep=""), "- inprod2(", paste("X", theEE, "reparamBase[]", sep=""),"," , paste("beta", theEE, "reparam[]", sep=""), ")")
+  }   
+
+
+#  if(length(covariates[[theEE]])==1) {  
+#    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "-# betareparam * Xreparam[]", sep="")
+#     } else if(length(covariates[[theEE]]) > 1) {
+#       cat(paste("intercept", prefix, sep=""), " + inprod2(betareparam[] ,
+# Xreparam[",    theDD, ",])", sep="")
+#      }
 
   
   cat("\n")
