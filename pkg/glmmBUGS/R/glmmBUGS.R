@@ -2,7 +2,9 @@
 function(formula, data, effects, 
   modelFile = "model.bug", initFile = "getInits.R", 
   family=c("bernoulli", "binomial", "poisson", "gaussian"),
-spatial=NULL, spatialEffect = NULL) {
+spatial=NULL, spatialEffect = NULL, reparam=NULL, prefix=NULL) {
+
+# reparam = list(CSDUID = c(20000, 10), observations=50 )
 
   family = family[1]
   if(!is.character(family)) {
@@ -46,6 +48,20 @@ thepql = glmmPQLstrings(effects=effects, covariates = covariates,
 # extract properly formatted starting values from the pql
 startingValues = getStartingValues(pql=thepql, ragged=ragged) 
 
+# if reparametrizing, subtract stuff from starting values
+if(!is.null(reparam)) {
+
+# and add stuff to the ragged array
+ for(D in names(reparam)) {
+
+    ragged[[paste("X", D, "reparam", prefix, sep="")]] = reparam[[D]]
+
+    startingValues$intercept = startingValues$intercept - 
+      reparam[[D]]%*%startingValues[[paste("beta", D, "reparam", sep="")]]
+ }
+
+}
+
 # write a function to generate starting values
 startingFunction(startingValues, initFile)
 
@@ -56,7 +72,7 @@ spatialEffect = gsub("Spatial$", "", spatialEffect)
 
 writeBugsModel(modelFile, effects =effects,
     covariates = covariates, observations = observations,
-     family=family, spatial = spatialEffect ) # add spatial            
+     family=family, spatial = spatialEffect, reparam = names(reparam), prefix=prefix ) # add spatial            
      
 return(list(ragged=ragged, startingValues = startingValues, pql=thepql))  
 }
