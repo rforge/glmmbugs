@@ -7,7 +7,7 @@ function(file, effects, covariates, observations,
  if(is.null(reparam)) {
  interceptString = "intercept"
 } else {
-
+interceptString = "interceptUnparam"
 }
 
 if (brugs) inprod="inprod" else inprod="inprod2"
@@ -181,23 +181,18 @@ if(!is.null(file)) {
     }
   }
   
-  Deffect=1
-  indent = encodeString(" ", width=2*Deffect)
+if(!is.null(reparam)){  
+Deffect=1
+#  indent = encodeString(" ", width=2*Deffect)
   theEE = paste(effects[Deffect], sep="")
-  theDD =  paste( "D", theEE, sep="")  
-  if(length(covariates[[theEE]])==1) {
-    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "-", paste("beta", theEE, sep=""),   "*", paste("X", theEE, "reparam", sep=""))
-  } else if(length(covariates[[theEE]]) > 1) {         
+#  theDD =  paste( "D", theEE, sep="")
+#  if(length(covariates[[theEE]])==1) {
+#    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "-", paste("beta", theEE, sep=""),   "*", paste("X", theEE, "reparam", sep=""))
+#  } else 
+if(length(covariates[[theEE]])) {
     cat(paste("intercept", prefix, sep=""), "- inprod2(", paste("beta", theEE, "Base[]", sep=""),"," , paste("X", theEE, "reparam[]", sep=""), ")")
-  }   
-
-
-#  if(length(covariates[[theEE]])==1) {  
-#    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "-# betareparam * Xreparam[]", sep="")
-#     } else if(length(covariates[[theEE]]) > 1) {
-#       cat(paste("intercept", prefix, sep=""), " + inprod2(betareparam[] ,
-# Xreparam[",    theDD, ",])", sep="")
-#      }
+  }
+}
 
   
   cat("\n")
