@@ -6,14 +6,16 @@ function(data,
     returnData=FALSE, prefix=NULL) {
 
   # if a vector of covariates is specified, assume they're all observation level
-  if(!is.list(covariates)) covariates = list(observations = covariates)
+  #if(!is.list(covariates)) covariates = list(observations = covariates)
+  if(!is.list(covariates)) covariates = list(covariates)
   
   # check to see covariate categories correspond to effects
   covNames= ! (names(covariates) %in% effects)
   if(any(covNames)) {
-     if(sum(covNames>1)) 
+     if(sum(covNames>1)){#add here
       warning("names of covariates don't match effect names")
      names(covariates)[covNames] = "observations" 
+     }#added here
   }
    
  
@@ -27,10 +29,8 @@ function(data,
   }
 
   # reorder the data
-  if(length(effects)>1)
-    theorder = do.call(order, data[,effects])
-  else
-    theorder = order(data[,effects])
+  if(length(effects)>1) {theorder = do.call(order, data[,effects])
+  }else theorder = order(data[,effects])
   data=data[theorder,]
 
   result[[paste("N", prefix, effects[1], sep="")]] = length(unique(data[,effects[1]]))
@@ -54,14 +54,15 @@ function(data,
    # get covariates
  
   # obseration level covariates
-  Dlevel = "observations"
+  #Dlevel = "observations"
+  Dlevel = paste(prefix,effects[1],sep="")
   
       
   # change data dataframe to a matrix
   data = as.matrix(data[,unlist(covariates), drop=FALSE])
 
   if(!is.null(covariates[[Dlevel]])) {
-      result[[paste("X", prefix, Dlevel, sep="")]] =  
+      result[[paste("X",  Dlevel, sep="")]] =
         data[Sfull,covariates[[Dlevel]]] 
   }
   
