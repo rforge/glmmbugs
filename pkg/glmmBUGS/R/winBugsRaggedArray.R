@@ -3,7 +3,7 @@ function(data,
     effects = names(data)[-length(names(data))], 
     covariates=NULL, 
     observations=names(data)[length(names(data))],
-    returnData=FALSE, prefix=NULL) {
+    returnData=FALSE, prefix=NULL, reparam=FALSE) {
 
   # if a vector of covariates is specified, assume they're all observation level
   #if(!is.list(covariates)) covariates = list(observations = covariates)
@@ -55,8 +55,8 @@ function(data,
  
   # obseration level covariates
   #Dlevel = "observations"
-  Dlevel = paste(prefix,effects[1],sep="")
-  
+   Dlevel = paste(prefix,effects[1],sep="")
+
       
   # change data dataframe to a matrix
   data = as.matrix(data[,unlist(covariates), drop=FALSE])
@@ -88,6 +88,14 @@ function(data,
       }   
     }
   }
+  
+  # add reparam 
+  for(Dlevel in reparam){
+     if(!is.null(covariates[[Dlevel]])){
+       theXname= paste("X", Dlevel, "reparam", sep="")
+       result[[theXname]] = mean(data[, covariates[[Dlevel]]])
+ }    
+}
 
 attributes(result)$prefix = prefix
 
