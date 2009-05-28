@@ -1,5 +1,5 @@
 `getStartingValues` <-
-function(pql, ragged, prefix=NULL) {
+function(pql, ragged, prefix=NULL, reparam=NULL) {
 # make a vector of starting values
 # observations and effects are character strings
 # covariates is a covariate list given to winBugsRaggedArray
@@ -7,7 +7,7 @@ function(pql, ragged, prefix=NULL) {
 
 # fixed effects  
 
-startingValues = list()
+startingValues = list()  
 startingValues[[paste("intercept",prefix, sep="")]]=  pql$coef$fixed["(Intercept)"]  
 
 
@@ -128,6 +128,13 @@ spatialFactor = 0.5
 
 }
 
+
+for(D in reparam) {
+   if(!is.null(covariates[[D]])){
+   theName = paste("X", D, "reparam", sep="")
+ startingValues[[paste("intercept",prefix, sep="")]] = startingValues[[paste("intercept",prefix, sep="")]] + pql$coef$fixed[covariates[[D]]] * ragged[[theName]]
+}
+}
 
 return(startingValues)
 

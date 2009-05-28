@@ -90,10 +90,10 @@ function(data,
   }
   
   # add reparam 
-  for(Dlevel in reparam){
-     if(!is.null(covariates[[Dlevel]])){
-       theXname= paste("X", Dlevel, "reparam", sep="")
-       result[[theXname]] = mean(data[, covariates[[Dlevel]]])
+  for(D in reparam){
+     if(!is.null(covariates[[D]])){
+       theXname= paste("X", D, "reparam", sep="")
+       result[[theXname]] = mean(data[, covariates[[D]]])
  }    
 }
 

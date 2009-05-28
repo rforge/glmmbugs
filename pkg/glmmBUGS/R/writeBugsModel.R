@@ -63,7 +63,7 @@ if(!is.null(file)) {
   cat("for(", theD, " in 1:N", theE, ") {\n\n", sep="")
   cat(indent, "R", effects[Deffect], "[", theD, "] ~ dnorm(mean", 
    theE, "[", theD, "], T", theE, ")\n",sep="")
- cat(indent, "mean", theE, "[", theD, "] <- ", interceptString, prefix,  sep="")
+ cat(indent, "mean", theE, "[", theD, "] <- ", "intercept", prefix,  sep="")
   
   # the covariates
   # check to see if there's more than one
