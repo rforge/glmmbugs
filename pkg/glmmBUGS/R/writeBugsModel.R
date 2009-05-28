@@ -156,7 +156,7 @@ if(!is.null(file)) {
     
     
     # the closing brackets
-    effects = c(effects, "observations")
+   effects = c(effects, "observations")
     
     for(Deffect in seq(length(effects),1)) {
        cat(encodeString("", width=2*Deffect-2), "}#", effects[Deffect],"\n",sep="")
@@ -181,16 +181,16 @@ if(!is.null(file)) {
     }
   }
   
-if(!is.null(reparam)){  
-Deffect=1
-#  indent = encodeString(" ", width=2*Deffect)
-  theEE = paste(effects[Deffect], sep="")
-#  theDD =  paste( "D", theEE, sep="")
-#  if(length(covariates[[theEE]])==1) {
-#    cat(paste("interceptUnparam", prefix, sep=""), "<-", paste("intercept", prefix, sep=""), "-", paste("beta", theEE, sep=""),   "*", paste("X", theEE, "reparam", sep=""))
-#  } else 
-if(length(covariates[[theEE]])) {
-    cat(paste("intercept", prefix, sep=""), "- inprod2(", paste("beta", theEE, "Base[]", sep=""),"," , paste("X", theEE, "reparam[]", sep=""), ")")
+if(!is.null(reparam)){ 
+ cat("interceptUnparam", prefix, "<- intercept", prefix, sep="")
+for(Deffect in reparam){
+  if(length(covariates[[Deffect]])==1) {
+  # add prefix here
+    cat("- beta", Deffect, " * X", Deffect, "reparam", sep="")
+  } else if (length(covariates[[Deffect]])>1){
+  # add prefix here
+    cat("-", "inprod(beta", Deffect, "[]," , "X", Deffect, "reparam[])", sep="")
+  }
   }
 }
 
