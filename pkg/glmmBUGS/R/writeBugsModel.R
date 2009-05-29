@@ -63,7 +63,7 @@ if(!is.null(file)) {
   cat("for(", theD, " in 1:N", theE, ") {\n\n", sep="")
   cat(indent, "R", effects[Deffect], "[", theD, "] ~ dnorm(mean", 
    theE, "[", theD, "], T", theE, ")\n",sep="")
- cat(indent, "mean", theE, "[", theD, "] <- ", "intercept", prefix,  sep="")
+ cat(indent, "mean", theE, "[", theD, "] <- ", interceptString, prefix,  sep="")
   
   # the covariates
   # check to see if there's more than one
@@ -189,7 +189,7 @@ for(Deffect in reparam){
     cat("- beta", Deffect, " * X", Deffect, "reparam", sep="")
   } else if (length(covariates[[Deffect]])>1){
   # add prefix here
-    cat("-", "inprod(beta", Deffect, "[]," , "X", Deffect, "reparam[])", sep="")
+    cat("-", "inprod(beta", prefix, Deffect, "[]," , "X", Deffect, "reparam[])", sep="")
   }
   }
 }
