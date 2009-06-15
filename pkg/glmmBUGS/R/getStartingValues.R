@@ -132,7 +132,7 @@ spatialFactor = 0.5
 for(D in reparam) {
    if(!is.null(covariates[[D]])){
    theName = paste("X", D, "reparam", sep="")
- startingValues[[paste("intercept",prefix, sep="")]] = startingValues[[paste("intercept",prefix, sep="")]] + pql$coef$fixed[covariates[[D]]] * ragged[[theName]]
+ startingValues[[paste("intercept",prefix, sep="")]] = startingValues[[paste("intercept",prefix, sep="")]] +sum(pql$coef$fixed[covariates[[D]]] * ragged[[theName]])
 }
 }
 
