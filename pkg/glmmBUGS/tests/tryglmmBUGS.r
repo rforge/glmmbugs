@@ -18,14 +18,14 @@ prefix="cancer"
 ### 
 reparam = "CSDUID"
 ###   when we have individual level covariates:
-reparam=c("CSDUID","observations")
+#reparam=c("CSDUID","observations")
 
 
 
-
+    if(length(prefix)){ 
     oldeffects = effects
     effects = paste(prefix, effects, sep="")
-
+    }
     #if prefix is not NULL or not empty ,,create a new column
     if(!is.null(prefix) & length(strsplit(toString(prefix)," ")[[1]])){
        data[,effects] = data[,oldeffects]
@@ -52,13 +52,13 @@ reparam=c("CSDUID","observations")
         reparam = paste(prefix, reparam, sep="")
      
     ragged = winBugsRaggedArray(data, effects = effects, covariates = covariates, 
-        observations = observations, prefix= "cancer" , reparam=reparam)  
+        observations = observations, prefix= prefix , reparam=reparam)  
     #ragged$Xreparam = ????
     if (!is.null(spatial)) 
-        ragged = addSpatial(spatial, ragged, spatialEffect, prefix= 'cancer')
+        ragged = addSpatial(spatial, ragged, spatialEffect, prefix= prefix)
     thepql = glmmPQLstrings(effects = effects, covariates = covariates, 
         observations = observations, data = data, family = family)
-    startingValues = getStartingValues(pql = thepql, ragged = ragged, prefix="cancer", reparam = reparam )
+    startingValues = getStartingValues(pql = thepql, ragged = ragged, prefix=prefix, reparam = reparam )
     
     startingFunction(startingValues, file="getInits.R")
 
@@ -76,13 +76,17 @@ reparam=c("CSDUID","observations")
 
     library(R2WinBUGS)     
     source("getInits.R")
-     
+
+## check whether this is unparam or reparam:     
      if(length(reparam)) reparamIntercept<-paste("interceptUnparam",prefix,sep="")
-    
+
        ontarioResult = bugs(ragged, getInits, 
        parameters.to.save = c(names(getInits()), reparamIntercept),
        model.file="model.bug", n.chain=3, n.iter=50, n.burnin=10, n.thin=2,
        program="WinBUGS", debug=T)
+
+
+
 
     ontarioParams = restoreParams(ontarioResult, ragged$ragged)
 
