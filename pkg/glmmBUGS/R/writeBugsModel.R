@@ -188,7 +188,6 @@ for(Deffect in reparam){
   # add prefix here
     cat("- beta", Deffect, " * X", Deffect, "reparam", sep="")
   } else if (length(covariates[[Deffect]])>1){
-  # add prefix here
     cat("-", "inprod(beta", prefix, Deffect, "[]," , "X", Deffect, "reparam[])", sep="")
   }
   }
