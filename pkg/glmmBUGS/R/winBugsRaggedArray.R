@@ -53,7 +53,7 @@ function(data,
 
    # get covariates
  
-  # obseration level covariates
+
   #Dlevel = "observations"
    Dlevel = paste(prefix,effects[1],sep="")
 
@@ -64,6 +64,14 @@ function(data,
   if(!is.null(covariates[[Dlevel]])) {
       result[[paste("X",  Dlevel, sep="")]] =
         data[Sfull,covariates[[Dlevel]]] 
+  }
+  
+    # obseration level covariates
+  Plevel = paste(prefix, "observations", sep="")
+    
+  if(!is.null(covariates[[Plevel]])) {
+      result[[paste("X",  Plevel, sep="")]] =
+        data[Sfull,covariates[[Plevel]]] 
   }
   
 
@@ -89,13 +97,32 @@ function(data,
     }
   }
   
-  # add reparam 
+  ##############
+#  if(length(reparam) != length(dimnames(data)[[2]])){
+#   warning("Categorical variable is reparametrized")
+#  }
+  
+#  toGrep<-paste(reparam,collapse = "|")
+#  Rname<-grep(toGrep,dimnames(data)[[2]],value=T)
+  
+#for(D in Rname){
+#    if(!is.null(dimnames(data)[2])){
+#       theXname= paste("X", D, "reparam", sep="")
+#       result[[theXname]] = mean(data[, D])
+#}
+#} 
+   
+ # add reparam 
   for(D in reparam){
      if(!is.null(covariates[[D]])){
-       theXname= paste("X", D, "reparam", sep="")
-       result[[theXname]] = mean(data[, covariates[[D]]])
+       theXname= paste("X", D, "reparam", sep="")  
+#       if(class(data[, covariates[[D]]])=="matrix"){
+       result[[theXname]] = apply(as.matrix(data[, covariates[[D]]]), 2, mean)
+       #}else if(class(data[, covariates[[D]]])=="numeric"){
+      #result[[theXname]] = mean(data[, covariates[[D]]])
+      } 
  }    
-}
+#}     
 
 attributes(result)$prefix = prefix
 
