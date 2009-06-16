@@ -76,7 +76,7 @@ function(data,
   
 
   # the other levels  
-  for(Dlevel in rev(effects[-1])) {
+  for(Dlevel in rev(effects)) {
      Dlevel = paste(prefix, Dlevel, sep="")
     # extract the covariates at this level
     Sfull = Sfull[result[[paste("S", Dlevel, sep="")]]]
