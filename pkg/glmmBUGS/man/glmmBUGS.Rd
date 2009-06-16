@@ -6,7 +6,7 @@
   Creates ragged arrays, writes a model file, and generates sensible starting estimates.
 }
 \usage{
-glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R", family = c("bernoulli", "binomial", "poisson", "gaussian"), spatial=NULL, spatialEffect = NULL)
+glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R", family = c("bernoulli", "binomial", "poisson", "gaussian"), spatial=NULL, spatialEffect = NULL,reparam=NULL, prefix=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +18,8 @@ glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R
    \item{family}{distribution of responses}
    \item{spatial}{Spatial adj matrix, in forms of ploygon, nb object or a list of adj and num}
    \item{spatialEffect}{ spatial variable from data } 
+  \item{reparam}{vector of random effect names, subtract covariates at this level from the intercept. }
+    \item{prefix}{string to append to object names}
 }
 \details{
 

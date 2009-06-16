@@ -9,7 +9,7 @@ Write a bugs model file for a Generalised Linear Mixed Model
 Given a list of effect groups, and the covariates associated with each level, a bugs model file is written using ragged arrays corresponding to output from \code{\link{winBugsRaggedArray}}        
 }
 \usage{
-writeBugsModel(file, effects, covariates, observations, family = c("bernoulli", "binomial", "poisson", "normal", "other"), spatial = NULL, prefix = "")
+writeBugsModel(file, effects, covariates, observations, family = c("bernoulli", "binomial", "poisson", "normal", "other"), spatial = NULL, prefix = "",reparam=NULL, brugs=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,11 +29,14 @@ A character string giving the column of observations, or a vector where the firs
 Response distribution
 }
   \item{spatial}{
-spatial variable
+name of the spatial random effect
 }
   \item{prefix}{
 the prefix 
 }
+  \item{reparam}{vector of random effect names, subtract covariates at this level from the intercept.
+}
+\item{brugs}{make the model file compatible with BRugs by using the inprod function in place of inprod2}
 }
 \details{
 The arguments to the function specify a generalised linear mixed model.  A file containing code for a corresponding bugs model is written.  The model uses ragged arrays to specify grouping factors, and includes covariates at the appropriate levels to aid in chain convergence.  It is intended that the user will edit this file before it's use.  The prior distributions in particular may not be appropriate.

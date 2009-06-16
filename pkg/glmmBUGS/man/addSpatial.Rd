@@ -5,13 +5,14 @@
 Put an adjacency object in a ragged array
 }
 \usage{
-addSpatial(map, raggedArray, effect = NULL)
+addSpatial(map, raggedArray, effect = NULL,prefix=NULL)
 }
 
 \arguments{
   \item{map}{ a spatialPolygonsDataFrame object, or an nb object or a list of two vectors, adj and num}
   \item{raggedArray}{ the result from winBugsRaggedArray }
   \item{effect}{ a character vector listing the effect names }
+  \item{prefix}{Character string to be appended to variable names}
 }
 \details{
 Computes the values need by the \code{car.normal} distribution in WinBUGS.  

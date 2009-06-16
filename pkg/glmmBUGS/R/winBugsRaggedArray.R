@@ -76,7 +76,7 @@ function(data,
   
 
   # the other levels  
-  for(Dlevel in rev(effects)) {
+  for(Dlevel in rev(effects[-1])) {
      Dlevel = paste(prefix, Dlevel, sep="")
     # extract the covariates at this level
     Sfull = Sfull[result[[paste("S", Dlevel, sep="")]]]
@@ -97,24 +97,10 @@ function(data,
     }
   }
   
-  ##############
-#  if(length(reparam) != length(dimnames(data)[[2]])){
-#   warning("Categorical variable is reparametrized")
-#  }
-  
-#  toGrep<-paste(reparam,collapse = "|")
-#  Rname<-grep(toGrep,dimnames(data)[[2]],value=T)
-  
-#for(D in Rname){
-#    if(!is.null(dimnames(data)[2])){
-#       theXname= paste("X", D, "reparam", sep="")
-#       result[[theXname]] = mean(data[, D])
-#}
-#} 
-   
+
  # add reparam 
   for(D in reparam){
-     if(!is.null(covariates[[D]])){
+     if(D %in% names(covariates)){
        theXname= paste("X", D, "reparam", sep="")  
 #       if(class(data[, covariates[[D]]])=="matrix"){
        result[[theXname]] = apply(as.matrix(data[, covariates[[D]]]), 2, mean)
