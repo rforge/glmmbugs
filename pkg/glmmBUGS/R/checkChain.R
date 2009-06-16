@@ -20,7 +20,7 @@ if(is.null(parameters)) {
 
   } else {
    thepars = parameters 
-   betas="beta"
+   betas=c(parameters, "betas")
   }
 
 
