@@ -5,6 +5,12 @@
 \bibliographystyle{abbrvnat}
 \DeclareMathOperator{\logit}{logit}
 
+
+\usepackage{Sweave}
+
+\SweaveOpts{height=3,width=5}
+\setkeys{Gin}{width=0.45\textwidth}
+
 \begin{document}
 
 
@@ -12,10 +18,15 @@
 \title{An Introduction to glmmBUGS Package}
 \author{lutong and patrick}
 \maketitle
-
+<<options,echo=false>>=
+options(SweaveSyntax="SweaveSyntaxNoweb", SweaveHooks=list(fig=function() par(mar=c(2.0,2.0,.2,.1), mgp=c(1, 0.3, 0), cex=0.5)), width=45)
+@
 
 \section{Introduction}
-The {\tt glmmBUGS} package is a bridging tool between Generalized Linear Mixed Models (GLMM's) in R and the BUGS language for  Bayesian analysis using Markov chain Monte Carlo (MCMC) methods.  The package allows users to specify models as formulas in R, as they would in the {\tt glm} function.  It creates the necessary BUGS model file, starting value function, and suitably formatted data for performing inference in WinBUGS or BRugs with the {\tt R2WinBUGS} package.  Some reparametrizing of the model is done to assist in mixing and convergence of the chains, and functions are provided for formatting and summarizing the results.  Although a variety of models can be implemented entirely within {\tt glmmBUGS}, the package intends to provide a basic set of data and files for users to modify as necessary.  This allows the full flexibility of BUGS model specification to be exploited, with much of the initial ``grunt work'' being taken care of by {\tt glmmBUGS}.
+The \pkg{glmmBUGS} package is a bridging tool between Generalized Linear Mixed Models (GLMM's) in R and the BUGS language \citep{winbugs} for  Bayesian analysis using Markov chain Monte Carlo (MCMC) methods\cite[see][]{gelman}.  Prior to writing this package, we found that there were two time consuming steps required for using WinBUGS compared to fitting models within R.  First, unbalanced multi-level data needs to be formatted in a way which BUGS can handle, including changing categorical variables to indicator variables.  Second, a BUGS model file must be written.  Also, the chain mixing was found to improve substantially with a simple reparametrization and the use of sensible starting values.  The package addresses these issues by allowing users to specify models as formulas in R, as they would in the \command{glm} function, and provides everything necessary for fitting the model with WinBUGS or OpenBUGS via the  \pkg{R2WinBUGS} package \citep{r2winbugs}.
+
+\pkg{glmmBUGS} creates the necessary BUGS model file, starting value function, and suitably formatted data.
+  Some reparametrizing of the model is done to assist in mixing and convergence of the chains, and functions are provided for formatting and summarizing the results.  Although a variety of models can be implemented entirely within \pkg{glmmBUGS}, the package intends to provide a basic set of data and files for users to modify as necessary.  This allows the full flexibility of BUGS model specification to be exploited, with much of the initial ``grunt work'' being taken care of by \pkg{glmmBUGS}.
 
 \section{Examples}
 
@@ -26,9 +37,9 @@ library(MASS)
 data(bacteria)
 head(bacteria)
 @
-The variables to be considered are: $y$, the presence or absence of bacteria in a sample coded as `y' and `n' respectively; $week$, the time of the observation; $ID$, subject identifier; and $trt$ giving the treatment group as `placebo', `drug', or `drug+'.  
+The variables to be considered are: \var{y}, the presence or absence of bacteria in a sample coded as `y' and `n' respectively; \var{week}, the time of the observation; $ID$, subject identifier; and $trt$ giving the treatment group as `placebo', `drug', or `drug+'.  
 
-A generalized linear mixed model is applied to the data with:
+A generalized linear mixed model  is applied to the data with:
 \begin{align}\nonumber
 Y_{ij} \sim & \text{Bernoulli}(p_{ij})\\ \nonumber
 \logit(p_{ij}) = &\mu + x_{ij}\beta + V_{i}\\ \label{eq:model}
@@ -51,11 +62,11 @@ bacterianew$yInt = as.integer(bacterianew$y=="y")
 levels(bacterianew$trt) <- c("placebo", "drug", "drugplus")
 @
 
-The primary function in the package is \verb!glmmBUGS!, which does the preparatory work for fitting the model in \ref{eq:modelReparam} with: 
+The primary function in the package is \pkg{glmmBUGS}, which does the preparatory work for fitting the model in \ref{eq:modelReparam} with: 
 <<bacrag>>=
 library(glmmBUGS)
 bacrag <- glmmBUGS(yInt ~ trt + week , data=bacterianew, effects = "ID", 
-                                                 family= "bernoulli", modelFile="bacmodel.bug") 
+                                                 family= "bernoulli") 
 @
 This specifies $yInt$ as a Bernoulli-valued response, $trt$ and $week$ as fixed-effect covariates, and the $ID$ column for the random effects.  The result is a list with three elements:
 \begin{description}
@@ -65,7 +76,7 @@ This specifies $yInt$ as a Bernoulli-valued response, $trt$ and $week$ as fixed-
 \end{description}  
 In addition, two files are written to the working directory
 \begin{description}
-\item[bacmodel.bug], the BUGS model file
+\item[\file{model.bug}], the BUGS model file
 \item[getInits.R], R code for a function to generate random starting values.
 \end{description}  
 
@@ -73,49 +84,48 @@ At this stage the user is expected to modify the files and, if necessary, the da
 <<raggedNames>>=
 names(bacrag$ragged)
 @
-The model file consists of an outer loop over $ID$ levels and an inner loop over observations.  The details of how the model is implemented are best understood by examining the `model.bug' file and consulting the WinBUGS manual.
+The model file consists of an outer loop over \var{ID} levels and an inner loop over observations.  The details of how the model is implemented are best understood by examining the `model.bug' file and consulting the WinBUGS manual.
 
-Before using the \verb!bugs! function in the \verb!R2WinBUGS! package to sample from the posterior, the starting values will be prepared by: sourcing in the R code containing the {\tt getInits} function to generate random starting values; and saving PQL-derived starting values with the name {\tt startingValues}, which this function is expecting.
+Before using the \command{bugs} function in the \pkg{R2WinBUGS} package to sample from the posterior, the starting values will be prepared by: sourcing in the R code containing the \command{getInits} function to generate random starting values; and saving PQL-derived starting values with the name \var{startingValues}, which this function is expecting.
 <<thebug>>=
 source("getInits.R")
 startingValues = bacrag$startingValues
 library(R2WinBUGS)
 bacResult = bugs(bacrag$ragged, getInits, parameters.to.save = names(getInits()),
-                 model.file="bacModel.bug", n.chain=3, 
-                 n.iter=500, n.burnin=50, n.thin=50, program="winbugs")
+                 n.chain=3, 
+                 n.iter=500, n.burnin=50, n.thin=50)
 @
 
 
-As the results stored in \verb!bacResult! are based on the reparametrized model, we use  \verb!restoreParams! to restore the orignial parametrization from \ref{eq:model}. 
+As the results stored in \var{bacResult} are based on the reparametrized model, we use  \command{restoreParams} to restore the original parametrization from (\ref{eq:model}). 
 
 <<theparam>>=
 bacParams = restoreParams(bacResult, bacrag$ragged) 
 names(bacParams)
 @ 
-The result is posterior samples for $\mu$ ($intercept$), $\sigma$ ($SDID$), all the $V_i$ ($RID$), and $\beta$ ($betas$).  Posterior means and credible intervals are obtanied by:
+The result is posterior samples for $\mu$ ($intercept$), $\sigma$ ($SDID$), all the $V_i$ ($RID$), and $\beta$ ($betas$).  Posterior means and credible intervals are obtained by:
 <<thesummary>>=
 bacsummary = summaryChain(bacParams)
 names(bacsummary)
 bacsummary$betas[,c("mean", "2.5%", "97.5%")]
 @                     
 
-In order to check the convergence of the simulations, we use the \verb!checkChain! function to produce trace plots:
+In order to check the convergence of the simulations, we use the \command{checkChain} function to produce trace plots:
 <<thechain, fig=true>>=
-#checkChain(bacParams, c("intercept", "SDID"))
-matplot(bacParams$intercept)
+checkChain(bacParams, c("intercept", "SDID"))
 @
 % \caption{A chain plot of the posterial distribution from MCMC simulation for the non-spatial model.}\label{chain}
 
 
 
 \subsection{A spatial example} 
-The {\tt ontario} dataset contains expected an observed counts of molar cancer by census sub-division in Ontario, Canada.
+The \var{ontario} dataset contains expected an observed counts of molar cancer by census sub-division in Ontario, Canada.
 <<thedata>>=
 data(ontario)
 head(ontario)
 @
 
-Consider the following model:
+Consider the following model \cite[see][]{GMRFbook}:
 \begin{align}\nonumber
 Y_{i} \sim  &\text{Poisson}(\lambda_i E_i)\\ \nonumber
 \log(\lambda_{i}) = &\mu + U_i + V_i\\ \nonumber
@@ -144,10 +154,10 @@ Notice the expected counts are needed on the log scale, and are passed as a seco
 startingValues = forBugs$startingValues
 source("getInits.R")
 library(R2WinBUGS)
-ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
+onResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
    n.chain=3, n.iter=600, n.burnin=60, n.thin=5,
        program="winbugs")
-ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
+ontarioParams = restoreParams(onResult, forBugs$ragged)
 names(ontarioParams)
 @     
 
@@ -167,27 +177,27 @@ These trace plots show poor mixing, and the MCMC should be re-run with longer ch
 
 The {\tt diseasemapping} package has facilities for merging BUGS results into spatial datasets, producing the map below.  
 
-<<ontarioMap, echo=false, fig=true>>=
+<<ontarioMap, echo=false, fig=true,height=6,width=6>>=
 library(diseasemapping)
+require(RColorBrewer)
 data(popdata)
 ontarioSummary = summaryChain(ontarioParams)
 newdata =mergeBugsData(popdata, ontarioSummary)
-print(spplot(newdata, "RCSDUID.mean"))
+therange =range(newdata$RCSDUID.mean)
+print(spplot(newdata, "RCSDUID.mean", col.regions=brewer.pal(7, "OrRd"), cuts=6, lwd=0))
+
 @
 
 
 \section{Summary}
 
+There are a number of methods and R packages for performing Bayesian inference on generalized liner mixed models, including \pkg{geoRglm} \citep{georglm}.  Particularly noteworthy is the \pkg{INLA} package which avoids the use of MCMC by using Laplace approximations, as described in \citet{ruelaplace}.  Despite this, many researchers working with R (including the authors) continue to use WinBUGS for model fitting.  This is at least partly due to the flexibility of the BUGS language, which gives the user nearly full control over specification of distributions and dependence structures.  This package aims to retain this flexibility by providing files to be edited before model fitting is carried out, rather than providing a large number of options for, i.e.\ prior distributions.  More model-specific packages such as \pkg{INLA} are entirely adequate (and perhaps preferable) for the two examples presented here.   Those who wish to have full control over priors or build more complex multivariate or errors-in-covariate models will likely appreciate the head start which \pkg{glmmBUGS} can provide for these tasks.
 
 
-The functions in the \verb!glmmBUGS! package can fit both non-spatial and spatial models. 
-The package connects two statistical softwares, R and WinBUGS, to finish a two-step job: model fitting and MCMC simulation. 
-Together with the \verb!mergeBugsData! function in the \verb!diseasemapping! package, the result from the MCMC simulation can be merged with the original population data set. This step allow us to draw disease maps in R or GIS softwares. 
-
-\section{Acknowledgments}
+\section*{Acknowledgements}
 
 
-\section{Bibliography}
+\bibliography{glmmBUGS}
 \end{article}
 \end{document}
 
