@@ -60,8 +60,9 @@ getCovList = function(covariates, data, effects) {
   interactions = grep(":", covariates, value=TRUE)
   mainEffects = covariates[! covariates %in% interactions]
   
-  response = all.vars(formula)
-  response = response[!response %in% covariates]
+  response = as.character(attributes(terms(formula))$variables)[2]
+  response = unlist(strsplit(response, "\\+"))
+  response=gsub("[[:space:]]", "", response)
 
   if(!all(mainEffects %in% names(data)))
     warning(mainEffects[!mainEffects %in% names(data)], " not found")
