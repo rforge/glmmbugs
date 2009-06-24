@@ -31,15 +31,15 @@ The \pkg{glmmBUGS} package is a bridging tool between Generalized Linear Mixed M
 \section{Examples}
 
 \subsection{Independent random effects} 
-Consider the bacteria data from the \verb!MASS! package: 
+Consider the bacteria data from the \pkg{MASS} package: 
 <<thedata1>>=
 library(MASS)
 data(bacteria)
 head(bacteria)
 @
-The variables to be considered are: \var{y}, the presence or absence of bacteria in a sample coded as `y' and `n' respectively; \var{week}, the time of the observation; $ID$, subject identifier; and $trt$ giving the treatment group as `placebo', `drug', or `drug+'.  
+The variables to be considered are: \var{y}, the presence or absence of bacteria in a sample coded as `y' and `n' respectively; \var{week}, the time of the observation; $ID$, subject identifier; and \var{trt} giving the treatment group as `placebo', `drug', or `drug+'.  
 
-A generalized linear mixed model  is applied to the data with:
+A generalized linear mixed model is applied to the data with:
 \begin{align}\nonumber
 Y_{ij} \sim & \text{Bernoulli}(p_{ij})\\ \nonumber
 \logit(p_{ij}) = &\mu + x_{ij}\beta + V_{i}\\ \label{eq:model}
@@ -55,7 +55,7 @@ R_{i} \sim& \text{N}(\mu + g_{i}\alpha, \sigma^2).
 \end{align}
 Here $g_i$ is the (indicator variables for) treatment group and $w_{ij}$ is the week.  Not that the two models are the same, with $V_i = R_{i} - \mu - g_{i}\alpha$ and $\beta = (\gamma, \alpha)$.  The former model has strong dependence between the posterior samples of the $V_i$ and $\mu$, whereas the $R_i$ and $\mu$ are largely independent.
 
-As BUGS only allows numeric data, and cannot have the `+' sign in variable names, the data are recoded as follows:
+As BUGS only allows numeric data, and cannot have the '+' sign in variable names, the data are recoded as follows:
 <<thechange>>=
 bacterianew <- bacteria
 bacterianew$yInt = as.integer(bacterianew$y=="y")
@@ -68,11 +68,11 @@ library(glmmBUGS)
 bacrag <- glmmBUGS(yInt ~ trt + week , data=bacterianew, effects = "ID", 
                                                  family= "bernoulli") 
 @
-This specifies $yInt$ as a Bernoulli-valued response, $trt$ and $week$ as fixed-effect covariates, and the $ID$ column for the random effects.  The result is a list with three elements:
+This specifies \var{yInt} as a Bernoulli-valued response, \var{trt} and \var{week} as fixed-effect covariates, and the \var{ID} column for the random effects.  The result is a list with three elements:
 \begin{description}
 \item[ragged] is a list containing the data to be passed to WinBUGS;
-\item[pql] is the results from fitting the model with \verb!glmmPQL! from the \verb!MASS! package.
-\item[startingValues] is a list of starting values for the parameters and random effects, which is obtained from the \verb!glmmPQL! result.
+\item[pql] is the results from fitting the model with \command{glmmPQL} from the \pkg{MASS} package.
+\item[startingValues] is a list of starting values for the parameters and random effects, which is obtained from the \command{glmmPQL} result.
 \end{description}  
 In addition, two files are written to the working directory
 \begin{description}
@@ -139,7 +139,7 @@ $V_i$ is spatially independent random effect with variance $\sigma_V^2$.
 
 
 This model is also reparametrised with $R_i \sim N(U_i + \mu, \sigma_V^2)$ replacing $V_i$.  
-An adjacency matrix is required for the spatial random effect, this was computed from the spatial boundary files with the \verb!poly2nb! function from the \verb!spdep! package and is stored as the {\tt popDataAdjMat} object.
+An adjacency matrix is required for the spatial random effect, this was computed from the spatial boundary files with the \command{poly2nb} function from the \command{spdep} package and is stored as the {\tt popDataAdjMat} object.
 
 {\tt glmmBUGS} can be used to fit this model as follows: 
 <<theragged>>=
@@ -191,7 +191,7 @@ print(spplot(newdata, "RCSDUID.mean", col.regions=brewer.pal(7, "OrRd"), cuts=6,
 
 \section{Summary}
 
-There are a number of methods and R packages for performing Bayesian inference on generalized liner mixed models, including \pkg{geoRglm} \citep{georglm}.  Particularly noteworthy is the \pkg{INLA} package which avoids the use of MCMC by using Laplace approximations, as described in \citet{ruelaplace}.  Despite this, many researchers working with R (including the authors) continue to use WinBUGS for model fitting.  This is at least partly due to the flexibility of the BUGS language, which gives the user nearly full control over specification of distributions and dependence structures.  This package aims to retain this flexibility by providing files to be edited before model fitting is carried out, rather than providing a large number of options for, i.e.\ prior distributions.  More model-specific packages such as \pkg{INLA} are entirely adequate (and perhaps preferable) for the two examples presented here.   Those who wish to have full control over priors or build more complex multivariate or errors-in-covariate models will likely appreciate the head start which \pkg{glmmBUGS} can provide for these tasks.
+There are a number of methods and R packages for performing Bayesian inference on generalized liner mixed models, including \pkg{geoRglm} \citep{georglm}.  Particularly noteworthy is the \pkg{INLA} package which avoids the use of MCMC by using Laplace approximations, as described in \citet{ruelaplace}.  Despite this, many researchers working with R (including the authors) continue to use WinBUGS for model fitting.  This is at least partly due to the flexibility of the BUGS language, which gives the user nearly full control over specification of distributions and dependence structures.  This package aims to retain this flexibility by providing files to be edited before model fitting is carried out, rather than providing a large number of options for, i.e. prior distributions.  More model-specific packages such as \pkg{INLA} are entirely adequate (and perhaps preferable) for the two examples presented here.   Those who wish to have full control over priors or build more complex multivariate or errors-in-covariate models will likely appreciate the head start which \pkg{glmmBUGS} can provide for these tasks.
 
 
 \section*{Acknowledgements}
