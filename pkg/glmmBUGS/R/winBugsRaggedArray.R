@@ -99,16 +99,24 @@ function(data,
   
 
  # add reparam 
-  for(D in reparam){
+ 
+ if(is.character(reparam))   {
+reparamName = reparam
+reparam = list()
+for(D in reparamName)
+reparam[[D]] = NULL
+ } 
+ 
+for(D in names(reparam)){
      if(D %in% names(covariates)){
        theXname= paste("X", D, "reparam", sep="")  
-#       if(class(data[, covariates[[D]]])=="matrix"){
-       result[[theXname]] = apply(as.matrix(data[, covariates[[D]]]), 2, mean)
-       #}else if(class(data[, covariates[[D]]])=="numeric"){
-      #result[[theXname]] = mean(data[, covariates[[D]]])
+       if(!is.null(reparam[[D]])){
+         result[[theXname]] = reparam[[D]]
+         }else{result[[theXname]] = apply(as.matrix(data[, covariates[[D]]]), 2, mean) }
+       
       } 
  }    
-#}     
+     
 
 attributes(result)$prefix = prefix
 
