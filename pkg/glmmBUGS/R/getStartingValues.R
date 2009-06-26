@@ -129,14 +129,31 @@ spatialFactor = 0.5
 }
 
 
-for(D in reparam) {
-   if(!is.null(covariates[[D]])){
-   theName = paste("X", D, "reparam", sep="")
- startingValues[[paste("intercept",prefix, sep="")]] = startingValues[[paste("intercept",prefix, sep="")]] +sum(pql$coef$fixed[covariates[[D]]] * ragged[[theName]])
-}
-}
+ if(is.character(reparam))   {
+reparamName = reparam
+reparam = list()
+for(D in reparamName)
+reparam[[D]] = NULL
+ } 
 
+ for(D in names(reparam)){
+     if(D %in% names(covariates)){
+       theXname= paste("X", D, "reparam", sep="")  
+        startingValues[[paste("intercept",prefix, sep="")]] = startingValues[[paste("intercept",prefix, sep="")]] +sum(pql$coef$fixed[covariates[[D]]] * ragged[[theName]]
+      } 
+ }  
+
+# for(D in reparam) {
+#   if(!is.null(covariates[[D]])){
+#   theName = paste("X", D, "reparam", sep="")
+# startingValues[[paste("intercept",prefix, sep="")]] = startingValues[[paste(#"intercept",prefix, sep="")]] +sum(pql$coef$fixed[covariates[[D]]] * ragged[[theName]]#)
+#}
+#}
+#}
+
+ 
 return(startingValues)
 
 }
 
+                                                       
