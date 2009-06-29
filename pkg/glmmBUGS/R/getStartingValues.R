@@ -138,8 +138,8 @@ reparam[[D]] = NULL
 
  for(D in names(reparam)){
      if(D %in% names(covariates)){
-       theXname= paste("X", D, "reparam", sep="")  
-        startingValues[[paste("intercept",prefix, sep="")]] = startingValues[[paste("intercept",prefix, sep="")]] +sum(pql$coef$fixed[covariates[[D]]] * ragged[[theName]]
+       theName= paste("X", D, "reparam", sep="")  
+       startingValues[[paste("intercept",prefix, sep="")]] = startingValues[[paste("intercept",prefix, sep="")]] +sum(pql$coef$fixed[covariates[[D]]] * ragged[[theName]])
       } 
  }  
 
