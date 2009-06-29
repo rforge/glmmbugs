@@ -114,7 +114,7 @@ bacsummary = summaryChain(bacParams)
 names(bacsummary)
 bacsummary$betas[,c("mean", "2.5%", "97.5%")]
 @              
-The coefficient on \var{week} is denoted `observations' in the results, as it is the only covariate which is assigned to observations (as opposed to ID's).       
+     
 
 In order to check the convergence of the simulations, we use the \command{checkChain} function to produce trace plots:
 <<thechain, fig=true>>=
@@ -144,10 +144,10 @@ $U_i$ is a spatial random effect, a Gaussian Markov random field with variance $
 $V_i$ is spatially independent random effect with variance $\sigma_V^2$. 
 
 
-This model is also reparametrised with $R_i \sim N(U_i + \mu, \sigma_V^2)$ replacing $V_i$.  
-An adjacency matrix is required for the spatial random effect, this was computed from the spatial boundary files with the \command{poly2nb} function from the \command{spdep} package and is stored as the {\tt popDataAdjMat} object.
+This model is reparametrised with $R_i = U_i + \mu+ V_i$ in place of $V_i$.  
+An adjacency matrix is required for the spatial random effect, this was computed from the spatial boundary files with the \command{poly2nb} function from the \command{spdep} package and is stored as the \var{popDataAdjMat} object.
 
-{\tt glmmBUGS} can be used to fit this model as follows: 
+\command{glmmBUGS} can be used to fit this model as follows: 
 <<theragged>>=
 data(popDataAdjMat)
 forBugs = glmmBUGS(formula=observed + logExpected ~ 1,
@@ -155,13 +155,13 @@ forBugs = glmmBUGS(formula=observed + logExpected ~ 1,
   data=ontario)
 @
 
-Notice the expected counts are needed on the log scale, and are passed as a second argument on the left side of the model equation to denote their being offset parameters without a coefficient.  The random effect is at the census sub-division level (CSDID), with {\tt popDataAdjMat} giving the dependency structure.  Posterior samples can be generated as follows: 
+Notice the expected counts are needed on the log scale, and are passed as a second argument on the left side of the model equation to denote their being offset parameters without a coefficient.  The random effect is at the census sub-division level (CSDID), with \var{popDataAdjMat} giving the dependency structure.  Posterior samples can be generated as follows: 
 <<thebugs>>=
 startingValues = forBugs$startingValues
 source("getInits.R")
 library(R2WinBUGS)
 onResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
-   n.chain=3, n.iter=600, n.burnin=60, n.thin=5,
+   n.chain=3, n.iter=100, n.burnin=20, n.thin=4,
        program="winbugs")
 ontarioParams = restoreParams(onResult, forBugs$ragged)
 names(ontarioParams)
@@ -171,17 +171,13 @@ There are posterior simulations for two variance parameters, $\sigma_U$ (SDCSDUI
 
 
 
-%\begin{figure}[ht]
-% \centering
 <<checkChainSpatial, fig=true>>=
 checkChain(ontarioParams, c("SDCSDUIDSpatial", "SDCSDUID")) 
 @
-% \caption{A chain plot of the posterior distribution from MCMC simulation for the spatial model.}\label{chainspatial}
-%\end{figure}
 
 These trace plots show poor mixing, and the MCMC should be re-run with longer chains and more thinning.
 
-The {\tt diseasemapping} package has facilities for merging BUGS results into spatial datasets, producing the map below.  
+The \pkg{diseasemapping} package has facilities for merging BUGS results into spatial datasets, producing the map below.  
 
 <<ontarioMap, echo=false, fig=true,height=6,width=6>>=
 library(diseasemapping)
@@ -197,11 +193,11 @@ print(spplot(newdata, "RCSDUID.mean", col.regions=brewer.pal(7, "OrRd"), cuts=6,
 
 \section{Summary}
 
-There are a number of methods and R packages for performing Bayesian inference on generalized liner mixed models, including \pkg{geoRglm} \citep{georglm}.  Particularly noteworthy is the \pkg{INLA} package which avoids the use of MCMC by using Laplace approximations, as described in \citet{ruelaplace}.  Despite this, many researchers working with R (including the authors) continue to use WinBUGS for model fitting.  This is at least partly due to the flexibility of the BUGS language, which gives the user nearly full control over specification of distributions and dependence structures.  This package aims to retain this flexibility by providing files to be edited before model fitting is carried out, rather than providing a large number of options for, i.e. prior distributions.  More model-specific packages such as \pkg{INLA} are entirely adequate (and perhaps preferable) for the two examples presented here.   Those who wish to have full control over priors or build more complex multivariate or errors-in-covariate models will likely appreciate the head start which \pkg{glmmBUGS} can provide for these tasks.
+There are a number of methods and R packages for performing Bayesian inference on generalized liner mixed models, including \pkg{geoRglm} \citep{georglm}.  Particularly noteworthy is the \pkg{INLA} package which avoids the use of MCMC by using Laplace approximations, as described in \citet{ruelaplace}.  Despite this, many researchers working with R (including the authors) continue to use WinBUGS for model fitting.  This is at least partly due to the flexibility of the BUGS language, which gives the user nearly full control over specification of distributions and dependence structures.  This package aims to retain this flexibility by providing files to be edited before model fitting is carried out, rather than providing a large number of options for, i.e.\ prior distributions.  More model-specific packages such as \pkg{INLA} are entirely adequate (and perhaps preferable) for the two examples presented here.   Those who wish to have full control over priors or build more complex models, for example multivariate or errors-in-covariate models, will likely appreciate the head start which \pkg{glmmBUGS} can provide for these tasks.
 
 
 \section*{Acknowledgements}
-
+Patrick Brown holds a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada.  Thanks are due to Lennon Li for assistance in 
 
 \bibliography{glmmBUGS}
 

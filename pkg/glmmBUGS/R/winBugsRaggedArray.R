@@ -119,6 +119,7 @@ for(D in names(reparam)){
      
 
 attributes(result)$prefix = prefix
+attributes(result)$covariates = covariates
 
  if(returnData) 
     result=list(data=data, result=result)

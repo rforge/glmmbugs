@@ -57,21 +57,6 @@ if(!length(scPars))
 for(D in scPars)
   result[[D]] = thearray[,,D]
 
-# change names of scalar parameters from level name to covariate name
-changeName = names(attributes(ragged)$covariates)
-changeNameBeta = paste("beta", changeName, sep="")
-changeName = changeName[scPars %in% changeNameBeta]
-
-
-if(length(changeName)) {
-changeName = unlist(attributes(ragged)$covariates[changeName])
-names(changeName) = paste("beta", names(changeName), sep="")
-  newnames = names(result)
-  names(newnames) = newnames
-  newnames[names(changeName)] = changeName
-  names(result) = newnames
-}
-
 
 # find grouping variables, all the variables with one dimensional indices
 groups = unique(gsub("\\[[[:digit:]]+\\]$", "", vecPars))
@@ -211,6 +196,25 @@ if(length(fixedEffects)){
         }
           betas = abind(betas, result[[D]])
      }
+     
+# change names of scalar parameters from level name to covariate name
+changeName = names(attributes(ragged)$covariates)
+changeName = changeName[changeName %in% dimnames(betas)[[3]] ]
+
+
+# if there are any levels with only one covariate
+if(length(changeName)) {
+  names(changeName) = unlist(attributes(ragged)$covariates[changeName])
+# create new names for betas
+  newnames = dimnames(betas)[[3]]
+  names(newnames) = newnames
+  newnames[changeName] = names(changeName)
+  dimnames(betas)[[3]] = newnames
+}
+
+
+     
+     
      if(length(betanameIndex)) {
       result = result[-betanameIndex]
       result$betas = betas
