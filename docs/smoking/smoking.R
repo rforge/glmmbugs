@@ -4,42 +4,71 @@ popdata <- read.xls("test.xls", header=TRUE)
 
 popdata$sex = factor(popdata$sex, levels=c(1,2), labels=c("M", "F"))
 
-# read in DA 2001, in C:\Documents and Settings\luzhou\My Documents\CRC
-#library(maptools)
-#adjdata01 = readShapePoly(fn="CRC_M9903_DA2001_QAIPPEadj")
+# read in DA 2001, in C:\Documents and Settings\luzhou\Paul
+library(maptools)
+adjdata01 = readShapePoly(fn="yyy2001")
 
-#library(spdep)
+library(spdep)
 #adj01 = poly2nb(adjdata01, as.character(adjdata01$DA2001))
 
 # just grab 1 region: EA_or_DA = 35230258
 hamiltoncchs = popdata[popdata$CD_sub=="3525005",]
-#hamiltonSpatial = adjdata01[adjdata01$CSDUID == "3525005",]
-#adj01 = poly2nb(hamiltonSpatial, as.character(hamiltonSpatial$DAUID))
+hamiltonSpatial = adjdata01[adjdata01$CSDUID == "3525005",]
+library(spdep)
+adj01 = poly2nb(hamiltonSpatial, as.character(hamiltonSpatial$DAUID))
+
+#smpopdata = popdata[popdata$EA_or_DA == "35230258" ,]
+
+
+library(glmmBUGS)
 # change the response variable to the 0 and 1's:
 hamiltoncchs$SMK_01a <- hamiltoncchs$SMK_01A - 1
 
+## add in quadratic term agesq :
 
-data = hamiltoncchs
-formula = SMK_01a ~ age:sex
-effects="EA_or_DA"
-spatial = adj01
-spatialEffect = "EA_or_DA"
-family="bernoulli"
-prefix = NULL
-reparam = NULL
-library(glmmBUGS)
+hamiltoncchs$agesq = hamiltoncchs$age^2
+
+## for males only 
+
+hamiltoncchsm = hamiltoncchs[hamiltoncchs$sex=="M",]
+
+#forBugs = glmmBUGS(SMK_01a ~ age:sex, effects="EA_or_DA", 
+#family="bernoulli", data=hamiltoncchs, spatial=adj01)
+
+
 source("C:\\Documents and Settings\\luzhou\\My Documents\\glmmBUGS\\pkg\\glmmBUGS\\R\\addSpatial.R")
 source("C:\\Documents and Settings\\luzhou\\My Documents\\glmmBUGS\\pkg\\glmmBUGS\\R\\getStartingValues.R")
 source("C:\\Documents and Settings\\luzhou\\My Documents\\glmmBUGS\\pkg\\glmmBUGS\\R\\winBugsRaggedArray.R")
 source("C:\\Documents and Settings\\luzhou\\My Documents\\glmmBUGS\\pkg\\glmmBUGS\\R\\writeBugsModel.R")
-source("C:\\Documents and Settings\\luzhou\\My Documents\\glmmBUGS\\pkg\\glmmBUGS\\R\\getDesignMatrix.R")   
+
+#data = hamiltoncchs
+effects="EA_or_DA"
+spatial = adj01
+spatialEffect = "EA_or_DA"
+family="bernoulli"
+
+formula = SMK_01a ~ age:sex
+# formula for quadratic terms: 
+
+formula = SMK_01a ~ (age+agesq):sex
+
+
+# for males in the model only: 
+data =hamiltoncchsm
+formula = SMK_01a ~ age+agesq
+reparam =list(c(25, 625))
+names(reparam)= "observations"
+prefix=NULL
 
     data = getDesignMatrix(formula, data, effects)
     data = na.omit(data)
     covariates = attributes(data)$covariates
     observations = attributes(data)$response
     
-   
+     #if new col created, change it back for ragged
+     
+     
+#        reparam = paste(prefix, reparam, sep="")
      
     ragged = winBugsRaggedArray(data, effects = effects, covariates = covariates, 
         observations = observations, prefix= prefix , reparam=reparam)  
@@ -68,9 +97,25 @@ source("C:\\Documents and Settings\\luzhou\\My Documents\\glmmBUGS\\pkg\\glmmBUG
     source("getInits.R")
 
 ## check whether this is unparam or reparam:     
-    
 
        smkResult = bugs(ragged, getInits, 
        parameters.to.save = names(getInits()),
        model.file="model.bug", n.chain=3, n.iter=50, n.burnin=10, n.thin=2,
        program="WinBUGS", debug=T)
+
+#popdata$ageCut = cut(popdata$age, c(0, seq(20, 60, by=5), Inf))
+smkParams = restoreParams(smkResult, ragged$ragged)
+
+    ontarioSummary = summaryChain(ontarioParams)
+
+
+
+
+
+
+
+
+
+
+
+
