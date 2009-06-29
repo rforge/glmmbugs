@@ -1,8 +1,8 @@
 Package: glmmBUGS
 Type: Package
 Title: Generalised Linear Mixed Models and Spatial Models with BUGS
-Version: 1.6.1
-Date: 2009-06-16
+Version: 1.6.2
+Date: 2009-06-29
 Depends: MASS,  abind   
 Suggests: spdep
 Enhances: R2WinBUGS, BRugs
