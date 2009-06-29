@@ -4,7 +4,7 @@ function(file, effects, covariates, observations,
   spatial=NULL, prefix="", reparam=NULL, brugs=FALSE) {
 
 # spatial is a character string of names of random effects
- if(is.null(reparam)) {
+ if(!length(reparam)) {
  interceptString = "intercept"
 } else {
 interceptString = "interceptUnparam"
@@ -70,7 +70,7 @@ if(!is.null(file)) {
   if(length(covariates[[theE]])==1) {
     cat(" + beta", theE, " * X", theE, "[", theD, "]", sep="")
   } else if (length(covariates[[theE]]) > 1) {
-    cat(" + inprod2(beta", theE, "[] , X", theE, "[", theD, ",])", sep="")
+    cat(" +",  inprod, "(beta", theE, "[] , X", theE, "[", theD, ",])", sep="")
     
   }   
   # spatial
@@ -100,7 +100,7 @@ if(!is.null(file)) {
       if(length(covariates[[theE]])==1) {
         cat(" + beta", theE, " * X", theE, "[", theD, "]", sep="")
       } else if (length(covariates[[theE]]) > 1) {
-        cat(" + inprod2(beta", theE, "[] , X", theE, "[", theD, ",])", sep="")
+        cat(" +", inprod, "(beta", theE, "[] , X", theE, "[", theD, ",])", sep="")
     
       }   
   # spatial
@@ -140,7 +140,7 @@ if(!is.null(file)) {
       if(length(covariates[[theE]])==1) {
          cat(" + beta", theE, " * X", theE, "[", theD, "]", sep="")
       } else if (length(covariates[[theE]]) > 1) {
-        cat(" + inprod2(beta", theE, "[] , X", theE, "[", theD, ",])", sep="")
+        cat(" +", inprod,"(beta", theE, "[] , X", theE, "[", theD, ",])", sep="")
       }   
 
     
@@ -183,18 +183,19 @@ if(!is.null(file)) {
 
 
   
-if(!is.null(reparam)){ 
+if(length(reparam)){ 
  cat("interceptUnparam", prefix, "<- intercept", prefix, sep="")
-for(Deffect in names(covariates)){
-  if(length(covariates[[Deffect]])==1) {
-  # add prefix here
-    cat("- beta", Deffect, " * X", Deffect, "reparam", sep="")
-  } else if (length(covariates[[Deffect]])>1){
-    cat("-", "inprod(beta", prefix, Deffect, "[]," , "X", Deffect, "reparam[])", sep="")
-  }
-  }
+ for(Deffect in names(covariates)){
+   if(length(covariates[[Deffect]])==1) {
+   # add prefix here
+     cat("- beta", Deffect, " * X", Deffect, "reparam", sep="")
+   } else {
+     if (length(covariates[[Deffect]])>1){
+          cat("-", inprod, "(beta", prefix, Deffect, "[]," , "X", Deffect, "reparam[])", sep="")
+     }
+   }
+ }
 }
-
   
   cat("\n")
   if(! family %in% c("normal", "gaussian"))
