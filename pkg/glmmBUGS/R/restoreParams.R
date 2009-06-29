@@ -14,7 +14,7 @@ scPars = parnames[! parnames %in% c(vecPars, matPars)]
 result = list()
 
 
-# if there are any random slopes (matrix parameters), put the slopes in their
+# if there are parameters with two indices (precision matrix parameters), put the each parameter in its
 # own element of the result list
 if(length(matPars)) {
 # find the precision matrix
@@ -56,6 +56,21 @@ if(!length(scPars))
 
 for(D in scPars)
   result[[D]] = thearray[,,D]
+
+# change names of scalar parameters from level name to covariate name
+changeName = names(attributes(ragged)$covariates)
+changeNameBeta = paste("beta", changeName, sep="")
+changeName = changeName[scPars %in% changeNameBeta]
+
+
+if(length(changeName)) {
+changeName = unlist(attributes(ragged)$covariates[changeName])
+names(changeName) = paste("beta", names(changeName), sep="")
+  newnames = names(result)
+  names(newnames) = newnames
+  newnames[names(changeName)] = changeName
+  names(result) = newnames
+}
 
 
 # find grouping variables, all the variables with one dimensional indices

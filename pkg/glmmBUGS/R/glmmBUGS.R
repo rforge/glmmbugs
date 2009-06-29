@@ -61,6 +61,7 @@ if(!is.null(reparam)) {
  }
 
 }
+attributes(ragged)$covariates = covariates
 
 # write a function to generate starting values
 startingFunction(startingValues, initFile)
