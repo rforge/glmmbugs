@@ -60,6 +60,7 @@ reparam =list(c(25, 625))
 names(reparam)= "observations"
 prefix=NULL
 
+
     data = getDesignMatrix(formula, data, effects)
     data = na.omit(data)
     covariates = attributes(data)$covariates
@@ -106,7 +107,11 @@ prefix=NULL
 #popdata$ageCut = cut(popdata$age, c(0, seq(20, 60, by=5), Inf))
 smkParams = restoreParams(smkResult, ragged$ragged)
 
-    ontarioSummary = summaryChain(ontarioParams)
+smkSummary = summaryChain(smkParams)
+source("C:\\Documents and Settings\\luzhou\\My Documents\\newDiseaseMapping\\pkg\\diseasemapping\\R\\mergeBugsData.R")
+
+smk = mergeBugsData(hamiltonSpatial, smkSummary, by.x= "DAUID")
+
 
 
 
