@@ -183,7 +183,8 @@ if(!is.null(file)) {
 
 
   
-
+if(!is.null(reparam)){ 
+ cat("interceptUnparam", prefix, "<- intercept", prefix, sep="")
 for(Deffect in names(covariates)){
   if(length(covariates[[Deffect]])==1) {
   # add prefix here
@@ -192,7 +193,7 @@ for(Deffect in names(covariates)){
     cat("-", "inprod(beta", prefix, Deffect, "[]," , "X", Deffect, "reparam[])", sep="")
   }
   }
-
+}
 
   
   cat("\n")
