@@ -110,7 +110,7 @@ smkParams = restoreParams(smkResult, ragged$ragged)
 smkSummary = summaryChain(smkParams)
 source("C:\\Documents and Settings\\luzhou\\My Documents\\newDiseaseMapping\\pkg\\diseasemapping\\R\\mergeBugsData.R")
 
-smk = mergeBugsData(hamiltonSpatial, smkSummary, by.x= "DAUID")
+smk = mergeBugsData(hamiltonSpatial, smkSummary, by.x= "CSDUID")
 
 
 
