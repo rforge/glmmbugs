@@ -1,5 +1,5 @@
 \documentclass[a4paper]{report}
-\usepackage{graphicx,amsmath}
+\usepackage{graphicx,amsmath,float}
 \usepackage{RJournal}
 \usepackage[round]{natbib}
 \bibliographystyle{abbrvnat}
@@ -9,7 +9,7 @@
 \usepackage{Sweave}
 
 \SweaveOpts{height=3,width=5}
-\setkeys{Gin}{width=0.45\textwidth}
+\setkeys{Gin}{width=1.1\columnwidth}
 
 \begin{document}
 
@@ -96,9 +96,9 @@ Before using the \command{bugs} function in the \pkg{R2WinBUGS} package to sampl
 source("getInits.R")
 startingValues = bacrag$startingValues
 library(R2WinBUGS)
-bacResult = bugs(bacrag$ragged, getInits, parameters.to.save = names(getInits()),
+bacResult = bugs(bacrag$ragged, getInits, 
                  n.chain=3, 
-                 n.iter=100, n.burnin=20, n.thin=4)
+                 n.iter=100, parameters.to.save = names(getInits()), n.burnin=20, n.thin=4)
 @
 
 
@@ -112,7 +112,7 @@ The result is posterior samples for $\mu$ ($intercept$), $\sigma$ ($SDID$), all 
 <<thesummary>>=
 bacsummary = summaryChain(bacParams)
 names(bacsummary)
-bacsummary$betas[,c("mean", "2.5%", "97.5%")]
+signif(bacsummary$betas[,c("mean", "2.5%", "97.5%")], 3)
 bacsummary$scalars[,c("mean", "2.5%", "97.5%")]
 @              
      
@@ -127,7 +127,7 @@ checkChain(bacParams, c("intercept", "SDID"))
 
 
 \subsection{A spatial example} 
-The \var{ontario} dataset contains expected an observed counts of molar cancer by census sub-division in Ontario, Canada.
+The \var{ontario} dataset contains expected an observed cases of molar cancer by census sub-division in Ontario, Canada.
 <<thedata>>=
 data(ontario)
 head(ontario)
@@ -148,28 +148,26 @@ $V_i$ is spatially independent random effect with variance $\sigma_V^2$.
 
 This model is reparametrised with $R_i = U_i + \mu+ V_i$ in place of $V_i$.  
 An adjacency matrix is required for the spatial random effect, this was computed from the spatial boundary files with the \command{poly2nb} function from the \command{spdep} package and is stored as the \var{popDataAdjMat} object.
-
 \command{glmmBUGS} can be used to fit this model as follows: 
 <<theragged>>=
 data(popDataAdjMat)
-forBugs = glmmBUGS(formula=observed + logExpected ~ 1,
-  effects="CSDUID", family="poisson", spatial=popDataAdjMat,
+forBugs = glmmBUGS(formula=observed + logExpected ~ 1, spatial=popDataAdjMat,
+  effects="CSDUID", family="poisson", 
   data=ontario)
 @
 
-Notice the expected counts are needed on the log scale, and are passed as a second argument on the left side of the model equation to denote their being offset parameters without a coefficient.  The random effect is at the census sub-division level (CSDID), with \var{popDataAdjMat} giving the dependency structure.  Posterior samples can be generated as follows: 
+Notice the expected counts are needed on the log scale, and are passed as a second argument on the left side of the model equation to denote their being offset parameters without a coefficient.  The random effect is at the census sub-division level (CSDUID), with \var{popDataAdjMat} giving the dependency structure.  Posterior samples can be generated as follows: 
 <<thebugs>>=
 startingValues = forBugs$startingValues
 source("getInits.R")
 library(R2WinBUGS)
-onResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
-   n.chain=3, n.iter=100, n.burnin=20, n.thin=4,
-       program="winbugs")
+onResult = bugs(forBugs$ragged, getInits, 
+   n.chain=3, n.iter=100, parameters.to.save = names(getInits()), n.burnin=20, n.thin=4)
 ontarioParams = restoreParams(onResult, forBugs$ragged)
 names(ontarioParams)
 @     
 
-There are posterior simulations for two variance parameters, $\sigma_U$ (SDCSDUIDSPATIAL) and $\sigma_V$ (SDCSDUID).  Samples for the random effects are given for $U_i$ (RCSDUIDSpatial), $U_i +V_i$ (RCSDUID), and $\lambda_i$ (FittedRateCSDUID).  Trace plots are shown below for $\sigma_U$ and $\sigma_V$, the standard deviations of the spatial and non-spatial random effets.
+There are posterior simulations for two variance parameters, $\sigma_U$ (SDCSDUIDSPATIAL) and $\sigma_V$ (SDCSDUID).  Samples for the random effects are given for $U_i$ (RCSDUIDSpatial), $U_i +V_i$ (RCSDUID), and $\lambda_i$ (FittedRateCSDUID).  Trace plots are shown below for $\sigma_U$ and $\sigma_V$, the standard deviations of the spatial and non-spatial random effects.
 
 
 
@@ -178,30 +176,40 @@ checkChain(ontarioParams, c("SDCSDUIDSpatial", "SDCSDUID"))
 @
 These trace plots show poor mixing, and the MCMC should be re-run with longer chains and more thinning.
 
-The posterior means for the relative risk $\lambda_i$ for the Toronto and Ottawa (Census Subdivisions 3506008 and 3530005) are computed as:
+The posterior means for the relative risk $\lambda_i$ for the Toronto and Ottawa (Census Subdivisions 3506008 and 3530005) are extracted with:
 <<ontarioSummary>>=
 ontarioSummary = summaryChain(ontarioParams)
-ontarioSummary$FittedRateCSDUID[c("3506008","3530005"),"mean"]
+ontarioSummary$FittedRateCSDUID[c("3506008","3520005"),"mean"]
 @
+The posterior probability of each region having a relative risk twice the provincial average is computed with
+<<ontarioPostProb>>=
+postProb = apply(ontarioParams$RCSDUID, 3, function(x) mean(x>log(2)))
+@
+The \var{RCSDUID} element of \var{ontarioParams} is a three dimensional array, with entry $i,j,k$ being iteration $i$ of chain $j$ for region $k$.  The \command{apply} statement computes the proportion of log-relative risks over log(2) for each region (the third dimension). 
 
-The \pkg{diseasemapping} package has facilities for merging BUGS results into spatial datasets, producing the map below.  
+The results can be merged into the original spatial dataset, as described in the documentation for the \pkg{diseasemapping} package.  Figure \ref{fig:postprob} shows a map of the posterior probabilities.
 
-<<ontarioMap, echo=false, fig=true,height=5,width=6>>=
+\begin{figure}[hbt]
+\begin{center}
+<<ontarioMap, echo=false, fig=true,height=4,width=6>>=
 library(diseasemapping)
-require(RColorBrewer)
 data(popdata)
 
-newdata =mergeBugsData(popdata, ontarioSummary)
-therange =range(newdata$RCSDUID.mean)
-print(spplot(newdata, "RCSDUID.mean", col.regions=brewer.pal(7, "OrRd"), cuts=6, lty=0))
+newdata =mergeBugsData(popdata, postProb, by.x="CSDUID", newcol="postProb")
+print(spplot(newdata, "postProb", col.regions=c("green","yellow","orange","red"), at=c(-0.01, 0.2, 0.8, 0.95,1.01), lwd=0.5))
+
 
 @
+\end{center}
+\caption{Posterior probabilities of Ontario census sub-divisions having twice the provincial average risk of molar cancer}
+\label{fig:postprob}
+\end{figure}
 
 \subsection{Additional features}
 
 The \var{reparam} argument to \command{glmmBUGS} reparametrizes the intercept, and a set of covariates for a new baseline group is provided.  Recall that in the bacteria example the \var{ragged} object passed to WinBUGS divides covariates into observation and ID level effects.  \var{ragged\$Xobservations} is a vector and \var{ragged\$XID} is a matrix of two columns, which contain the week variable and indicator variables for the treatments respectively.  \var{reparam} should accordingly be a list with one or more of elements ``observations'' containing the week or ``ID'' containing the two treatment indicators.  Setting {\tt reparam=list(observations=2) } would make week 2 the baseline week, rather than week zero.  This argument is useful when using spline functions as covariates, as the intercept parameter which WinBUGS updates can be set to the curve evaluated in the middle of the dataset.
 
-The \var{prefix} argument allows a character string to  precede all data and variable names.  This can be used to combine multiple model files and datasets into a single BUGS model, and modifying these files to allow dependence between the various components.  For instance, one random effects model for blood pressure could be given \var{prefix='blood'}, and a model body mass given \var{prefix='mass'}.  To allow for dependence between the individual-level random effects for blood pressure and mass, the ragged data sets and starting values can be combined, and the two model files concatenated and modified.  Were it not for the prefix, some variable names would be identical in the two datasets and combining would not be possible.
+The \var{prefix} argument allows a character string to  precede all data and variable names.  This can be used to combine multiple model files and datasets into a single BUGS model, and modifying these files to allow dependence between the various components.  For instance, one random effects model for blood pressure could be given \var{prefix='blood'}, and a model body mass given \var{prefix='mass'}.  To allow for dependence between the individual-level random effects for blood pressure and mass, the two data sets and starting values produced by \command{glmmBUGS} can be combined, and the two model files concatenated and modified.  Were it not for the prefix, some variable names would be identical in the two datasets and combining would not be possible.
 
 Finally, multi-level models can be accommodated by passing multiple variable names in the \var{effects} argument.  If the bacteria data were collected from students nested within classes nested within schools, the corresponding argument would be  {\tt effects = c(`school','class','ID')}.
 
