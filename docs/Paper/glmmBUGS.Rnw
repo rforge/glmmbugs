@@ -9,7 +9,7 @@
 \usepackage{Sweave}
 
 \SweaveOpts{height=3,width=5}
-\setkeys{Gin}{width=1.1\columnwidth}
+\setkeys{Gin}{width=\columnwidth}
 
 \begin{document}
 
@@ -19,7 +19,7 @@
 \author{by Patrick Brown and Lutong Zhou}
 \maketitle
 <<options,echo=false>>=
-options(SweaveSyntax="SweaveSyntaxNoweb", SweaveHooks=list(fig=function() par(mar=c(2.0,2.0,.2,.1), mgp=c(1, 0.3, 0), cex=0.5)), width=42)
+options(SweaveSyntax="SweaveSyntaxNoweb", SweaveHooks=list(fig=function() par(mar=c(2.0,2.0,.2,.1), mgp=c(1, 0.3, 0), cex=0.5)), width=44)
 @
 
 \section{Introduction}
@@ -98,7 +98,7 @@ startingValues = bacrag$startingValues
 library(R2WinBUGS)
 bacResult = bugs(bacrag$ragged, getInits, 
                  n.chain=3, 
-                 n.iter=100, parameters.to.save = names(getInits()), n.burnin=20, n.thin=4)
+                 n.iter=100,  n.burnin=20,parameters.to.save = names(getInits()), n.thin=4)
 @
 
 
@@ -160,9 +160,8 @@ Notice the expected counts are needed on the log scale, and are passed as a seco
 <<thebugs>>=
 startingValues = forBugs$startingValues
 source("getInits.R")
-library(R2WinBUGS)
 onResult = bugs(forBugs$ragged, getInits, 
-   n.chain=3, n.iter=100, parameters.to.save = names(getInits()), n.burnin=20, n.thin=4)
+   n.chain=3, n.iter=100,  n.burnin=20, parameters.to.save = names(getInits()), n.thin=4)
 ontarioParams = restoreParams(onResult, forBugs$ragged)
 names(ontarioParams)
 @     
@@ -191,7 +190,7 @@ The results can be merged into the original spatial dataset, as described in the
 
 \begin{figure}[hbt]
 \begin{center}
-<<ontarioMap, echo=false, fig=true,height=4,width=6>>=
+<<ontarioMap, echo=false, fig=true,height=4,width=7>>=
 library(diseasemapping)
 data(popdata)
 
