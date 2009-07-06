@@ -202,7 +202,7 @@ if(length(reparam)){
     effects = effects[-length(effects)]
   for(Deffect in effects) {
     cat("T", Deffect, " <- pow(SD", Deffect, ", -2)\n", sep="")
-    cat("SD", Deffect, " ~ dunif(0, 100)\n", sep="")
+    cat("SD", Deffect, " ~ dunif(0, 25)\n", sep="")
   }
   for(Deffect in spatial) {
        cat("T", Deffect, "Spatial <- pow(SD", Deffect, "Spatial, -2)\n", sep="")
