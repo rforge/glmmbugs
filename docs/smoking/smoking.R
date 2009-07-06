@@ -59,7 +59,7 @@ formula = SMK_01a ~ age+agesq
 reparam =list(c(25, 625))
 names(reparam)= "observations"
 prefix=NULL
-
+mypriors = c("SDEA_or_DA" = "dunif(0, 20)", "SDEA_or_DASpatial"="dunif(0, 100)", "betaobservations[2]"="dunif(-3, 3)")
 
     data = getDesignMatrix(formula, data, effects)
     data = na.omit(data)
@@ -92,7 +92,7 @@ prefix=NULL
     
     writeBugsModel(file="model.bug", effects = effects, covariates = covariates, 
         observations = observations, family = family, spatial = spatialEffect,
-        prefix= attributes(ragged)$prefix, reparam =reparam)
+        prefix= attributes(ragged)$prefix, reparam =reparam, priors= mypriors)
 
     library(R2WinBUGS)     
     source("getInits.R")
@@ -102,15 +102,15 @@ prefix=NULL
        smkResult = bugs(ragged, getInits, 
        parameters.to.save = names(getInits()),
        model.file="model.bug", n.chain=3, n.iter=50, n.burnin=10, n.thin=2,
-       program="WinBUGS", debug=T)
+       program="WinBUGS", debug=T)     
 
 #popdata$ageCut = cut(popdata$age, c(0, seq(20, 60, by=5), Inf))
-smkParams = restoreParams(smkResult, ragged$ragged)
+smkParams = restoreParams(smkResult, ragged)
 
 smkSummary = summaryChain(smkParams)
 source("C:\\Documents and Settings\\luzhou\\My Documents\\newDiseaseMapping\\pkg\\diseasemapping\\R\\mergeBugsData.R")
 
-smk = mergeBugsData(hamiltonSpatial, smkSummary, by.x= "CSDUID")
+smk = mergeBugsData(hamiltonSpatial, smkSummary, by.x= "DAUID")
 
 
 
