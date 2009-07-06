@@ -7,6 +7,8 @@
 
 
 \usepackage{Sweave}
+%\usepackage{/Library/Frameworks/R.framework/Resources/share/texmf/Sweave}
+
 
 \SweaveOpts{height=3,width=5}
 \setkeys{Gin}{width=\columnwidth}
@@ -18,12 +20,13 @@
 \title{MCMC for Generalized Linear Mixed Models with glmmBUGS}
 \author{by Patrick Brown and Lutong Zhou}
 \maketitle
+
 <<options,echo=false>>=
 options(SweaveSyntax="SweaveSyntaxNoweb", SweaveHooks=list(fig=function() par(mar=c(2.0,2.0,.2,.1), mgp=c(1, 0.3, 0), cex=0.5)), width=44)
 @
 
 \section{Introduction}
-The \pkg{glmmBUGS} package is a bridging tool between Generalized Linear Mixed Models (GLMM's) in R and the BUGS language \citep{winbugs}.  It provides a simple way of performing Bayesian inference using Markov chain Monte Carlo (MCMC) methods \cite[see][]{gelman}.  In the past, there were two  steps which were much more time consuming when fitting models with  WinBUGS than in R.  First, unbalanced multi-level data needs to be formatted in a way which BUGS can handle, including changing categorical variables to indicator variables.  Second, a BUGS model file must be written.  The package addresses these issues by allowing users to specify models as formulas in R, as they would in the \command{glm} function, and provides everything necessary for fitting the model with WinBUGS or OpenBUGS via the  \pkg{R2WinBUGS} package \citep{r2winbugs}. 
+The \pkg{glmmBUGS} package is a bridging tool between Generalized Linear Mixed Models (GLMM's) in R and the BUGS language \citep{winbugs}.  It provides a simple way of performing Bayesian inference using Markov Chain Monte Carlo (MCMC) methods \cite[see][]{gelman}.  In the past, there were two  steps which were much more time consuming when fitting models with  WinBUGS than in R.  First, unbalanced multi-level data needs to be formatted in a way which BUGS can handle, including changing categorical variables to indicator variables.  Second, a BUGS model file must be written.  The package addresses these issues by allowing users to specify models as formulas in R, as they would in the \command{glm} function, and provides everything necessary for fitting the model with WinBUGS or OpenBUGS via the  \pkg{R2WinBUGS} package \citep{r2winbugs}. 
 
 \pkg{glmmBUGS} creates the necessary BUGS model file, starting value function, and suitably formatted data.
  Improved chain mixing is accomplished with a simple reparametrization and the use of sensible starting values.  
@@ -35,6 +38,7 @@ The \pkg{glmmBUGS} package is a bridging tool between Generalized Linear Mixed M
 
 \subsection{Independent random effects} 
 Consider the bacteria data from the \pkg{MASS} package: 
+
 <<thedata1>>=
 library(MASS)
 data(bacteria)
@@ -68,19 +72,19 @@ levels(bacterianew$trt) <- c("placebo", "drug", "drugplus")
 The primary function in the package is \command{glmmBUGS}, which does the preparatory work for fitting the model in (\ref{eq:modelReparam}) with: 
 <<bacrag>>=
 library(glmmBUGS)
-bacrag <- glmmBUGS(yInt ~ trt + week , data=bacterianew, effects = "ID", 
+bacrag <- glmmBUGS(formula = yInt ~ trt + week , data=bacterianew, effects = "ID", 
                                                  family= "bernoulli") 
 @
 This specifies \var{yInt} as a Bernoulli-valued response, \var{trt} and \var{week} as fixed-effect covariates, and the \var{ID} column for the random effects.  The result is a list with three elements:
 \begin{description}
 \item[\var{ragged}] is a list containing the data to be passed to WinBUGS;
-\item[\var{pql}] is the results from fitting the model with \command{glmmPQL} from the \pkg{MASS} package.
+\item[\var{pql}] is the results from fitting the model with \command{glmmPQL} function in \pkg{MASS} package.
 \item[\var{startingValues}] is a list of starting values for the parameters and random effects, which is obtained from the \command{glmmPQL} result.
 \end{description}  
 In addition, two files are written to the working directory
 \begin{description}
-\item[\file{model.bug}] the BUGS model file
-\item[\file{getInits.R}] R code for a function to generate random starting values.
+\item[\file{model.bug}] is the BUGS model file
+\item[\file{getInits.R}] is the R code for a function to generate random starting values.
 \end{description}  
 
   To accommodate unbalanced designs, the data are stored as `ragged arrays', described as `offsets' in the section ``Handling unbalanced datasets" of the WinBUGS manual\cite{winbugsmanual}.  The \var{ragged} result has a vector element $SID$ indicating the starting position of each individual's observations in the dataset.   The covariates are split into elements $XID$ and $Xobservations$ for the individual-level and observation-level covariates respectively:
@@ -98,7 +102,7 @@ startingValues = bacrag$startingValues
 library(R2WinBUGS)
 bacResult = bugs(bacrag$ragged, getInits, 
                  n.chain=3, 
-                 n.iter=100,  n.burnin=20,parameters.to.save = names(getInits()), n.thin=4)
+                 n.iter=2000,  n.burnin=100, parameters.to.save = names(getInits()), n.thin=10)
 @
 
 
@@ -161,7 +165,7 @@ Notice the expected counts are needed on the log scale, and are passed as a seco
 startingValues = forBugs$startingValues
 source("getInits.R")
 onResult = bugs(forBugs$ragged, getInits, 
-   n.chain=3, n.iter=100,  n.burnin=20, parameters.to.save = names(getInits()), n.thin=4)
+   n.chain=3, n.iter=2000,  n.burnin=100, parameters.to.save = names(getInits()), n.thin=10)
 ontarioParams = restoreParams(onResult, forBugs$ragged)
 names(ontarioParams)
 @     
@@ -200,7 +204,7 @@ print(spplot(newdata, "postProb", col.regions=c("green","yellow","orange","red")
 
 @
 \end{center}
-\caption{Posterior probabilities of Ontario census sub-divisions having twice the provincial average risk of molar cancer}
+\caption{Posterior probabilities of Ontario census sub-divisions having twice the provincial average risk of molar cancer.}
 \label{fig:postprob}
 \end{figure}
 
