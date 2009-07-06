@@ -1,7 +1,7 @@
 `writeBugsModel` <-
 function(file, effects, covariates, observations, 
   family=c("bernoulli", "binomial", "poisson", "normal",  "other"),
-  spatial=NULL, prefix="", reparam=NULL, brugs=FALSE) {
+  spatial=NULL, prefix="", reparam=NULL, brugs=FALSE, priors=NULL) {
 
 # spatial is a character string of names of random effects
  if(!length(reparam)) {
@@ -171,16 +171,21 @@ if(!is.null(file)) {
   # the priors
   cat("\n\n# priors\n\n")
    cat(paste("intercept", prefix, sep=""), "~ dflat()\n")
-  for(Deffect in effects) {
+  for(Deffect in names(covariates)) {
     thiscov = covariates[[Deffect]]
     if(length(thiscov)==1) {
         cat("beta", Deffect, " ~ dflat()\n", sep="")
     } else if(length(thiscov)>1) {
-      for(Dpar in 1:length(covariates[[Deffect]]))
-          cat("beta", Deffect, "[", Dpar,  "] ~ dflat()\n",sep="")
+      for(Dpar in 1:length(covariates[[Deffect]])) {
+          parName = paste("beta", Deffect, "[", Dpar, "]", sep="")
+          if(any(names(priors)==parName)) {
+           cat(parName, "~", priors[parName], "\n")
+          } else {     
+          cat(parName,  " ~ dflat()\n",sep="")
+        }
     }
   }
-
+}
 
   
 if(length(reparam)){ 
@@ -202,11 +207,21 @@ if(length(reparam)){
     effects = effects[-length(effects)]
   for(Deffect in effects) {
     cat("T", Deffect, " <- pow(SD", Deffect, ", -2)\n", sep="")
-    cat("SD", Deffect, " ~ dunif(0, 25)\n", sep="")
+     parName = paste("SD", Deffect, sep="")
+     if(any(names(priors) == parName)){
+         cat(parName, "~", priors[parName], "\n", sep="")
+     }else{
+     cat(parName, " ~ dunif(0, 25)\n", sep="")
+     }
   }
   for(Deffect in spatial) {
        cat("T", Deffect, "Spatial <- pow(SD", Deffect, "Spatial, -2)\n", sep="")
-       cat("SD", Deffect, "Spatial ~ dunif(0, 100)\n", sep="")
+       parName = paste("SD", Deffect, "Spatial", sep="")
+       if(any(names(priors) == parName)){
+       cat(parName, "~", priors[parName], "\n", sep="")
+       }else{
+       cat(parName, "Spatial ~ dunif(0, 100)\n", sep="")    
+       }
   }
   
 if(!is.null(file)) {
