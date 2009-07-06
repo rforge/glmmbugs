@@ -1,6 +1,6 @@
 `restoreParams` <-
 function(bugsResult, ragged=NULL) {
-
+                              
 thearray = bugsResult$sims.array
 parnames = dimnames(thearray)[[3]]
 # vector valued parameters
@@ -14,7 +14,7 @@ scPars = parnames[! parnames %in% c(vecPars, matPars)]
 result = list()
 
 
-# if there are parameters with two indices (precision matrix parameters), put the each parameter in its
+# if there are any random slopes (matrix parameters), put the slopes in their
 # own element of the result list
 if(length(matPars)) {
 # find the precision matrix
@@ -147,7 +147,7 @@ for(D in groups) {
        }
         
        theID = dimnames(result[[D]])[[3]]
-       theID = gsub("[[:alnum:]]+\\[", "", theID)
+       theID = gsub("[[:graph:]]+\\[", "", theID)
        theID = gsub("\\]$", "", theID)
        dimnames(result[[D]])[[3]] = thenames[as.integer(theID)]
        
@@ -196,25 +196,6 @@ if(length(fixedEffects)){
         }
           betas = abind(betas, result[[D]])
      }
-     
-# change names of scalar parameters from level name to covariate name
-changeName = names(attributes(ragged)$covariates)
-changeName = changeName[changeName %in% dimnames(betas)[[3]] ]
-
-
-# if there are any levels with only one covariate
-if(length(changeName)) {
-  names(changeName) = unlist(attributes(ragged)$covariates[changeName])
-# create new names for betas
-  newnames = dimnames(betas)[[3]]
-  names(newnames) = newnames
-  newnames[changeName] = names(changeName)
-  dimnames(betas)[[3]] = newnames
-}
-
-
-     
-     
      if(length(betanameIndex)) {
       result = result[-betanameIndex]
       result$betas = betas
