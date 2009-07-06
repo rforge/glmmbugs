@@ -79,7 +79,7 @@ startingValues$vars = lapply(pql$modelStruct$reStruct, function(x) pql$sigma^2 *
 #
 
 # spatial
-spatialEffect = grep("^N[[:alnum:]]+Spatial$" , names(ragged), value=T)
+spatialEffect = grep("^N[[:graph:]]+Spatial$" , names(ragged), value=T)
 if(length(spatialEffect) ) {
 spatialEffect = paste("R", gsub("^N", "", spatialEffect), sep="")
   spatialEffectIndep = gsub("Spatial$", "", spatialEffect)
