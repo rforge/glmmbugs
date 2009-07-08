@@ -55,11 +55,29 @@ formula = SMK_01a ~ (age+agesq):sex
 
 # for males in the model only: 
 data =hamiltoncchsm
-formula = SMK_01a ~ age+agesq
-reparam =list(c(25, 625))
+#formula = SMK_01a ~ age+agesq
+reparam =list(c(0.14, 0.32, 0.27, 0.13, 0.05))
 names(reparam)= "observations"
 prefix=NULL
-mypriors = c("SDEA_or_DA" = "dunif(0, 20)", "SDEA_or_DASpatial"="dunif(0, 100)", "betaobservations[2]"="dunif(-3, 3)")
+mypriors = c("SDEA_or_DA" = "dunif(0, 25)", "SDEA_or_DASpatial"="dunif(0, 100)")
+
+
+ageRange = range(hamiltoncchsm$age)
+
+#internalKnots = c(6, 10, 14)  # 3 internal knots
+internalKnots = c(32, 52)  # 3 internal knots
+
+#Get basis for cubic splines, 4+3-1(intercept) = 6
+library(splines)
+thesplines = as.matrix(bs(hamiltoncchsm$age, knots=internalKnots, Boundary.knots=ageRange))
+colnames(thesplines) = paste("s", colnames(thesplines), sep="")   
+class(thesplines)="matrix"
+hamiltoncchsm = cbind(hamiltoncchsm, thesplines) 
+
+formula = SMK_01a ~ s1+ s2+ s3 + s4 + s5
+#hamiltoncchsm$agebs = bs(hamiltoncchsm$age, knots = c(32,52))
+#hamiltoncchsm$agesqbs = bs(hamiltoncchsm$agesq, knots = c(3000, 4500))
+
 
     data = getDesignMatrix(formula, data, effects)
     data = na.omit(data)
