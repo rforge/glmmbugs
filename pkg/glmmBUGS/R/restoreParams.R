@@ -167,7 +167,7 @@ for(D in groups) {
      
      fixedEffects = grep("^X", names(ragged), value=TRUE)
 
-
+  #if there are any fixed effects, format the posterior samples of the coefficients
 if(length(fixedEffects)){
      fixedEffects = substr(fixedEffects, 2, nchar(fixedEffects))
 
