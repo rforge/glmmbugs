@@ -9,7 +9,11 @@ Write a bugs model file for a Generalised Linear Mixed Model
 Given a list of effect groups, and the covariates associated with each level, a bugs model file is written using ragged arrays corresponding to output from \code{\link{winBugsRaggedArray}}        
 }
 \usage{
+<<<<<<< .mine
+writeBugsModel(file, effects, covariates, observations, family = c("bernoulli", "binomial", "poisson", "normal", "other"), spatial = NULL, allRegions=F, prefix = "",reparam=NULL, brugs=FALSE)
+=======
 writeBugsModel(file, effects, covariates, observations, family = c("bernoulli", "binomial", "poisson", "normal", "other"), spatial = NULL, prefix = "",reparam=NULL, brugs=FALSE, priors=NULL)
+>>>>>>> .r163
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,6 +34,9 @@ Response distribution
 }
   \item{spatial}{
 name of the spatial random effect
+}
+\item{allRegions}{
+   Compute non-spatial random effects for all regions, even those without data.  Defaults to false.
 }
   \item{prefix}{
 the prefix 
