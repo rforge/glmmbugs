@@ -152,11 +152,15 @@ for(D in groups) {
        dimnames(result[[D]])[[3]] = thenames[as.integer(theID)]
        
        # get the fitted risk, and add names
-       thefitted = grep(paste("^R", Dsub, "\\[[[:digit:]]+\\]$", sep=""),
-        dimnames(thearray)[[3]], value=T)
-       thefitted = thearray[,,thefitted]
-       thenames = names(ragged[[paste("S", Dsub, sep="")]])
-       dimnames(thefitted)[[3]] = thenames[thenames != "end"]
+       thefitted = array(0, c(dim(result[[D]])[1:2], length(thenames)),
+        dimnames = list(NULL, NULL, thenames) )
+       thefitted[,,dimnames(result[[D]])[[3]]] = result[[D]] 
+       
+       DsubR = paste("R", Dsub, sep="")
+       thefitted[,,dimnames(result[[DsubR]])[[3]]] = 
+                thefitted[,,dimnames(result[[DsubR]])[[3]]] +
+                result[[DsubR]]
+       
 
        result[[paste("FittedRate", Dsub, sep="")]] = exp(thefitted)
        
