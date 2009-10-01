@@ -161,6 +161,17 @@ for(D in groups) {
                 thefitted[,,dimnames(result[[DsubR]])[[3]]] +
                 result[[DsubR]]
        
+       # regions which dont have Rstuff
+       regionsNoV = thenames[!thenames %in% dimnames(result[[DsubR]])[[3]] ]
+
+       # expand intercept
+       interceptBig = array(result$intercept, c(dim(result$intercept),length(regionsNoV)))
+       varBig =    array(result[[paste("SD",Dsub,sep="")]], 
+        c(dim(result$intercept),length(regionsNoV)))
+
+       thefitted[,,regionsNoV] = thefitted[,,regionsNoV] + 
+          rnorm(prod(dim(varBig)), interceptBig, varBig)
+       
 
        result[[paste("FittedRate", Dsub, sep="")]] = exp(thefitted)
        

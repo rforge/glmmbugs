@@ -29,11 +29,17 @@ the result will have list entries the following:
 \item{Reffect}{The log relative risk, which is the sum of the spatial and non-spatial random effect}, 
 \item{FittedRateeffect}{The incidence rate for each region (if the offset in the model is total population), 
 or the incident rate relative to the population average (if the offset is an expected count).  Note that 
-these rates are on the natural scale rather than the log scale.}
+these rates are on the natural scale rather than the log scale.  }
 }
 \references{}
 \author{Patrick Brown \code{patrick.brown@utoronto.ca}}
-\note{}
+\note{For spatial models, one fitted rate is computed 
+for each region in the adjacency matrix, even though some of these regions may not have spatial or non-spatial random 
+effects simulated in the bugs model.  If a spatial random effect is missing (as happens with islands), a zero is 
+added.  If a non-spatial random effect is missing (as happens when a regions does not have data), a value is simulated
+unconditionally from each iteration's intercept and standard deviation for that effect.  Note that this does not add 
+on the effect of possible covariates for that region.  This can be added manually, or the region could be included in 
+the dataset with missing values for observations.}
 \seealso{\code{\link[R2WinBUGS:bugs]{bugs}}}
 \examples{
                         
