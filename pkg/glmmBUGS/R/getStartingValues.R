@@ -42,7 +42,11 @@ if(is.list(covariates)) {
     theorder = do.call(order, subdata)
   }
   thedata=pql$data[theorder,]
-
+#  thedata =pql$data
+  # dont use observation level covariates in predictions
+  thedata[,covariates$observations]=0
+  
+  
 for(Deffect in seq(length(pql$effects), 1)) {
   theE = pql$effects[Deffect]
   theE = paste(prefix, theE, sep="")
@@ -50,11 +54,10 @@ for(Deffect in seq(length(pql$effects), 1)) {
   # get one row of data for each different value of the effect
   theS = ragged[[paste("S", theE, sep="")]]
   theS = theS[-length(theS)]
- # thedata = thedata[theS,]
 
+  thedata = thedata[theS,]
   # get predicted values
-  thepred = predict(pql, level=Deffect)[theorder]
-  # names(thepred) = ?????
+  thepred = predict(pql, level=Deffect, newdata=thedata)#[theorder]
   
   # strip white space to make sure everything's compatible
   names(theS) = gsub(" ", "", names(theS))
