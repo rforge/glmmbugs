@@ -24,7 +24,7 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
    for(D in thenames[themat]) {
      result$scalars[D,] = getRes(chain[[D]])
    }
-   
+                 
    for(D in thenames[!themat]) {
     result[[D]] = t(apply(chain[[D]], 3, getRes))
    
