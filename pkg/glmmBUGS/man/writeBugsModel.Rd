@@ -33,6 +33,12 @@ Response distribution
   \item{spatial}{
 name of the spatial random effect
 }
+<<<<<<< .mine
+#\item{allRegions}{
+#   Compute non-spatial random effects for all regions, even those without data.  #Defaults to false.
+#}
+=======
+>>>>>>> .r171
   \item{prefix}{
 the prefix 
 }
