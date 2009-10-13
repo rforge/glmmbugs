@@ -33,16 +33,13 @@ Response distribution
   \item{spatial}{
 name of the spatial random effect
 }
-\item{allRegions}{
-   Compute non-spatial random effects for all regions, even those without data.  Defaults to false.
-}
   \item{prefix}{
 the prefix 
 }
   \item{reparam}{vector of random effect names, subtract covariates at this level from the intercept.
 }
 \item{brugs}{make the model file compatible with BRugs by using the inprod function in place of inprod2}
-\item{prior}{character string of prior distributions, with the name of each element referring to the parameter it is the prior for}
+\item{priors}{character string of prior distributions, with the name of each element referring to the parameter it is the prior for}
 
 }
 
@@ -71,6 +68,6 @@ Patrick Brown, \email{patrick.brown@utoronto.ca}
 \examples{
 writeBugsModel("model.bug", effects="Strip",  observations="conc",
   covariates=list(observations="length"),
-  family="normal", priors=c(intercept="dunif(-10,10)") 
+  family="normal", priors=c(intercept="dunif(-10,10)") ) 
 }
 
