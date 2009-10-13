@@ -32,7 +32,7 @@ A list with the following components
 \item{}{vector of observations.}
 
 }
-\references{"Handling unbalanced datasets" in the "Tricks: Advanced Use of the BUGS Language" section of the bugs manual, at \code{\url{http://mathstat.helsinki.fi/openbugs/data/Docu/Tricks.html#HandlingUnbalancedDatasets}}}
+\references{"Handling unbalanced datasets" in the "Tricks: Advanced Use of the BUGS Language" section of the bugs manual, at \code{\url{http://mathstat.helsinki.fi/openbugs/data/Docu/Tricks.html}}}
 \author{Patrick Brown, \email{patrick.brown@utoronto.ca}}
 \note{}
 \seealso{\code{\link[R2WinBUGS:bugs]{bugs}} }
