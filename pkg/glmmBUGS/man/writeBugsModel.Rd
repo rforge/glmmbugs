@@ -9,7 +9,9 @@ Write a bugs model file for a Generalised Linear Mixed Model
 Given a list of effect groups, and the covariates associated with each level, a bugs model file is written using ragged arrays corresponding to output from \code{\link{winBugsRaggedArray}}        
 }
 \usage{
-writeBugsModel(file, effects, covariates, observations, family = c("bernoulli", "binomial", "poisson", "normal", "other"), spatial = NULL, prefix = "",reparam=NULL, brugs=FALSE, priors=NULL)
+writeBugsModel(file, effects, covariates, observations, 
+family = c("bernoulli", "binomial", "poisson", "normal", "other"), spatial = NULL, 
+prefix = "",reparam=NULL, brugs=FALSE, priors=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -40,7 +42,7 @@ the prefix
   \item{reparam}{vector of random effect names, subtract covariates at this level from the intercept.
 }
 \item{brugs}{make the model file compatible with BRugs by using the inprod function in place of inprod2}
-\item{bugs}{character string of prior distributions, with the name of each element referring to the parameter it is the prior for}
+\item{prior}{character string of prior distributions, with the name of each element referring to the parameter it is the prior for}
 
 }
 
