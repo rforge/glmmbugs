@@ -95,18 +95,16 @@ The model file consists of an outer loop over \var{ID} levels and an inner loop 
 
 
 At this stage the user is expected to modify the files and, if necessary, the data to refine the model, set appropriate priors, and ensure suitability of starting values.
-Before using the \command{bugs} function in the \pkg{R2WinBUGS} package to sample from the posterior, the starting values \command{getInits} function must be prepared.  First, the file \file{getInits.R} (which contains the source for \command{getInits}) should be edited and sourced into R.  Next, the list containing the PQL-derived starting values must be assigned the name \var{startingValues}, as \command{getInits} will be accessing this object every time it is run.
+Before using the \command{bugs} function in the \pkg{R2WinBUGS} package to sample from the posterior, the starting values \command{getInits} function must be prepared.  First, the file \file{getInits.R} (which contains the source for \command{getInits}) should be edited and sourced into R.  Next, the list containing the PQL-derived starting values must be assigned the name \var{startingValues}, as \command{getInits} will be accessing this object every time it is run. The \command{model.file} indicates the name of the bug file, it was generated from the \command{glmmBUGS} function and stored in the default folder. Usually, this comment can be ommited since \var{model.bug} is the default value. 
 <<thebug>>=
 source("getInits.R")
 startingValues = bacrag$startingValues
 library(R2WinBUGS)
-bacResult = bugs(bacrag$ragged, getInits, 
-                 n.chain=3, 
-                 n.iter=2000,  n.burnin=100, parameters.to.save = names(getInits()), n.thin=10)
+bacResult = bugs(bacrag$ragged, getInits, model.file = "model.bug", n.chain=3, n.iter=2000, n.burnin=100, parameters.to.save = names(getInits()), n.thin=10)
 @
 
 
-As the results stored in \var{bacResult} are based on the reparametrized model, we use  \command{restoreParams} to restore the original parametrization from (\ref{eq:model}). 
+As the results stored in \var{bacResult} are based on the reparametrized model, we use \command{restoreParams} is used to restore the original parametrization from (\ref{eq:model}). 
 
 <<theparam>>=
 bacParams = restoreParams(bacResult, bacrag$ragged) 
@@ -127,6 +125,9 @@ checkChain(bacParams, c("intercept", "SDID"))
 @
 
 
+
+\subsection{Pre and Post-WinBUGS commands}
+Before running WinBUGS, \command{glmmBUGS} is needed to generate a list of data for running the MCMC simulation. In order to run \command{glmmBUGS}, the data needed to be in the format for running the generalized linear model. After running WinBUGS, a series of commands in the \pkg{glmmBUGS} can be used to check the simulation results. \command{resoreParams} is used to give the original names to random effect levels.  \command{summaryChain} is used to compute summary statistics for each parameter. \command{summaryChain} is used to make time series plots of the parameters (not the random effects) of an MCMC run.
 
 
 
