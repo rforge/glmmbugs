@@ -1,0 +1,60 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\vspace*{10pt}
+
+{\flushright
+
+\begin{minipage}{3in}
+Lutong Zhou\\ Population  Studies and Surveillance\\
+Cancer Care Ontario\\ 620 University Avenue\\Toronto, ON\\M5G 2L7\\
+\\
+{\tt carly\_zhou@hotmail.com}
+\\ \\
+\today
+\end{minipage}
+
+}
+
+\vspace{10pt}
+
+\noindent Dear Reviewer, 
+
+\vspace{10pt}
+
+Thank you for your valuable comments on our glmmBUGS paper. We've made changes according to your comments as follows:
+
+\begin{itemize}
+\item I've included the two R packages (MCMCglmm and glmmGibbs) into the discussion section and put the information into the bibiliography section too.
+
+\item We are considering generating a super function which included all the functions from the glmmBUGS package.  
+
+\item I've added the argument "model.file = "model.bug" in the bugs function and a comment that it can be omitted.
+
+\item I've added a section "pre and post-WinBUGS command" between the two examples, outline the usage of the functions briefly and when to use those functions.
+
+\item  I've tidy up the R codes, so that it won't print outside the margins.
+\end{itemize}
+
+
+{\flushleft
+
+\begin{minipage}{3in}
+\vspace{10pt}
+Regards,
+
+\vspace{10pt}
+
+Lutong Zhou
+
+\end{minipage}
+
+}
+
+
+\end{document}
