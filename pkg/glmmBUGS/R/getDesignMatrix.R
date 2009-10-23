@@ -115,10 +115,14 @@ getBases = function(covariates, data,  effects=NULL) {
     allfactors = names(which(sapply(data, is.factor)))
 
  
-    for(D in covariates$observations[covariates$observations %in% allfactors])
+    for(D in covariates$observations[covariates$observations %in% allfactors])  {
+      # remove spaces from labels
+      levels(data[[D]]) <- gsub("[[:space:]]", "", levels(data[[D]]))
+    
       bases[[D]] = contr.treatment(levels(data[[D]]), 
     order(table(data[[D]]), decreasing=TRUE)[1])
     
+   } 
 
 
     if(is.null(effects)) {
