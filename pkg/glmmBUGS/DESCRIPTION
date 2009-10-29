@@ -3,7 +3,6 @@ Type: Package
 Title: Generalised Linear Mixed Models and Spatial Models with BUGS
 Version: 1.6.4
 Date: 2009-10-13
->>>>>>> .r179
 Depends: MASS,  abind   
 Suggests: spdep
 Enhances: R2WinBUGS, BRugs
