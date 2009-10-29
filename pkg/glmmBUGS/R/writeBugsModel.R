@@ -211,7 +211,7 @@ if(length(reparam)){
      if(any(names(priors) == parName)){
          cat(parName, "~", priors[parName], "\n", sep="")
      }else{
-     cat(parName, " ~ dunif(0, 25)\n", sep="")
+     cat(parName, " ~ dunif(0, 100)\n", sep="")
      }
   }
   for(Deffect in spatial) {
