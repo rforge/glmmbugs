@@ -1,60 +1,56 @@
-\documentclass[12pt]{article}
+\documentclass[12pt]{letter}
 
 \usepackage[margin=1in]{geometry}
 
-\begin{document}
-
-\thispagestyle{empty}
-
-\vspace*{10pt}
-
-{\flushright
-
-\begin{minipage}{3in}
+\address{
 Lutong Zhou\\ Population  Studies and Surveillance\\
 Cancer Care Ontario\\ 620 University Avenue\\Toronto, ON\\M5G 2L7\\
 \\
 {\tt carly\_zhou@hotmail.com}
-\\ \\
-\today
-\end{minipage}
-
 }
 
-\vspace{10pt}
+\signature{Lutong Zhou}
 
-\noindent Dear Dr.\ Turner, 
+\begin{document}
 
-\vspace{10pt}
+\begin{letter}{
+Dr.\ Heather Turner\\
+Heather.Turner@warwick.ac.uk
+}
 
-Thank you for your the valuable comments on our glmmBUGS paper. We've made changes according to the comments as follows:
-Reviewer 1
+\opening{Dear Dr.\ Turner,} 
+
+
+
+Please thank the referees for the valuable comments on our glmmBUGS paper. We've made changes according to the comments as follows:
+
+\noindent{\bf Reviewer 1}
+
 \begin{enumerate}
-\item I've included the two R packages (MCMCglmm and glmmGibbs) into the discussion section and put the information into the bibiliography	 section.  Working via WinBUGS is the difference between  glmmBUGS and the other packages, which is both an advantage and disadvantage.
+	\item No, the program can't handle lmer syntax, though the way random effects and the model formula are specified and handled should be improved and thank you for the suggestion. 
+	\item overdispersed models could be specified by creating a column of unique observation identifiers and specifying this as a random effect.  
+	\item Currently only random intercepts are allowed for.  Users would have to edit the bugs model file to allow for random slopes. 
+\end{enumerate}
+A paragraph on possible enhancements has been added, along with a call for contributors!
 
-\item We are considering generating a super function which included all the functions from the glmmBUGS package.  
+\noindent{\bf Reviewer 2}
 
-\item I've added the argument "model.file = "model.bug" in the bugs function and a comment that it can be omitted.
+\begin{enumerate}
+\item I've included the two R packages (MCMCglmm and glmmGibbs) into the discussion section and put the information into the bibiliography	 section.  The advantage (and disadvantage!) of glmmBUGS with respect to the other packages is the use of WinBUGS for model fitting.
 
-\item I've added a section "pre and post-WinBUGS command" between the two examples, outline the usage of the functions briefly and when to use those functions.
+\item We are considering writing a function to automate the whole process. The argument against such a function is that users shouldn't be encouraged to accept the default priors and starting values. 
+
+\item I've added the model file argument in the bugs and glmmBUGS functions.
+
+\item The post-WinBUGS glmmBUGS functions are more clearly indicated.
 
 \item  I've tidy up the R codes, so that it won't print outside the margins.
-\end{itemize}
+\end{enumerate}
 
 
-{\flushleft
+\closing{Regards,}
 
-\begin{minipage}{3in}
-\vspace{10pt}
-Regards,
 
-\vspace{10pt}
-
-Lutong Zhou
-
-\end{minipage}
-
-}
-
+\end{letter}
 
 \end{document}
