@@ -5,6 +5,9 @@ function(pql, ragged, prefix=NULL, reparam=NULL) {
 # covariates is a covariate list given to winBugsRaggedArray
 # pql comes from glmmPQLstrings
 
+# starting value for the proportion of spatial effect
+spatialFactor = 0.5
+
 # fixed effects  
 
 startingValues = list()  
@@ -91,8 +94,7 @@ spatialEffect = paste("R", gsub("^N", "", spatialEffect), sep="")
 
   
 for(D in 1:length(spatialEffect)) {
-# starting value for the proportion of spatial effect
-spatialFactor = 0.5
+
 
   # create a vector of zeros for starting values for the spatial component
   # getting names from the Sspatial index in the ragged array
@@ -109,7 +111,7 @@ spatialFactor = 0.5
   #names(startingValues[[spatialEffectIndep[D] ]])
   thenames = names(theStart)[names(theStart) %in% thenames]
   theStart[thenames] =  pql$coef$random[[spatialEffectIndepVar[D] ]][
-        thenames, ,drop=TRUE]
+        thenames, ,drop=TRUE] * spatialFactor
   
   startingValues[[spatialEffect[D] ]] = theStart
   
