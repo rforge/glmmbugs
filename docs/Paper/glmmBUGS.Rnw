@@ -72,7 +72,7 @@ levels(bacterianew$trt) <- c("placebo", "drug", "drugplus")
 The primary function in the package is \command{glmmBUGS}, which does the preparatory work for fitting the model in (\ref{eq:modelReparam}) with: 
 <<bacrag>>=
 library(glmmBUGS)
-bacrag <- glmmBUGS(formula = yInt ~ trt + week , data=bacterianew, effects = "ID", 
+bacrag <- glmmBUGS(formula = yInt ~ trt + week , data=bacterianew, effects = "ID", modelFile="model.bug",
                                                  family= "bernoulli") 
 @
 This specifies \var{yInt} as a Bernoulli-valued response, \var{trt} and \var{week} as fixed-effect covariates, and the \var{ID} column for the random effects.  The result is a list with three elements:
