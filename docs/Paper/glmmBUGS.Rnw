@@ -27,8 +27,8 @@ library(mgcv)
 @
 
 
-\section{Abstract}
-The \pkg{glmmBUGS} package is a bridging tool between Generalized Linear Mixed Models (GLMM's) in R and the BUGS language \citep{winbugs}.  It provides a simple way of performing Bayesian inference using Markov Chain Monte Carlo (MCMC) methods \cite[see][]{gelman}.  
+\section*{Abstract}
+The glmmBUGS package is a bridging tool between Generalized Linear Mixed Models (GLMM's) in R and the BUGS language.  It provides a simple way of performing Bayesian inference using Markov Chain Monte Carlo (MCMC) methods, taking a model formula and data frame in R and writing a BUGS model file, data file, and initial values files.  Functions are provided to reformat and summarize the BUGS results.  A key aim of the package is to provide files and objects which can be modified prior to calling BUGS, giving users a platform for customizing and extending the models to accommodate a wide variety of analyses.
 
 
 \section{Introduction}
