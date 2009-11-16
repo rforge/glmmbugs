@@ -157,6 +157,7 @@ for(D in groups) {
        thefitted[,,dimnames(result[[D]])[[3]]] = result[[D]] 
        
        DsubR = paste("R", Dsub, sep="")
+ 
        thefitted[,,dimnames(result[[DsubR]])[[3]]] = 
                 thefitted[,,dimnames(result[[DsubR]])[[3]]] +
                 result[[DsubR]]
@@ -165,19 +166,39 @@ for(D in groups) {
        regionsNoV = thenames[!thenames %in% dimnames(result[[DsubR]])[[3]] ]
 
        if(length(regionsNoV)) {
+        # dimension of array to hold the realisations for regions without Rstuff
+        dimNoV = c(dim(result$intercept),length(regionsNoV) ) 
 
+       # standard deviationsf or realisations for these regions
+       # as an array  
+       sdBig = array(result[[paste("SD",Dsub,sep="")]], dimNoV)
+
+       # realisations of spatially independent effect for regions without Rstuff
+       VfornoV =  rnorm(prod(dim(sdBig)), 0, sdBig)
+       # convert to an array       
+       VfornoV = array(VfornoV, dimNoV) 
+       # add names
+       dimnames(VfornoV)[[3]] = regionsNoV
+
+       # find regions with a spatial random effect  
+       DsubSpatial=paste(DsubR, "Spatial", sep="")      
+       withSpatial = regionsNoV[regionsNoV %in% 
+        dimnames(result[[DsubSpatial]])[[3]] ]
+       # and add it to the realised non-spatail effect       
+       VfornoV[,,withSpatial] =   VfornoV[,,withSpatial] +
+            result[[DsubSpatial]][,,withSpatial]
+        
+      # put these results into the posterior simulations array
+      result[[DsubR]] = abind(result[[DsubR]], VfornoV, along=3)
+
+      # now add to the fitted values
        # expand intercept and variance
-       interceptBig = array(result$intercept, c(dim(result$intercept),length(regionsNoV)))
-       varBig =    array(result[[paste("SD",Dsub,sep="")]], 
-        c(dim(result$intercept),length(regionsNoV)))
+       interceptBig = array(result$intercept, dimNoV)
 
-       thefitted[,,regionsNoV] = thefitted[,,regionsNoV] + 
-          rnorm(prod(dim(varBig)), interceptBig, varBig)
-       
+       thefitted[,,regionsNoV] = thefitted[,,regionsNoV] + interceptBig +
+          VfornoV          
        }
-
        result[[paste("FittedRate", Dsub, sep="")]] = exp(thefitted)
-       
        
      }
      
