@@ -20,6 +20,7 @@ summaryChain(chain, probs = c(0.005, 0.025, 0.05, 0.5))
  A list of matrices, with rows corresponding to summary statistics and columns to parameters. 
   \item{scalar}{Matrix for the scalar parameters}
   \item{... }{One matrix for each vector valued parameter}
+  \item{FittedRateReffect}{For spatial models only, summaries on the natural scale (exponential of FittedReffect).}
 }
 \references{}
 \author{Patrick Brown}

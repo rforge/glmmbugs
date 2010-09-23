@@ -30,6 +30,16 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
    
    }
    
+   # if this is a spatial model, get summaries of exponentials of fitted values
+   
+   if(length(grep("Spatial$",names(result)))) {
+     for(D in grep("^Fitted", names(result), value=T)) {
+        result[[paste("FittedRate", gsub("^Fitted", "", D), sep="")]]=
+                t(apply(exp(chain[[D]]), 3, getRes))
+
+     } 
+   }
+   
    return(result)
 
 }
