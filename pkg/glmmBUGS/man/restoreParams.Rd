@@ -6,7 +6,7 @@
   Undoes the parametrisation used in \code{\link{writeBugsModel}}, and gives the original names to random effect levels.
 }
 \usage{
-restoreParams(bugsResult, ragged = NULL)
+restoreParams(bugsResult, ragged = NULL,extraX=NULL)
 }
 
 \arguments{
