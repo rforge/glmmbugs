@@ -34,7 +34,7 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
    
    if(length(grep("Spatial$",names(result)))) {
      for(D in grep("^Fitted", names(result), value=T)) {
-        result[[paste("FittedRate", gsub("^Fitted", "", D), sep="")]]=
+        result[[paste("FittedRate", gsub("^FittedR", "", D), sep="")]]=
                 t(apply(exp(chain[[D]]), 3, getRes))
 
      } 

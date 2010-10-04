@@ -136,7 +136,7 @@ ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
 ontarioSummary = summaryChain(ontarioParams)
 
 # posterior probability of having 10x excess risk
-postProb = apply(ontarioParams$FittedRateCSDUID, 3, function(x) mean(x>10))
+postProb = apply(ontarioParams$FittedRCSDUID, 3, function(x) mean(x>log(10)) )
 hist(postProb)
 
 \dontrun{
