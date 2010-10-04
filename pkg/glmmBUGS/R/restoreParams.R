@@ -238,7 +238,7 @@ if(is.null(ragged)) {
         
       # put these results into the posterior simulations array
       result[[DsubR]] = abind(result[[DsubR]], VfornoV, along=3)
-      fittedForNoV = VforNoV + array(result$intercept, dimNoV)
+      fittedForNoV = VfornoV + array(result$intercept, dimNoV)
 # add covariates if we have them
 if(!is.null(extraX)) {
 haveExtraX = rownames(extraX)[rownames(extraX) %in% VfornoV]
