@@ -57,48 +57,38 @@ if(!length(scPars))
 for(D in scPars)
   result[[D]] = thearray[,,D]
 
+  fixedEffects = grep("^X", names(ragged), value=TRUE)
 
-     
-     
-     fixedEffects = grep("^X", names(ragged), value=TRUE)
+  betas=NULL
+  library(abind)
+  
+  # extract betas 
+for(D in fixedEffects) {
+	tobind = thearray[,,
+			grep(gsub("^X","beta", D), dimnames(thearray)[[3]]),drop=F]
+	if(!dim(tobind)[3])
+		warning("can't find fixed effect parameters for ", D)
+	
+	newnames=dimnames(ragged[[D]])[[2]]
 
-  #if there are any fixed effects, format the posterior samples of the coefficients
-if(length(fixedEffects)){
-     fixedEffects = substr(fixedEffects, 2, nchar(fixedEffects))
+	if(length(newnames)== (dim(tobind)[3]) )
+		dimnames(tobind)[[3]] = newnames
 
-     Sbeta = paste("beta", fixedEffects, sep="")
+	betas = abind(betas, tobind, along=3)
+	
+}  
 
-     SX = paste("X", fixedEffects, sep="")
-     for(D in 1:length(fixedEffects)) {
-        if(is.matrix(ragged[[SX[D]]])) {
-          newnames = dimnames(ragged[[SX[D]]])[[2]]
-          newnames = newnames[!(paste("beta", newnames, sep="") %in% names(result) )]
-          if(length(newnames) == (dim(result[[Sbeta[D]]])[3]) )
-            dimnames(result[[Sbeta[D]]])[[3]] = newnames
-        }
-     } 
- }    
-     # make one matrix of betas
-     betanameIndex = grep("beta", names(result))
-      betas = NULL
-     library(abind)
-     for(D in betanameIndex) {
-        if(is.matrix(result[[D]])) {
-          result[[D]] = array(result[[D]], c(dim(result[[D]]), 1), 
-            dimnames = list(dimnames(result[[D]])[[1]], dimnames(result[[D]])[[2]], 
-            sub("beta", "", names(result)[D])) 
-          )
-        }
-          betas = abind(betas, result[[D]])
-     } # end loop betanameIndex
-     if(length(betanameIndex)) {
-      result = result[-betanameIndex]
-      result$betas = betas
-     }
+if(!is.null(betas))
+	result$betas = betas
+  
+
 
 #the random effects
 # find grouping variables, all the variables with one dimensional indices
 groups = unique(gsub("\\[[[:digit:]]+\\]$", "", vecPars))
+thebetas = grep("^beta", groups)
+if(length(thebetas))
+	groups = groups[-thebetas]
 
 for(D in groups) {
   thisGroup = grep(paste("^", D, "\\[", sep=""), vecPars, value=TRUE)
@@ -141,6 +131,8 @@ if(is.null(ragged)) {
   #   at the first level, torep assigns the intercept to each group   
   torep = rep(1, length(ragged[[paste("S", randomEffects[1], sep="")]])-1)
 
+  betanames = dimnames(result$betas)[[3]]
+  
   for(D in randomEffects) {  
         theR = paste("R", D, sep="")
 
@@ -158,29 +150,33 @@ if(is.null(ragged)) {
        Dbeta = paste("beta", D, sep="")
 
       themean = theMeanOld[,,torep]
-       
+ 
+      
        # expand the previous mean vector to the number of current random effects
 #       return(list(themean=themean, rag = ragged[[DX]], res = result[[Dbeta]][,,]))
       if(!is.null(ragged[[DX]])) {
        # if there are covariates at this level
-       theX = t(ragged[[DX]])
-	   if(any(names(result)==Dbeta)){
-       		thebeta = result[[Dbeta]]
+
+        
+	theX = t(ragged[[DX]])
+	# if only one covariate at this level
+	if(D %in% betanames){
+		theseBetas =  result$betas[,,D,drop=F]		
+	} else { # more than one covariate, have matrices
+	    if(all(rownames(theX) %in% dimnames(result$betas)[[3]]) ) {
+			theseBetas = result$betas[,,rownames(theX),drop=F]
 		} else {
-			if(D %in% dimnames(result$betas)[[3]]) {
-			  thebeta = result$betas[,,D,drop=F]
-			} else {
-				warning("cannot find ",D," , ", DX)
-			}
-		}
-       if(is.matrix(thebeta))
-        thebeta = array(thebeta, c(dim(thebeta), 1))
-       for(Dchain in 1:Nchain) {
-          themean[,Dchain,] = themean[,Dchain,] + 
-            thebeta[,Dchain,] %*% theX
-       }  
-      } 
-      # get ready for the next random effect
+			warning("cannot find ",D," , ", DX)
+		}		
+	} # end else more than one covariate
+	
+    for(Dchain in 1:Nchain) {
+        themean[,Dchain,] = themean[,Dchain,] + 
+            	theseBetas[,Dchain,] %*% theX
+    } 
+	}	# end there are covariates here
+	
+	      # get ready for the next random effect
       # the random effects (reparameterised) are the means of the next level
       theMeanOld = result[[theR]]
       # see torep above

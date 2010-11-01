@@ -22,7 +22,7 @@ addSpatial = function(map, raggedArray=NULL, effect=NULL, prefix=NULL) {
     theregions = attributes(map)$region.id
  #   map = list(num = sapply(map, length),
  #     adj = unlist(map)  )
-	nb2WB(map)	
+	map=nb2WB(map)	
     names(map$num) = theregions
 
   } else {
