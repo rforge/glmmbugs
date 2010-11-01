@@ -1,0 +1,808 @@
+\documentclass[xcolor=dvipsnames]{beamer}
+
+\usetheme{Singapore}
+\usecolortheme[named=RawSienna]{structure}
+
+
+\usefonttheme{serif}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number] 
+
+\usepackage{tikz}
+\usetikzlibrary{shapes}
+\usepackage{amsmath}
+
+\usepackage[nogin]{Sweave}
+\SweaveOpts{echo=FALSE,fig=true,prefix.string=Figures/G,height=2,width=3}
+
+\graphicspath{{Figures/}}
+\setkeys{Gin}{width=\textwidth}
+
+\DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\logit}{logit}
+
+\title{LDA with non-normal errors}
+\author{Patrick Brown}
+
+
+\begin{document}
+	
+\frame{\maketitle}
+
+\begin{frame}
+\frametitle{Examples Bacteria counts in cattle feces}
+
+\begin{columns}
+\column{0.5\textwidth}
+\begin{itemize}
+	\item $Y_{ijk}$ is the number of colonies of E-coli 0157 in the $k$th sample from the $j$th fecal pat from animal $i = 1 \ldots 16$
+	\item $X_{ij}$ has the age of the animal and the consistency of the pat
+	\item $A_i$ is animal $i$'s relative bacteria level
+	\item $B_{ij}$ is pat $ij$'s relative bacteria level
+\end{itemize}
+
+\column{0.5\textwidth}
+<<cowPlot>>=
+options(SweaveHooks=list(fig=function() par(mar=c(2.5,2.5,0.1,0.1), mgp=c(1.5, 0.5, 0), cex=0.8)))
+cows=read.csv("..\\data\\1st diurnal.csv", as.is=T)
+cows$animal = gsub('\\?', '', cows$animal)
+cows$time = gsub(' ', '', cows$time)
+cows$time = cows$day + as.integer(substr(cows$time, 1,2))/24 + as.integer(substr(cows$time, 4,5))/(24*60)
+
+cowPois = cows[cows$count >= 0,]
+
+plot(cowPois$time, cowPois$count, col='grey')
+for(D in 1:7) {
+	points(count ~ time, data=cowPois, 
+		subset= (cowPois$animal==(unique(cowPois$animal)[D]) ) , col=D)
+}
+@
+\begin{itemize}
+	\item Colours correspond to cow ID's
+\end{itemize}
+
+\end{columns}
+\begin{itemize}
+	\item Thanks to Susan Robinson, University of Liverpool
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Poisson Distribution}
+\begin{columns}
+\column{0.4\textwidth}
+\begin{align*}
+X_i &\sim \text{Poisson}(\lambda_i)\\
+pr(X_i=x ) &= \lambda_i^x \exp(-\lambda_i) / x!\\
+X_1 + X_2 & \sim \text{Poisson}(\lambda_1 + \lambda_2)
+\end{align*}
+
+\column{0.3\textwidth}
+<<poissonPdf1>>=
+x = 0:10
+barplot(dpois(x, lambda=0.5), names=x, ylab='pr(X=x; mean=0.5)',space=1.5)
+@
+
+$\lambda = 0.5$
+\column{0.3\textwidth}
+<<poissonPdf2>>=
+barplot(dpois(x, lambda=2.5), names=x, ylab='pr(X=x; mean=2.5)',space=1.5)
+@
+
+$\lambda = 2.5$
+\end{columns}
+
+\begin{itemize}
+	\item Suppose the concentration of bacteria in a fecal pat is $\mu$ cfu/g
+	\item The number of colonies in a one gramme sample $\sim\text{Poisson}(\mu)$
+	\item A 0.01 gramme sample $\sim\text{Poisson}(\mu/100)$
+	\item Take 100 0.01 gramme samples and add up the counts in each of them $\sim \text{Poisson}(100 \mu/0.01)$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Poisson Distribution}
+\begin{itemize}
+		\item The Poisson is infinitely divisible: you can divide the sample into any number of bits without affecting the distribution.
+\item The Poisson is the only integer-valued distribution with this property
+\item In other words, the only distribution where the counts can be interpreted as the sum of infinitely many independent processes.
+\item Similar to the reason the central limit theorem makes the Gaussian distribution sensible for continuous data.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Breast screening data}
+\begin{itemize}
+\item Women screened by the Ontario Breast Cancer Screening Program were followed up
+\item Of the women who had cancer at the time of the screen, what 
+factors influence cancer detection?
+\item Covariates: breast density, radiographer's experience, type of centre.
+	\item $Y_{ijk}=1$ if breast cancer was detected in woman $k$ with radiographer $j$ at screening site $i$.  
+\end{itemize}
+\vspace{-10pt}
+\begin{columns}
+\column{0.5\textwidth}
+\begin{align*}
+Y_{ijk} & \sim \text{Bernoulli}(p_{ijk})\\
+\logit(p_{ijk}) & = X_{ijk}\beta + A_i + B_{ij}\\ 
+A_i & \sim \text{N}(0, \sigma^2_A) \\
+ B_{ij}& \sim \text{N}(0, \sigma^2_B)\\
+\end{align*}
+\column{0.5\textwidth}
+\begin{itemize}
+	\item Which women are most at risk of a missed cancer?
+	\item How different are radiographers and screening centres?
+	\end{itemize}
+\end{columns}
+Thanks to Anna Ciarelli, Marc Theriault and Vicky Majpruz at Cancer Care Ontario 
+
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Maximum Likelihood Estimation?}
+
+\begin{align*}
+Y_{ij} |A_i&\sim \text{Poisson}[\exp(X_{ij}\beta + A_i)]\\
+A_i & \sim \text{N}(0,\sigma^2)\\ 
+pr(Y_{11} \ldots Y_{MN}) & = \int\ldots\int pr(\mathbf{Y} | A_1 \ldots A_M) pr(A_1 \ldots A_M) dA_1 \ldots dA_M\\
+&= \prod_i \int pr(Y_{i1} \ldots Y_{iN} | A_i ) pr(A_i) dA_i\\
+& = \text{usually intractable}
+\end{align*}
+\begin{itemize}
+	\item Without covariates, there are some tractable pairs of distributions
+\begin{itemize}
+	\item Gamma-Gamma
+	\item Binomial-Beta
+\end{itemize}
+\item Sometimes called Empirical Bayes models or conjugate models
+\end{itemize}
+\end{frame}
+\begin{frame}
+\frametitle{Penalised Quasi-likelihood}
+\begin{itemize}
+	\item Breslow and Clayton (1993) JASA
+	\item Write the likelihood as in the GLM framework, based on mean, variance, and deviance.
+	\item Laplace approximation to the integral gives something like Fisher scores
+	\item The `penalty' relates to the distribution of the random effects
+	\item In effect, it reduces to repeatedly fitting a Gaussian random effects model with Fisher scoring.
+	\item the {\tt glmmPQL} function in R does this.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Cow data with PQL}
+
+\begin{align*}
+Y_{ijk} \sim & \text{Poisson}(S_{ijk}\lambda_{ijk})\\
+\log(\lambda_{ijk}) = & X_{ijk} \beta + A_i + B_{ij}\\
+A_i \sim & \text{N}(0, \sigma^2_A)\\
+B_{ij} \sim & \text{N}(0, \sigma^2_B)
+\end{align*}
+\begin{verbatim}
+library(MASS)
+cowPois$logScaler = log(cowPois$scaler)
+cowPQL = glmmPQL(count ~ offset(logScaler) + 
+  factor(consistency), random = ~1|pat/animal, 
+  data=cowPois, family='poisson')
+\end{verbatim}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Results}
+\begin{footnotesize}
+
+\vspace*{-1in}
+
+<<cowPQL,fig=false>>=
+library(MASS)
+cowPois$logScaler = log(cowPois$scaler)
+cowPQL = glmmPQL(count ~ offset(logScaler) + factor(consistency), random = ~1|animal/pat, data=cowPois, family='poisson')
+summary(cowPQL)
+@
+\end{footnotesize}
+\end{frame}
+\begin{frame}
+\frametitle{Random effects}
+\begin{columns}
+\column{0.5\textwidth}
+<<histCow>>=
+hist(cowPQL$coef$random$animal, main='', breaks=10)
+@
+\column{0.5\textwidth}
+<<histPat>>=
+hist(cowPQL$coef$random$pat, main='', breaks=10)
+@
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Pat effect over time}
+<<patTime>>=
+patEffect = data.frame( patEffect = cowPQL$coef$random$pat[,1])
+thenames = gsub('\\?', '', rownames(cowPQL$coef$random$pat))
+patEffect$pat = as.integer(gsub('^[[:digit:]]+/', '', thenames))
+patEffect$animal = as.integer(gsub('/[[:digit:]]+$', '', thenames))
+
+cowRes = merge(cowPois, patEffect)
+cowRes$animal = as.integer(factor(cowRes$animal))
+plot(cowRes$time, cowRes$patEffect, col='grey', xlab='time', ylab='E(B_ij | Y)')
+
+
+for(D in 1:8) {
+	qq = cowRes[cowRes$animal == (unique(cowRes$animal)[D]),]
+	qq = qq[order(qq$time),]
+ lines(qq$time , qq$patEffect, col=D)
+}
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Breast Cancer Data}
+
+\begin{columns}
+\column{0.5\textwidth}
+
+\begin{align*}
+Y_{ijk\ell} \sim & \text{Bernoulli}(p_{ijk})\\
+\logit(p_{ijk}) = & X_{ijk} \beta + A_i + B_{ij}\\
+A_i \sim & \text{N}(0, \sigma^2_A)\\
+B_{ij} \sim & \text{N}(0, \sigma^2_B)
+\end{align*}
+
+\begin{itemize}
+\item Region $i$, nurse $j$ examined woman $k\ell$, with covariates $X_{ijk}$
+
+\end{itemize}
+\column{0.6\textwidth}
+\begin{scriptsize}
+<<cancerData,fig=false>>=
+load("..\\data\\cancer.RData")
+rownames(NurseReferral.Cancer) = NULL
+NurseReferral.Cancer$y = NurseReferral.Cancer$NurseReferral
+NurseReferral.Cancer[1:10,c('odense','SCRNAGE', 'NURSEID', 'siteadminregion', 'y')]
+@
+\end{scriptsize}
+\end{columns}
+\begin{itemize}
+\item $Y_{ijk\ell}=1$ if the nurse detected a cancer and referred a woman for ultrasound.
+\item All of the women were later shown to have breast cancer
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Binomial data}
+\begin{itemize}
+		\item Group women into group $k$ according to covariate values, with each group having
+\begin{itemize}
+	\item $N_{ijk}$ women total
+	\item $Y_{ijk} = \sum_\ell Y_{ijk\ell}$ of whom were referred
+\end{itemize}
+\end{itemize}
+
+\begin{itemize}
+	\item The number of referrals per group is a sufficient statistic
+	\item Using the Binomial makes the dataset smaller and the computations faster
+\end{itemize}
+\begin{align*}
+Y_{ijk} \sim & \text{Binomial}(N_{ijk},p_{ijk})\\
+\logit(p_{ijk}) = & X_{ijk} \beta + A_i + B_{ij}\\
+A_i \sim & \text{N}(0, \sigma^2_A)\\
+B_{ij} \sim & \text{N}(0, \sigma^2_B)
+\end{align*}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Model fitting}
+\begin{verbatim}
+nurse$experience = nurse$NurseExperience - 
+  mean(nurse$NurseExperience)
+nurse$fails = nurse$Count - nurse$y 
+resp = as.matrix(nurse[,c('y', 'fails')])
+
+nursePQL = glmmPQL(resp~
+  odense + newsiteclass+ SCRNAGE + experience, 
+  random = ~1|siteadminregion/NURSEID, 
+  data=nurse, family='binomial')
+
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Results}
+\vspace*{-1in}
+
+
+<<nurseRes,fig=false>>=
+nurse = as.data.frame(NurseReferral.Cancer)
+nurse$experience = nurse$NurseExperience - mean(nurse$NurseExperience)
+nurse$fails = nurse$Count - nurse$y 
+resp = as.matrix(nurse[,c('y', 'fails')])
+
+nursePQL = glmmPQL(resp~ odense + newsiteclass+ SCRNAGE + experience, random = ~1|siteadminregion/NURSEID, data=nurse, family='binomial')
+summary(nursePQL)
+@
+\end{frame}
+
+\begin{frame}
+\frametitle{Fixed effects}
+\begin{footnotesize}
+<<nurseFixedResults,fig=false,results=tex>>=
+library(Hmisc)
+latex(summary(nursePQL)$tTable, file='',dec=2)
+@
+\end{footnotesize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Splines}
+\begin{itemize}
+	\item the {\tt gamm} function allows for splines to be used to model covariates
+	\item the following code uses 4 knots for each of age and experience.
+	\item {\tt s(x, fx=T, k=4) } 
+	\item the {\tt fx=T} argument tells gamm to use regression splines instead of penalised least squares.
+\end{itemize}
+\begin{verbatim}
+library(mgcv)
+nurseGAMM = gamm(resp~ 
+  odense + newsiteclass+ s(SCRNAGE,fx=T,k=4) + 
+    s(experience,fx=T,k=4), 
+    random = list(siteadminregion=~1, NURSEID=~1), 
+    data=nurse, family='binomial')
+plot(nurseGAMM$gam, pages=1)
+summary(nurseGAMM$lme)
+\end{verbatim}
+\end{frame}
+\begin{frame}[fragile]
+\frametitle{Results}
+
+<<nurseGamm,fig=false>>=
+library(mgcv)
+nurseGAMM = gamm(resp~ 
+  odense + newsiteclass+ s(SCRNAGE,fx=T,k=4) + 
+    s(experience,fx=T,k=4), 
+    random = list(siteadminregion=~1, NURSEID=~1), 
+    data=nurse, family='binomial')
+summary(nurseGAMM$lme)
+@
+\end{frame}
+\begin{frame}
+\begin{columns}
+\column{0.5\textwidth}
+<<nurseGammPlot>>=
+plot(nurseGAMM$gam, select=1)
+@
+\column{0.5\textwidth}
+<<nurseGammPlot2>>=
+plot(nurseGAMM$gam, select=2)
+@
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Extra-Poisson variation}
+\begin{align*}
+Y_{ijk} \sim & \text{Poisson}(S_{ijk}\lambda_{ijk})\\
+\log(\lambda_{ijk}) = & X_{ijk} \beta + A_i + B_{ij} + C_{ijk}\\
+A_i \sim & \text{N}(0, \sigma^2_A)\\
+B_{ij} \sim & \text{N}(0, \sigma^2_B)\\
+C_{ijk} \sim & \text{N}(0, \sigma^2_C)
+\end{align*}
+\begin{itemize}
+	\item If $Y$ were normal, we wouldn't be able to identify $\sigma_C$ and $\var(Y_{ijk})$ 
+	\item The Poisson distribution only has one argument, the mean
+	\item so we can identify $\sigma_C$, the overdispersion
+	
+
+	\item $\sigma_C=0$ implies the only variation in $Y_{ijk}| A_i, B_{ij}$ is Poisson sampline variation
+\item $\sigma_C>0$ means the $Y$ are more variable than the Poisson would suggest
+
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Results}
+\vspace*{-1in}
+
+
+\begin{footnotesize}
+<<cowPQLplate,fig=false>>=
+cowPQLplate = glmmPQL(count ~ offset(logScaler) + factor(consistency), random = ~1|animal/pat/plate, data=cowPois, family='poisson')
+summary(cowPQLplate)
+@
+\end{footnotesize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Notes}
+\begin{itemize}
+	\item Using a GLMM is always preferable to doing something barbarous to the data to make it normal-ish
+	\item i.e.\ taking count/fecal volume, and logging that
+	\item 1 colony in 10 grams is less informative than 10 colonies in 100 grams.
+	\item PQL is only an approximation, MCMC is a more rigorous method.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Example: Breast Screening Data}
+  $Y_{ijk}$ is the number of detected  breast cancers   in woman with covariates $X_{ijk}$  with nurse examiner $j$ at screening site $i$.  $N_{ijk}$ is the total number in that category screened.
+\begin{align*}
+Y_{ij} & \sim \text{Bernoulli}(N_{ij}, p_{ij})\\
+\logit(p_{ijk}) & = X_{ijk}\beta + A_i + B_{ij}\\ 
+A_i & \sim \text{N}(0, \sigma^2_A) \\
+ B_{ij}& \sim \text{N}(0, \sigma^2_B)\\
+\end{align*}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{WinBUGS model file}
+<<junk,fig=false>>=
+options(width=53)
+#load("../cancer.RData")
+rownames(NurseReferral.Cancer) = NULL
+NurseReferral.Cancer$y = NurseReferral.Cancer$NurseReferral
+NurseReferral.Cancer[1:10,c('odense','SCRNAGE', 'NURSEID', 'siteadminregion', 'y')]
+nurse = as.data.frame(NurseReferral.Cancer)
+nurse$experience = nurse$NurseExperience - mean(nurse$NurseExperience)
+nurse$fails = nurse$Count - nurse$y 
+
+@
+<<cancerModel,fig=false, echo=TRUE>>= 
+library(glmmBUGS)
+nurseForBugs = glmmBUGS(y + Count ~
+  odense + newsiteclass+ SCRNAGE + experience, 
+  effects=c('site', 'NURSEID'), 
+  data=nurse, family='binomial')
+names(nurseForBugs)
+@
+\begin{itemize}
+	\item Here {\tt y} is the number of successes and {\tt Count} is the total number of trials
+	\item Random effects at the {\tt NURSEID} and {\tt site} level
+	\item {\tt ragged} is the data for WinBUGS 
+	\item {\tt startingValues} is the parameter estimates and conditional expectations of random effects from {\tt glmmPQL}
+	\item {\tt pql} is the {\tt glmmPQL} result
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{{\tt model.bug}}
+\begin{scriptsize}
+\begin{verbatim}
+for(Dsite in 1:Nsite) {
+
+  Rsite[Dsite] ~ dnorm(meansite[Dsite], Tsite)
+  meansite[Dsite] <- intercept + betasite * Xsite[Dsite]
+
+  for(DNURSEID in Ssite[Dsite]:(Ssite[Dsite+1]-1)){
+
+    RNURSEID[DNURSEID] ~ dnorm(meanNURSEID[DNURSEID], TNURSEID)
+    meanNURSEID[DNURSEID] <- Rsite[Dsite] + betaNURSEID * XNURSEID[DNURSEID]
+
+    for(Dobservations in SNURSEID[DNURSEID]:(SNURSEID[DNURSEID+1]-1)){
+
+      y[Dobservations] ~ dbin(meanobservations[Dobservations], 
+                              Count[Dobservations])
+      logit(meanobservations[Dobservations]) <- RNURSEID[DNURSEID] + 
+                  inprod2(betaobservations[] , Xobservations[Dobservations,])
+
+    }#observations
+  }#NURSEID
+}#site
+\end{verbatim}
+\end{scriptsize}
+\end{frame}
+
+\begin{frame}
+\frametitle{What it means}
+\begin{block}{loops}
+\begin{itemize}
+	\item {\tt for(Dsite }, {\tt for(DNURSEID } and {\tt for(Dobservations}
+	
+	\item Loop through screening sites, nurses within screening sites, and observations within nurses.
+
+\end{itemize}
+\end{block}
+
+\begin{block}{Random effects}
+\begin{itemize}
+	\item {\tt Rsite[Dsite]}, {\tt RNURSEID[DNURSEID}
+	\item $A_i$, $B_{ij}$ 
+	\item Random effects at the site and nurse level
+\end{itemize}
+\end{block}
+
+\begin{block}{Covariates}
+\begin{itemize}
+	\item {\tt Xsite}, {\tt XNURSEID}, {\tt Xobservations}
+	\item covariates which vary by site, by nurse, and by observation 
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Ragged Arrays}
+\begin{columns}
+\column{0.7\textwidth}
+
+If the data were balanced, we'd write
+\begin{verbatim}
+for(Dsite in 1:Nsite) {
+ for(Dnurse in 1:Nnurse) {
+  for(Dobs in 1:Nobservations) {
+    ...
+  }
+ }
+}  	
+\end{verbatim}
+\begin{itemize}
+\item Since the world is unbalanced, 	use ragged arrays
+\item {\tt Dsite in 1:2}
+\item {\tt Dnurse in 1:2} then {\tt 3:5}
+\item {\tt Dobs in 1:2} then {\tt 3}, then {\tt 4:6}, then {\tt 7} then {\tt 8:10}
+\end{itemize}
+\column{0.3\textwidth}
+\begin{tabular}{lll}
+site & nurse & obs\\
+1&1&1\\
+1&1&2\\
+1&2&3\\
+2&3&4\\
+2&3&5\\
+2 & 3&6\\
+2&4&7\\
+2&5&8\\
+2&5&9\\
+2 &5&10
+\end{tabular}
+\end{columns}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Data For Bugs}
+\begin{itemize}
+	\item Sort the data by site and nurse within site
+	\item Store the start positions of each nurse (1, 3) {\tt Ssite}
+	\item Store the start positions of each observation (1,3,4,7,8) {\tt SNURSEID}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Reparametrising}
+\begin{align*}
+Y_{ij} \sim&\text{N}(\mu + A_i, \tau^2)\\
+A_i \sim & \text{N}(0, \sigma^2)
+\end{align*}
+\begin{itemize}
+	\item The Chain could update $\mu^{(p+1)} = \mu^{(p)} + 0.1$ and $A_i^{(p+1)} = A_i^{(p)} - 0.1$ with little effect on probabilities
+	\item WinBUGS would spend a lot of time undoing with the $A_i$ any moves it made with $\mu$
+	\item $A_i$ and $\mu$ are correlated
+\end{itemize}
+\begin{align*}
+Y_{ij} \sim&\text{N}(\tilde A_i, \tau^2)\\
+\tilde A_i \sim & \text{N}(\mu, \sigma^2)
+\end{align*}
+\begin{itemize}
+	\item Now the dependence is broken.  
+	
+\begin{itemize}
+	\item Update $\mu$ without changing the $\tilde A_i$
+	\item Updating $\tilde A_i$ will change the probabilities of the $Y_{ij}$, without $\mu$ cancelling it's effect out.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{How the code works}
+\begin{itemize}
+	\item Divide the covariates $X_{ijk}$ into groups $U_i$, $V_{ij}$ and $W_{ijk}$ which change with the site, nurse, and observations respectively
+	\item Write the model as
+\end{itemize}
+\begin{align*}
+Y_{ij} & \sim \text{Bernoulli}(N_{ij}, p_{ij})\\
+\logit(p_{ijk}) & = W_{ijk}\beta_w + B_{ij}\\ 
+ B_{ij}& \sim \text{N}(A_i + V_{ij}\beta_b, \sigma^2_B)\\
+A_i & \sim \text{N}(\mu + U_i\beta_a, \sigma^2_A) 
+\end{align*}
+\begin{itemize}
+	\item This helps the parameters mix well
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Data}
+\begin{itemize}
+	\item Three matrices of covariates: observation level, nurse level, and site level
+	\item Here there's only one nurse level and one site level covariate, so a vector will do.
+	\item For each random effect, calculate the expected value by adding lower-level random effects and covariates
+	
+	{\tt meanNURSEID[DNURSEID] <- Rsite[Dsite] + betaNURSEID * XNURSEID[DNURSEID]}
+	\item when there's more than one covariate, use the inner product
+	
+	 {\tt       logit(meanobservations[Dobservations]) <- RNURSEID[DNURSEID] + 
+                  inprod2(betaobservations[] , Xobservations[Dobservations,])
+ }
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Back to glmmBUGS}
+<<glmmBUGSragged,echo=true,fig=false>>=
+args(glmmBUGS)
+names(nurseForBugs)
+names(nurseForBugs$ragged)
+@
+\begin{itemize}
+	\item A bugs model file is written in the file ``model.bug''
+	\item The file ``getInits.R'' contains code for a function to generate random starting values
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{getInits.R}
+\begin{scriptsize}
+\begin{verbatim}
+getInits = function() { 
+
+scale = 1.5
+SDscale = 4
+
+result = list()
+
+result[["intercept"]] = sign(startingValues[["intercept" ]]) *
+    runif(length(startingValues[["intercept" ]]),
+       abs(startingValues[["intercept"]])/scale,
+       scale * abs(startingValues[["intercept"]]))
+       
+result[["SDNURSEID"]] = sqrt(runif(1,
+       startingValues$vars[["NURSEID"]]/scale,
+       startingValues$vars[["NURSEID"]]*scale))
+
+result[["RNURSEID"]] = rnorm(length(startingValues[["RNURSEID"]]),
+        startingValues[["RNURSEID"]], startingValues$vars[["NURSEID"]]/SDscale)
+\end{verbatim}
+\end{scriptsize}       
+       
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Starting Values}
+\begin{itemize}
+\item Edit ``getInits.R'' if you wish
+	\item Source in ``getInits.R''
+	\item This defines the function {\tt getInits()} which generates random starting values
+	\item Notice that it requires the starting values to be saved as an object called {\tt startingValues}
+	\item {\tt startingValues = nurseForBugs\$startingValues}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Priors}
+In ``model.bug''
+\begin{columns}
+\column{0.5\textwidth}
+\begin{verbatim}
+# priors
+
+intercept ~ dflat()
+betasite ~ dflat()
+betaNURSEID ~ dflat()
+betaobservations[1] ~ dflat()
+betaobservations[2] ~ dflat()
+
+Tsite <- pow(SDsite, -2)
+SDsite ~ dunif(0, 100)
+TNURSEID <- pow(SDNURSEID, -2)
+SDNURSEID ~ dunif(0, 100)
+\end{verbatim}
+\column{0.5\textwidth}
+\begin{itemize}
+	\item Edit this file as you wish
+	\item Notice that WinBUGS needs precisions instead of variances or standard deviations
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Calling WinBUGS}
+<<callWinBUGS,echo=true,fig=false>>=
+startingValues = nurseForBugs$startingValues
+source('getInits.R')
+library(R2WinBUGS)
+nurseFromBugs = bugs(nurseForBugs$ragged, getInits, parameters.to.save=names(getInits()), n.chains=3, n.iter=200, n.burnin=10, n.thin=2, debug=T)
+names(nurseFromBugs)
+@
+\end{frame}
+
+\begin{frame}
+\frametitle{The Results}
+\begin{itemize}
+	\item {\tt sims.array} is an array with dimensions	
+\begin{itemize}
+	\item 1- realisations from each chain
+	\item 2- chains
+	\item 3- parameters
+\end{itemize}
+%\item {\tt nurseFromBugs\$sims.array[,2,'SDNURSEID'] } is the posterior sample from chain 2 for the standard deviation of the nurse effect
+\item Remember that the random effects are reparametrised and don't have mean zero
+\item The function {\tt restoreParams} undoes the reparametrisation, subtracting the mean.
+\item {\tt summaryChain} computes some summary statistics
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Restored Parameters}
+<<restore,echo=true,fig=false>>=
+nurseResult = restoreParams(nurseFromBugs, nurseForBugs$ragged)
+names(nurseResult)
+nurseSummary=summaryChain(nurseResult)
+names(nurseSummary)
+nurseSummary$betas[,c('mean','2.5%','97.5%')]
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Trace plots}
+<<tracePlots,echo=true,width=6,height=2,fig=true>>=
+checkChain(nurseResult)
+@
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Posterior distributions}
+\begin{columns}
+\column{0.5\textwidth}
+Nurse level sd
+
+<<histSdNurseid,echo=true>>=
+hist(nurseResult$SDNURSEID)
+@
+\column{0.5\textwidth}
+Effect of breast density
+
+<<histodense,echo=true>>=
+hist(nurseResult$betas[,,'odense'])
+@
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Posterior means of random effects}
+\begin{columns}
+\column{0.5\textwidth}
+Nurse level 
+
+<<histRNurseid,echo=true>>=
+hist(nurseSummary$RNURSEID[,'mean'])
+@
+\column{0.5\textwidth}
+Site level
+
+\vspace{10pt}
+
+<<histRsite,echo=true>>=
+hist(nurseSummary$Rsite[,'mean'])
+@
+\end{columns}
+
+\end{frame}
+
+
+\end{document}
