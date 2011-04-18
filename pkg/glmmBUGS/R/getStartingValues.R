@@ -8,6 +8,8 @@ function(pql, ragged, prefix=NULL, reparam=NULL) {
 # starting value for the proportion of spatial effect
 spatialFactor = 0.5
 
+
+
 # fixed effects  
 
 startingValues = list()  
@@ -152,6 +154,11 @@ if(any(names(ragged) == paste("adj",spatialEffectPlain[D], sep=""))) {
 } #end loop through spatial effects
 
 } # end if spatial effects
+
+# change variances to be at least 0.1^2
+for(D in names(startingValues$vars))
+	startingValues$vars[[D]] = max(c(0.1^2, startingValues$vars[[D]]))
+	
 
 
  if(is.character(reparam))   {

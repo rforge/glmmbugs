@@ -165,18 +165,23 @@ rongelapSP=SpatialPointsDataFrame(rongelap$coords, data=data.frame(count=rongela
   logOffset = log(rongelap$units.m),
   site = seq(1, length(rongelap$data)) )
   )
+  
+rongelapSP = rongelapSP[1:50,]  
 
 forBugs = glmmBUGS(
 formula=count + logOffset ~ 1, family="poisson",
     data=rongelapSP@data, effects="site", spatial=rongelapSP)
     
 startingValues = forBugs$startingValues
+startingValues$vars$site = max(c(0.1, startingValues$vars$site))
 source("getInits.R")
 
 rongelapResult = bugs(forBugs$ragged, getInits, 
   parameters.to.save = names(getInits()),
-    model.file="model.bug", n.chain=3, n.iter=50, n.burnin=10, n.thin=2,
-      program="winbugs", debug=T)
+    model.file="model.bug", n.chain=3, n.iter=200, n.burnin=10, n.thin=5,
+      program="winbugs", debug=TRUE,
+      working.directory=getwd())
+      ,working.directory="/home/patrick/research/glmmBUGS")
 
 
 }
