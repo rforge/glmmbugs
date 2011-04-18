@@ -14,7 +14,7 @@ function(startingValues, file="getInits.R") {
 #    cat("startingValues =", as.character(sys.calls()[[1]])[2], "\n\n")
    
     fixed = names(startingValues)
-    fixed = fixed[! fixed %in% "vars"]
+    fixed = fixed[! fixed %in% c("vars","phi")]
 
     random = paste("R", names(startingValues$vars),sep="")
     fixed = fixed[! fixed %in% random]
@@ -44,6 +44,17 @@ function(startingValues, file="getInits.R") {
       theSV, ", startingValues$vars[[\"", Dvar, "\"]]/SDscale)\n\n",sep="")
     
   }
+ 
+  # range parameters for geostatiatical models
+  for(Dvar in names(startingValues$phi)) {
+      cat("result[[\"", paste("phi", Dvar, sep=""), 
+        	  "\"]] = runif(1,\n", indent, "startingValues$phi[[\"", Dvar, 
+        	  "\"]]/scale,\n", indent, "startingValues$phi[[\"",
+              Dvar, "\"]]*scale)\n\n", sep="")
+  } 
+  
+  
+  
   cat("\nreturn(result)\n")
   cat("\n}")
   sink()

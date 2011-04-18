@@ -86,8 +86,14 @@ startingValues$vars = lapply(pql$modelStruct$reStruct, function(x) pql$sigma^2 *
 
 # spatial
 spatialEffect = grep("^N[[:graph:]]+Spatial$" , names(ragged), value=T)
+
+
+
 if(length(spatialEffect) ) {
-spatialEffect = paste("R", gsub("^N", "", spatialEffect), sep="")
+	
+  spatialEffectPlain = gsub("^N", "", spatialEffect)
+  effectVec = gsub("Spatial$","",spatialEffectPlain)
+  spatialEffect = paste("R", spatialEffectPlain, sep="")
   spatialEffectIndep = gsub("Spatial$", "", spatialEffect)
   spatialEffectIndepVar = gsub("^R", "", spatialEffectIndep)
   spatialEffectVar = paste(spatialEffectIndepVar, "Spatial", sep="")
@@ -95,7 +101,11 @@ spatialEffect = paste("R", gsub("^N", "", spatialEffect), sep="")
   
 for(D in 1:length(spatialEffect)) {
 
-
+# if this is a BYM model
+	
+if(any(names(ragged) == paste("adj",spatialEffectPlain[D], sep=""))) {		
+	
+	
   # create a vector of zeros for starting values for the spatial component
   # getting names from the Sspatial index in the ragged array
   theStart = rep(0, ragged[[gsub("^R", "N", spatialEffect[D])]])
@@ -129,9 +139,19 @@ for(D in 1:length(spatialEffect)) {
         startingValues$vars[[spatialEffectIndepVar[D] ]]^2*(1-spatialFactor)
       )
 
-}
+ } else if (paste("xSpatial",effectVec[D], sep="" ) %in% names(ragged)) { # this is a geostatistical model
+	startingValues$phi[[effectVec[D] ]] = sqrt(
+			diff(range(ragged[[paste("xSpatial",effectVec[D], sep="" )]]))^2 + 
+	    			diff(range(ragged[[paste("ySpatial",effectVec[D], sep="" )]]))^2 
+	)/10
+} else {
+	 warning(spatialEffectPlain[D], " not sure what to do with this spatial random effect")
+	 
+ }
 
-}
+} #end loop through spatial effects
+
+} # end if spatial effects
 
 
  if(is.character(reparam))   {

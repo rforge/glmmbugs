@@ -33,6 +33,7 @@ Response distribution
   \item{spatial}{
 name of the spatial random effect
 }
+\item{geostat}{Is this a geostatistical random effect?  Defaults to FALSE for the Besag, York and Mollie discrete spatial variation model}
   \item{prefix}{
 the prefix 
 }

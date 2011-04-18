@@ -1,7 +1,7 @@
 `writeBugsModel` <-
 function(file, effects, covariates, observations, 
   family=c("bernoulli", "binomial", "poisson", "normal",  "other"),
-  spatial=NULL, prefix="", reparam=NULL, brugs=FALSE, priors=NULL) {
+  spatial=NULL, geostat=FALSE, prefix="", reparam=NULL, brugs=FALSE, priors=NULL) {
 
 # spatial is a character string of names of random effects
  if(!length(reparam)) {
@@ -61,8 +61,10 @@ if(!is.null(file)) {
   theE = paste(effects[Deffect], sep="")
   theD =  paste( "D", theE, sep="") 
   cat("for(", theD, " in 1:N", theE, ") {\n\n", sep="")
-  cat(indent, "R", effects[Deffect], "[", theD, "] ~ dnorm(mean", 
-   theE, "[", theD, "], T", theE, ")\n",sep="")
+  if(!geostat | (!(effects[Deffect] %in% spatial)) ) {
+    cat(indent, "R", effects[Deffect], "[", theD, "] ~ dnorm(mean", 
+     theE, "[", theD, "], T", theE, ")\n",sep="")
+  }
  cat(indent, "mean", theE, "[", theD, "] <- ", interceptString, prefix,  sep="")
   
   # the covariates
@@ -74,7 +76,7 @@ if(!is.null(file)) {
     
   }   
   # spatial
-  if(theE %in% spatial) {
+  if(theE %in% spatial & !geostat) {
      cat("+ R", theE, "Spatial[Sspatial", theE, "[", theD, "]]", sep="")
   }
   cat("\n")
@@ -89,8 +91,10 @@ if(!is.null(file)) {
       cat("\n", indent, "for(", theD, " in ", thePastS, "[",
         thePastD, "]:(", thePastS, "[", thePastD, "+1]-1)){\n\n", sep="")
       indent = encodeString(" ", width=2*Deffect)
-      cat(indent, "R", theE, "[", theD, "] ~ dnorm(mean", 
-        theE, "[", theD, "], T", theE, ")\n",sep="")
+      if(!geostat | (!(effects[Deffect] %in% spatial)) ) {
+        cat(indent, "R", theE, "[", theD, "] ~ dnorm(mean", 
+          theE, "[", theD, "], T", theE, ")\n",sep="")
+	  }
       cat(indent, "mean", theE, "[", theD, "] <- R", 
         effects[Deffect-1], "[",
         thePastD, "]", sep="")
@@ -104,8 +108,8 @@ if(!is.null(file)) {
     
       }   
   # spatial
-  if(theE %in% spatial) {
-     cat("+ R", theE, "Spatial[", theD, "]", sep="")
+  if(theE %in% spatial & !geostat) {
+        	cat("+ R", theE, "Spatial[", theD, "]", sep="")
   }
 
   cat("\n")
@@ -161,12 +165,29 @@ if(!is.null(file)) {
     for(Deffect in seq(length(effects),1)) {
        cat(encodeString("", width=2*Deffect-2), "}#", effects[Deffect],"\n",sep="")
     }
-  
+
+    cat("\n\n")
+    
   # the spatial distributions
-  for(Deffect in spatial) {  
-    cat("R", Deffect, "Spatial[1:N", Deffect, "Spatial] ~ car.normal(adj", Deffect, 
-        "[], weights", Deffect, "[], num", Deffect, "[], T", Deffect, "Spatial)\n", sep="")  
-  }  
+	if(geostat){
+	    for(Deffect in spatial) {  
+        	cat("R", Deffect, "[1:N", Deffect, "Spatial] ~ spatial.exp(",sep="")
+			cat("mean", Deffect, "[1:N", Deffect, "Spatial], xSpatial", Deffect, "[1:N", Deffect, "Spatial], 
+				ySpatial",Deffect, "[1:N", Deffect, "Spatial], T", Deffect,
+					", phi", Deffect,", 1)\n", sep="")  
+		# prior on phi
+		parName = paste("phi", Deffect,sep="")
+		if(parName %in% names(priors))
+			cat(parName, "~", priors[parName], "\n")
+		else
+		 cat(parName, "~ dgamma(0.01, 0.01)")
+		}
+	} else { # a BYM model
+	  for(Deffect in spatial) {  
+        cat("R", Deffect, "Spatial[1:N", Deffect, "Spatial] ~ car.normal(adj", Deffect, 
+          "[], weights", Deffect, "[], num", Deffect, "[], T", Deffect, "Spatial)\n", sep="")  
+      }  
+}
   
   # the priors
   cat("\n\n# priors\n\n")
@@ -214,6 +235,8 @@ if(length(reparam)){
      cat(parName, " ~ dunif(0, 100)\n", sep="")
      }
   }
+	# if a BYM model, add prior for standard deviation of spatial effect
+  if (length(spatial) & !geostat) {
   for(Deffect in spatial) {
        cat("T", Deffect, "Spatial <- pow(SD", Deffect, "Spatial, -2)\n", sep="")
        parName = paste("SD", Deffect, "Spatial", sep="")
@@ -223,6 +246,7 @@ if(length(reparam)){
        cat(parName, "~ dunif(0, 100)\n", sep="")    
        }
   }
+}
   
 if(!is.null(file)) {
   cat("\n} # model\n") 

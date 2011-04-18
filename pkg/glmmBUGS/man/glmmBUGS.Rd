@@ -16,7 +16,9 @@ glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R
    \item{modelFile}{File for saving the bugs model}
    \item{initFile}{File for saving the function for generating initial values}
    \item{family}{distribution of responses}
-   \item{spatial}{Spatial adj matrix, in forms of ploygon, nb object or a list of adj and num}
+   \item{spatial}{For Markov Random Field models, a polygons or adjacency matrix.  
+   For Geostatistical models, a SpatialPoints objects, a matrix or data frame with columns "x" and "y", 
+   or a vector of complex numbers.}
    \item{spatialEffect}{ spatial variable from data } 
   \item{reparam}{vector of random effect names, subtract covariates at this level from the intercept. }
     \item{prefix}{string to append to object names}
@@ -149,6 +151,32 @@ spplot(ontario, "FittedRateCSDUID.mean")
 ontario = mergeBugsData(ontario, postProb, newcol="postProb", by.x="CSDUID")
 spplot(ontario, "postProb")
 
+
+
+}
+
+# geostatistical example
+
+\dontrun{
+library(geoRglm)
+data(rongelap)
+
+rongelapSP=SpatialPointsDataFrame(rongelap$coords, data=data.frame(count=rongelap$data, 
+  logOffset = log(rongelap$units.m),
+  site = seq(1, length(rongelap$data)) )
+  )
+
+forBugs = glmmBUGS(
+formula=count + logOffset ~ 1, family="poisson",
+    data=rongelapSP@data, effects="site", spatial=rongelapSP)
+    
+startingValues = forBugs$startingValues
+source("getInits.R")
+
+rongelapResult = bugs(forBugs$ragged, getInits, 
+  parameters.to.save = names(getInits()),
+    model.file="model.bug", n.chain=3, n.iter=50, n.burnin=10, n.thin=2,
+      program="winbugs", debug=T)
 
 
 }
