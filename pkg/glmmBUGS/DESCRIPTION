@@ -1,10 +1,10 @@
 Package: glmmBUGS
 Type: Package
 Title: Generalised Linear Mixed Models and Spatial Models with WinBUGS, BRugs, or OpenBUGS
-Version: 1.9
+Version: 2.0
 Date: 2010-11-01		
 Depends: MASS,  abind, spdep
-Enhances: R2WinBUGS, BRugs
+Enhances: R2WinBUGS, BRugs, raster, RandomFields
 Author: Patrick Brown
 Maintainer: Patrick Brown <patrick.brown@utoronto.ca>
 Description: Write bugs model files for hierarchical and spatial models, arranges unbalanced data in ragged arrays, and creates starting values.

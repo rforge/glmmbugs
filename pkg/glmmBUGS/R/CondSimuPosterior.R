@@ -37,7 +37,7 @@ CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, grid
 	result = array(NA, c(length(xgrid), length(ygrid), Nchain, Niter))
 
 	haveRandomFields = library(RandomFields,return.logical=T,quietly=T)
-
+	if(haveRandomFields){
 	for(Dchain in 1:Nchain){
 		for(Diter in 1:Niter){
 
@@ -52,6 +52,10 @@ CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, grid
 
 	result = list(x=xgrid, y=ygrid, z=result)
 #	return(list(result, stuff))
-result
+	return(result)
+} else {
+	warning("Install the RandomFields package before using CondSimuPosterior")
+	return()
+}
 	
 }
