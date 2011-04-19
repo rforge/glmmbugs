@@ -78,20 +78,6 @@ library(nlme)
 data(Muscle)
 
 
-Muscle2<-data.frame(Muscle)
-Muscle2$sex<-factor(c(rep(0,25),rep(1,35)))
-muscleRagged = glmmBUGS(conc ~ length+sex, data=Muscle2,
-effects="Strip", family="gaussian")
-startingValues = muscleRagged$startingValues
-source("getInits.R")
-require(R2WinBUGS)
-muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save
-= names(getInits()),
-               model.file="model.bug", n.chain=3, n.iter=1000,
-n.burnin=100, n.thin=10,
-                            program="winbugs")
-muscleParams = restoreParams(muscleResult, muscleRagged$ragged)
-
 muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gaussian")
 startingValues = muscleRagged$startingValues
 
