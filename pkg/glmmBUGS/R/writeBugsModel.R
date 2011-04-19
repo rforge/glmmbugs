@@ -178,7 +178,7 @@ if(!is.null(file)) {
 		# prior on phi
 		parName = paste("phi", Deffect,sep="")
 		if(parName %in% names(priors))
-			cat(parName, "~", priors[parName], "\n")
+			cat(parName, "~", priors[[parName]], "\n")
 		else
 		 cat(parName, "~ dgamma(0.01, 0.01)")
 		}

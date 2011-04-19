@@ -5,6 +5,8 @@ if(is.null(parameters)) {
   betas = grep("^beta", names(chain), value=TRUE)
   betas = c( grep("intercept", names(chain), value=TRUE), betas)
   betas  = c(grep("^SD", names(chain), value=TRUE), betas)
+  betas  = c(grep("^phi", names(chain), value=TRUE), betas)
+  
  
   if(length(betas) > 100)
     betas = betas[1:100]

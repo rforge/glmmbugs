@@ -166,23 +166,33 @@ rongelapSP=SpatialPointsDataFrame(rongelap$coords, data=data.frame(count=rongela
   site = seq(1, length(rongelap$data)) )
   )
   
-rongelapSP = rongelapSP[1:50,]  
-
 forBugs = glmmBUGS(
 formula=count + logOffset ~ 1, family="poisson",
-    data=rongelapSP@data, effects="site", spatial=rongelapSP)
+    data=rongelapSP@data, effects="site", spatial=rongelapSP,
+    priors=list(phisite="dgamma(100,1)"))
     
 startingValues = forBugs$startingValues
-startingValues$vars$site = max(c(0.1, startingValues$vars$site))
+startingValues$phi$site = 100
+
 source("getInits.R")
 
 rongelapResult = bugs(forBugs$ragged, getInits, 
   parameters.to.save = names(getInits()),
-    model.file="model.bug", n.chain=3, n.iter=200, n.burnin=10, n.thin=5,
+    model.file="model.bug", n.chain=2, n.iter=100, n.burnin=4, n.thin=2,
       program="winbugs", debug=TRUE,
       working.directory=getwd())
-      ,working.directory="/home/patrick/research/glmmBUGS")
 
+rongelapParams = restoreParams(rongelapResult, forBugs$ragged)      
+      
+checkChain(rongelapParams)
+
+library(RandomFields)
+rongelapParams$siteGrid = CondSimuPosterior(rongelapParams, rongelapSP,gridSize=100) 
+
+rongelapSummary=summaryChain(rongelapParams)
+
+# plot posterior probabilities of being above average
+image(rongelapSummary$siteGrid$pgt0)
 
 }
 }

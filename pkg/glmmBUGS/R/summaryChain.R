@@ -24,8 +24,11 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
    for(D in thenames[themat]) {
      result$scalars[D,] = getRes(chain[[D]])
    }
-                 
-   for(D in thenames[!themat]) {
+                
+   vectorParams = thenames[!themat]
+   vectorParams = vectorParams[!vectorParams %in% grep("Grid$", vectorParams, value=T)]
+   
+   for(D in vectorParams) {
     result[[D]] = t(apply(chain[[D]], 3, getRes))
    
    }
@@ -40,7 +43,34 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
      } 
    }
    
-   return(result)
+   # geostatistical variables on a grid
+	theGrids = grep("Grid$", names(chain),value=T)
+	haveRaster = library(raster, logical.return=T,quietly=T)
+	if(haveRaster){
+		for(D in theGrids)
+			thelist = list(x=chain[[D]]$x,y=chain[[D]]$y)
+		
+			thelist$z = apply(chain[[D]]$z, 1:2, mean)
+			result[[D]]$mean = raster(thelist)
+	
+	thelist$z = apply(chain[[D]]$z, 1:2, sd)
+	result[[D]]$sd = raster(thelist)
+	
+	thelist$z = apply(chain[[D]]$z, 1:2, function(qq) mean(qq>0) )
+	result[[D]]$pgt0 = raster(thelist)
+	
+	
+	} else{
+		
+	for(D in theGrids)
+		result[[D]] = list(
+				x=chain[[D]]$x,y=chain[[D]]$y,
+				mean = apply(chain[[D]]$z, 1:2, mean),
+				sd = apply(chain[[D]]$z, 1:2, sd),
+				pgt0 = apply(chain[[D]]$z, 1:2, function(qq) mean(qq>0)))
+	}
+   
+	return(result)
 
 }
                                             

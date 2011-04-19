@@ -145,7 +145,7 @@ if(any(names(ragged) == paste("adj",spatialEffectPlain[D], sep=""))) {
 	startingValues$phi[[effectVec[D] ]] = sqrt(
 			diff(range(ragged[[paste("xSpatial",effectVec[D], sep="" )]]))^2 + 
 	    			diff(range(ragged[[paste("ySpatial",effectVec[D], sep="" )]]))^2 
-	)/10
+	)/20
 } else {
 	 warning(spatialEffectPlain[D], " not sure what to do with this spatial random effect")
 	 
