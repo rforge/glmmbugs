@@ -47,7 +47,7 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
 	theGrids = grep("Grid$", names(chain),value=T)
 	haveRaster = library(raster, logical.return=T,quietly=T)
 	if(haveRaster){
-		for(D in theGrids)
+		for(D in theGrids) {
 			thelist = list(x=chain[[D]]$x,y=chain[[D]]$y)
 		
 			thelist$z = apply(chain[[D]]$z, 1:2, mean)
@@ -58,7 +58,7 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
 	
 	thelist$z = apply(chain[[D]]$z, 1:2, function(qq) mean(qq>0) )
 	result[[D]]$pgt0 = raster(thelist)
-	
+}
 	
 	} else{
 		

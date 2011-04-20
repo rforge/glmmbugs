@@ -87,7 +87,7 @@ require(BRugs)
 require(R2WinBUGS)  
 muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
                 model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
-                             program="openbugs") 
+                             program="winbugs", working.directory=getwd()) 
 }
  
 data(muscleResult)
