@@ -99,13 +99,13 @@ if(length(spatialEffect) ) {
   spatialEffectIndep = gsub("Spatial$", "", spatialEffect)
   spatialEffectIndepVar = gsub("^R", "", spatialEffectIndep)
   spatialEffectVar = paste(spatialEffectIndepVar, "Spatial", sep="")
-
+  startingValues$phi=list()
   
 for(D in 1:length(spatialEffect)) {
 
 # if this is a BYM model
 	
-if(any(names(ragged) == paste("adj",spatialEffectPlain[D], sep=""))) {		
+if(any(names(ragged) == paste("adj",effectVec[D], sep=""))) {		
 	
 	
   # create a vector of zeros for starting values for the spatial component

@@ -45,7 +45,9 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
    
    # geostatistical variables on a grid
 	theGrids = grep("Grid$", names(chain),value=T)
-	haveRaster = library(raster, logical.return=T,quietly=T)
+	if(length(theGrids)){
+		haveRaster = library(raster, logical.return=T)
+		
 	if(haveRaster){
 		for(D in theGrids) {
 			thelist = list(x=chain[[D]]$x,y=chain[[D]]$y)
@@ -53,7 +55,9 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
 			thelist$z = apply(chain[[D]]$z, 1:2, mean)
 			result[[D]]$mean = raster(thelist)
 	
-	thelist$z = apply(chain[[D]]$z, 1:2, sd)
+			ssq = apply(chain[[D]]$z, 1:2, function(qq) sum(qq*qq))
+			
+	thelist$z = sqrt((ssq-thelist$z*thelist$z)/prod( dim(chain[[D]]$z)[3:4]) ) 
 	result[[D]]$sd = raster(thelist)
 	
 	thelist$z = apply(chain[[D]]$z, 1:2, function(qq) mean(qq>0) )
@@ -69,7 +73,7 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
 				sd = apply(chain[[D]]$z, 1:2, sd),
 				pgt0 = apply(chain[[D]]$z, 1:2, function(qq) mean(qq>0)))
 	}
-   
+} # end if have grids   
 	return(result)
 
 }

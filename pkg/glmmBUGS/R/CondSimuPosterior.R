@@ -36,16 +36,16 @@ CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, grid
 	Niter = dim(params[[thePhi]])[1]
 	result = array(NA, c(length(xgrid), length(ygrid), Nchain, Niter))
 
-	haveRandomFields = library(RandomFields,return.logical=T,quietly=T)
-	if(haveRandomFields){
+	library(RandomFields)
+	
 	for(Dchain in 1:Nchain){
 		for(Diter in 1:Niter){
 
 		result[,,Dchain, Diter]=CondSimu("S", given=locations.obs, 
-				data=rongelapParams$Rsite[Diter,Dchain,], 
+				data=params$Rsite[Diter,Dchain,], 
     		x=xgrid, y=ygrid, grid=TRUE, model="exponential", 
-    		param=c(mean=0, variance=rongelapParams[[theSD]][Diter,Dchain]^2, nugget=0, 
-					scale=rongelapParams[[thePhi]][Diter,Dchain]), pch="")
+    		param=c(mean=0, variance=params[[theSD]][Diter,Dchain]^2, nugget=0, 
+					scale=params[[thePhi]][Diter,Dchain]), pch="")
 	
 		}
 	}
@@ -53,9 +53,5 @@ CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, grid
 	result = list(x=xgrid, y=ygrid, z=result)
 #	return(list(result, stuff))
 	return(result)
-} else {
-	warning("Install the RandomFields package before using CondSimuPosterior")
-	return()
-}
 	
 }
