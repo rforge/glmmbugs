@@ -1,4 +1,11 @@
-CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, gridSize=NULL) {
+CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, gridSize=NULL, thin=1) {
+	
+	
+	if(any(slotNames(locations.obs)=="proj4string")) {
+		theproj4string = locations.obs@proj4string
+	} else {
+		theproj4string=NULL
+	}
 	
 	thePhi = grep("^phi", names(params), value=T)[1]
 	theEffect = gsub("^phi", "",thePhi)
@@ -34,23 +41,28 @@ CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, grid
 	
 	Nchain = dim(params[[thePhi]])[2]
 	Niter = dim(params[[thePhi]])[1]
-	result = array(NA, c(length(xgrid), length(ygrid), Nchain, Niter))
+	Siter = seq(from=1, to=Niter, by=thin)
+	Siter2 = seq(1, length(Siter))
+	names(Siter) = as.character(1:length(Siter))
+	result = array(NA, c(length(xgrid), length(ygrid), Nchain, length(Siter)))
 
 	library(RandomFields)
 	
 	for(Dchain in 1:Nchain){
-		for(Diter in 1:Niter){
+		for(Diter in Siter2){
 
-		result[,,Dchain, Diter]=CondSimu("S", given=locations.obs, 
-				data=params$Rsite[Diter,Dchain,], 
+		result[,,Dchain, Diter]=
+			CondSimu("S", given=locations.obs, 
+				data=params$Rsite[Siter[Diter],Dchain,], 
     		x=xgrid, y=ygrid, grid=TRUE, model="exponential", 
-    		param=c(mean=0, variance=params[[theSD]][Diter,Dchain]^2, nugget=0, 
-					scale=params[[thePhi]][Diter,Dchain]), pch="")
+    		param=c(mean=0, variance=params[[theSD]][Siter[Diter],Dchain]^2, nugget=0, 
+					scale=params[[thePhi]][Siter[Diter],Dchain]), pch="")
 	
 		}
 	}
 
-	result = list(x=xgrid, y=ygrid, z=result)
+	result = list(x=xgrid, y=ygrid, z=result, proj4string=theproj4string)
+	
 #	return(list(result, stuff))
 	return(result)
 	

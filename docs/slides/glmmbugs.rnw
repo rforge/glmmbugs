@@ -22,13 +22,385 @@
 \DeclareMathOperator{\var}{var}
 \DeclareMathOperator{\logit}{logit}
 
-\title{LDA with non-normal errors}
+\title{Heirarchical models and glmmBUGS}
 \author{Patrick Brown}
 
 
 \begin{document}
+
+
+
 	
 \frame{\maketitle}
+
+
+
+
+
+\begin{frame}
+
+\frametitle{Repeated measures/longitudinal studies}
+
+\begin{description}
+\item[Classical (cross-sectional) designs] -- {\em single} outcome measured on
+each subject
+
+\item[Multivariate designs] -- single outcome of two or more quantities measured
+on each subject.
+
+\item[Repeated measures designs] -- {\em multiple} outcomes of a single quantity
+measured on each subject.
+
+\item[Longitudinal designs] -- repeated measures {\em in time}.
+\end{description}
+\end{frame}
+
+\begin{frame}
+\frametitle{Example 1: human growth}
+
+\begin{description}
+\item[cross-sectional] -- take sample of subjects with different ages,
+measure height of each
+
+\item[multivariate] -- as above, but measure height and weight
+
+\item[longitudinal] -- take sample of subjects all of same age, measure
+height of each at sequence of time-points.
+\end{description}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example 2: repeated measures need not be longitudinal}
+
+\begin{description}
+\item[ophthalmology] -- measurements on both eyes of each subject
+
+\item[animal experiments] -- treatments applied to complete litters, rather
+than to individual animals
+\item[education research] -- apply treatments to different classes or schools and test multiple pupils per class.
+\end{description}
+Sometimes described as \emph{clustered data}.
+
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: Reading ability and age}
+\begin{columns}
+\column{0.5\textwidth}
+ Longitudinal designs also enable us to distinguish 
+\begin{itemize}
+    \item cross-sectional effects, and
+\item longitudinal effects
+\end{itemize}
+\column{0.5\textwidth}
+
+\begin{block}{A cross-sectional dataset}
+<<reading1,fig=true>>=
+  thepoints <- c(0.5483871, 1.3870968, 1.2258065, 1.9032258, 2.3548387,
+              3.0322581, 2.2580645, 2.8709677, 3.7419355, 4.4838710,
+              3.1612903, 4.5161290) + 
+              1i*c(7.22973207, 8.01382887, 5.13880726, 6.07225583,
+                   4.76542783, 7.04304235, 3.04788245, 4.01866897,
+                   2.93586863, 4.35471046, 0.09818496, 0.47156439)
+  
+  plot(thepoints, xlab="Age", ylab="Cognitive ability")
+@ 
+
+\end{block}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Two longitudinal datasets}
+\begin{columns}
+\column{0.5\textwidth}
+<<reading2,fig=true>>=
+
+  pointsmat <- matrix(thepoints, ncol=2, byrow=T)
+
+  plot(thepoints, xlab="Age", ylab="Cognitive ability", type="n")
+  for(D in 1:(dim(pointsmat)[1]))
+    lines(c(pointsmat[D,1], pointsmat[D,2]), type="o")
+
+@ 
+\column{0.5\textwidth}
+<<reading3,fig=true>>==  
+  pointsmat <- cbind(thepoints[c(1,2,5,6,7,9)],
+                     thepoints[c(3,4,8,10,11,12)])
+
+  plot(thepoints, xlab="Age", ylab="Cognitive ability", type="n")
+  for(D in 1:(dim(pointsmat)[1]))
+    lines(c(pointsmat[D,1], pointsmat[D,2]), type="o")
+
+@
+ 
+ \end{columns}
+ \end{frame} 
+
+
+
+
+
+
+
+
+\begin{frame}
+\frametitle{The general linear model with correlated errors}
+
+If $Y_{ij}$ is the observation $j$ from subject $i$, and $x_{ijk}$ is the $k^\mathrm{th}$ explanatory variable, then we write:
+\[
+Y_{ij} = \alpha + \beta_1 x_{ij1} + \beta_2 x_{ij2} + \dots + \beta_p x_{ijp} + \epsilon_{ij}
+\]
+\begin{itemize}
+\item The explanatory variables might be age, treatment, or time.
+\item The $\epsilon$ are normally distributed but are \emph{correlated}.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{What do correlated errors mean}
+\begin{columns}
+\column{0.5\textwidth}
+\begin{block}{Independent $\epsilon_{ij}$}
+<<label=independent>>=
+
+x <- seq(0, 12, len=100)
+
+ex <- 2 + x
+
+thexlab = 'age'
+theylab = 'score'
+
+y <- cbind(ex+rnorm(100), ex+rnorm(100))
+matplot(x, y, pch=c(1,2), xlab=thexlab, ylab=theylab)
+abline(2,1, lwd=2)
+legend(0,15,col=1:2, pch=1:2, legend=c("Subject 1", "Subject 2"))
+@
+\end{block}
+\column{0.5\textwidth}
+\begin{block}{Dependent $\epsilon_{ij}$}
+<<label=dependent1>>=
+y <- cbind(ex+rnorm(100,1), ex+rnorm(100,-1))
+matplot(x, y, pch=1:2, xlab=thexlab, ylab=theylab)
+abline(2,1, lwd=2)
+
+@
+\end{block}
+\end{columns}
+
+\begin{itemize}
+    \item This is just one type of dependence
+    \item If a subject is above average on one observation, they're likely to above average on all the others.
+\item Random Intercept
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Another type of dependence}
+\begin{columns}
+\column{0.5\textwidth}
+<<label=dependent22>>=
+
+y <- cbind(1.2*ex+rnorm(100,1), 1+.6*ex+rnorm(100,-1))
+matplot(x, y, pch=1:2)
+abline(2,1, lwd=2)
+#legend(0,17,col=1:2, pch=1:2, legend=c("Subject 1", "Subject 2"))
+@
+\column{0.5\textwidth}
+\begin{itemize}
+    \item Not only are the residuals higher for subject 1, the difference gets bigger over time
+    \item Random Slope
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{More dependence}
+\begin{columns}
+\column{0.5\textwidth}
+<<label=serialcorrelation,fig=TRUE,echo=FALSE,width=3,height=2>>=
+
+
+y <- cbind(ex+arima.sim(list(ar=0.88), 100), ex+arima.sim(list(ar=0.88),100))
+matplot(x, y, pch=1:2)
+abline(2,1, lwd=2)
+#legend(0,17,col=1:2, pch=1:2, legend=c("Subject 1", "Subject 2"))
+@
+\column{0.5\textwidth}
+\begin{itemize}
+    \item The residuals change slowly over time
+    \item Serial Correlation
+\end{itemize}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{A simple random effects model}
+\begin{align*}
+Y_{ij} = & X_{ij} \beta + A_i + Z_{ij}\\
+A_i \sim & \text{N}(0, \sigma^2)\\
+Z_{ij} \sim & \text{N}(0, \tau^2)\\
+\end{align*}
+\begin{itemize}
+    \item $Y_{ij}$ is the response for person $i$ at time $t_{ij}$
+    \item $X_{ij}\beta$ is the effect of covariates (including the intercept)
+    \item $A_i$ is individual $i$'s random effect
+\begin{itemize}
+    \item An individual's deviation from the population average
+\end{itemize}
+    \item $Z_{ij}$ is the randomness associated with each observation
+
+\begin{itemize}
+    \item Observation error
+    \item Uncorrelated random terms
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Example}
+\begin{align*}
+Y_{ij} = & X_{ij} \beta + A_i + Z_{ij}\\
+A_i \sim & \text{N}(0, \sigma^2)\\
+Z_{ij} \sim & \text{N}(0, \tau^2)\\
+\end{align*}
+\begin{itemize}
+    \item $Y_{ij}$ is a test score for the $i$th individual on the $j$th visit
+    \item $X_{ij}\beta$ has an intercept, effects of age and education status
+    \item $A_i$ is $i$'s natural ability
+    \item $Z_{ij}$ is their luck and specific circumstances on day $t_{ij}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Example}
+\[
+Y_{ij} = \mu + A_i + Z_{ij} \ , \ A_i \sim N(0, \sigma^2)\ , \ Z_{ij} \sim N(0, \tau^2)
+\]
+\begin{columns}
+\column{0.75\textwidth}
+<<label=resim>>=
+sdpar= 4
+sdjuv=1
+parents = rnorm(4, 0, sdpar)
+Noffspring=5
+offspring = rnorm(length(parents)*Noffspring, rep(parents, Noffspring), sdjuv)
+xseq=seq(from=min(offspring)-1, to=max(offspring)+1, length=1000)
+plot(parents, rep(0, length(parents)), xlim=range(offspring), 
+    ylim=c(0, dnorm(0, 0, sdjuv)), col=1:length(parents), pch='|', cex=4,
+        xlab='y', ylab='density')
+lines(xseq, dnorm(xseq, 0, sdpar), col='grey',lwd=2)    
+for(D in 1:length(parents)) {
+    lines(xseq, dnorm(xseq, mean=parents[D], sd=sdjuv), col=D)  
+}   
+abline(h=0, col='white')
+points(offspring, rep(dnorm(0, 0, sdpar)/5, length(offspring)), col=rep(1:length(parents), Noffspring), pch=4, cex=1.5)     
+@
+\column{0.25\textwidth}
+\begin{tabular}{rl}
+ \textcolor{Red}{\rule{1pt}{10pt}} & $A_i$ \\
+\textcolor{Red}{$\times$} & $Y_{ij}$ \\
+\textcolor{Red}{\rule{10pt}{1pt}} & density of \\
+ & $Y_{ij} | A_i$ \\
+\textcolor{Gray}{\rule{10pt}{2pt}} & density of \\
+&$A_i$ 
+\end{tabular}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Random intercepts}
+\[
+Y_{ij} =  A_i + \beta X_{ij} + Z_{ij} \ , \ A_i \sim N(0, \sigma^2)\ , \ Z_{ij} \sim N(0, \tau^2)
+\]
+\begin{columns}
+\column{0.75\textwidth}
+<<label=resimSlope>>=
+sdpar= 4
+sdjuv=1
+parents = rnorm(4, 0, sdpar)
+Noffspring=10
+offspring = rnorm(length(parents)*Noffspring, rep(parents, rep(Noffspring, length(parents))), sdjuv)
+offspring = matrix(offspring, ncol=length(parents))
+
+xseq=seq(0,Noffspring-1)
+offspring = offspring + matrix(xseq, dim(offspring)[1], dim(offspring)[2])
+
+matplot(xseq, offspring, pch=1, col=seq(2, length(parents)+1),xlab='age', ylab='y')
+lines(xseq, xseq, lwd=2)
+for(Dparent in 1:length(parents))
+    lines(xseq, xseq+parents[Dparent], col=Dparent+1)
+text(rep(-0.1, length(parents)), parents, labels = paste("A", seq(1, length(parents)), sep='') )
+    
+@
+\column{0.25\textwidth}
+\begin{itemize}
+    \item Everyone has a different starting point
+    \item The effect of age is the same for everyone
+\end{itemize}
+\end{columns}
+\end{frame}
+\begin{frame}
+\frametitle{Correlated Errors}
+\begin{align*}
+Y_{ij} = & \mu + A_i + Z_{ij} \\
+Y_{ij} = & \mu + \epsilon_{ij} \\
+\epsilon_{ij} = & A_i + Z_{ij}
+\end{align*}
+\begin{itemize}
+    \item $A_i$ and $Z_{ij}$ are all mutually independent
+    \item The $\epsilon_{ij}$ are correlated.  
+    \item If $\epsilon_{1j}$ is particularly large:
+    
+\begin{itemize}
+    \item then $A_1$ is probably big
+    \item $\epsilon_{1k}$ is probably large as well
+\end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Example: weights of pigs}
+\begin{columns}
+\column{0.5\textwidth}
+\begin{block}{Raw data}
+% show some examples with R code
+<<pigs,height=4,width=3>>=
+ pigs <- t(read.table("book.data", skip=269, nrow= 48, header=T))
+matplot(pigs, type='l', xlab='time', ylab='weight')
+
+@
+\end{block}
+\column{0.5\textwidth}
+\begin{itemize}
+    \item $Y_{ij}$ is the weight of pig $i$ at time $t_{ij}$
+    \item A random intercept model seems appropriate
+\end{itemize}
+\begin{align*}
+Y_{ij} = & \mu + t_{ij} \beta + A_i + Z_{ij}\\
+A_i \sim & \text{N}(0, \sigma^2)\\
+Z_{ij} \sim & \text{N}(0, \tau^2)
+\end{align*}
+\vspace{-10pt}
+\begin{itemize}
+    \item $\mu$ is the population average weight at birth
+    \item $\beta$ is the weight gain, per year
+    \item $A_i$ is pig $i$'s deviation from the population average
+\end{itemize}
+\end{columns}
+
+\end{frame}
+
 
 \begin{frame}
 \frametitle{Examples Bacteria counts in cattle feces}
@@ -45,7 +417,7 @@
 \column{0.5\textwidth}
 <<cowPlot>>=
 options(SweaveHooks=list(fig=function() par(mar=c(2.5,2.5,0.1,0.1), mgp=c(1.5, 0.5, 0), cex=0.8)))
-cows=read.csv("..\\data\\1st diurnal.csv", as.is=T)
+cows=read.csv("1st diurnal.csv", as.is=T)
 cows$animal = gsub('\\?', '', cows$animal)
 cows$time = gsub(' ', '', cows$time)
 cows$time = cows$day + as.integer(substr(cows$time, 1,2))/24 + as.integer(substr(cows$time, 4,5))/(24*60)
@@ -141,298 +513,44 @@ Thanks to Anna Ciarelli, Marc Theriault and Vicky Majpruz at Cancer Care Ontario
 
 \end{frame}
 
+
+
+
+
+
+
 \begin{frame}
-\frametitle{Maximum Likelihood Estimation?}
-
-\begin{align*}
-Y_{ij} |A_i&\sim \text{Poisson}[\exp(X_{ij}\beta + A_i)]\\
-A_i & \sim \text{N}(0,\sigma^2)\\ 
-pr(Y_{11} \ldots Y_{MN}) & = \int\ldots\int pr(\mathbf{Y} | A_1 \ldots A_M) pr(A_1 \ldots A_M) dA_1 \ldots dA_M\\
-&= \prod_i \int pr(Y_{i1} \ldots Y_{iN} | A_i ) pr(A_i) dA_i\\
-& = \text{usually intractable}
-\end{align*}
+\frametitle{Software}
+\begin{block}{WinBUGS}
 \begin{itemize}
-	\item Without covariates, there are some tractable pairs of distributions
+    \item Bayesian inference Using Gibbs Sampling
+    \item Write a file of BUGS code to specify the model
+\item Give WinBUGS some data
+    \item Pass in some starting values, one set for each chain
+    \item Turn the handle to get a simulation from the posteriors
+\end{itemize}
+\end{block}
+\begin{block}{R2WinBUGS}
 \begin{itemize}
-	\item Gamma-Gamma
-	\item Binomial-Beta
+    \item An R package which interfaces R and WinBUGS
+    \item Specify your data and starting values as lists in R
+    \item It calls WinBUGS and runs the model
+    \item and results are returned in R as a list
 \end{itemize}
-\item Sometimes called Empirical Bayes models or conjugate models
-\end{itemize}
-\end{frame}
-\begin{frame}
-\frametitle{Penalised Quasi-likelihood}
-\begin{itemize}
-	\item Breslow and Clayton (1993) JASA
-	\item Write the likelihood as in the GLM framework, based on mean, variance, and deviance.
-	\item Laplace approximation to the integral gives something like Fisher scores
-	\item The `penalty' relates to the distribution of the random effects
-	\item In effect, it reduces to repeatedly fitting a Gaussian random effects model with Fisher scoring.
-	\item the {\tt glmmPQL} function in R does this.
-\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Cow data with PQL}
-
-\begin{align*}
-Y_{ijk} \sim & \text{Poisson}(S_{ijk}\lambda_{ijk})\\
-\log(\lambda_{ijk}) = & X_{ijk} \beta + A_i + B_{ij}\\
-A_i \sim & \text{N}(0, \sigma^2_A)\\
-B_{ij} \sim & \text{N}(0, \sigma^2_B)
-\end{align*}
-\begin{verbatim}
-library(MASS)
-cowPois$logScaler = log(cowPois$scaler)
-cowPQL = glmmPQL(count ~ offset(logScaler) + 
-  factor(consistency), random = ~1|pat/animal, 
-  data=cowPois, family='poisson')
-\end{verbatim}
-
-
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Results}
-\begin{footnotesize}
-
-\vspace*{-1in}
-
-<<cowPQL,fig=false>>=
-library(MASS)
-cowPois$logScaler = log(cowPois$scaler)
-cowPQL = glmmPQL(count ~ offset(logScaler) + factor(consistency), random = ~1|animal/pat, data=cowPois, family='poisson')
-summary(cowPQL)
-@
-\end{footnotesize}
-\end{frame}
-\begin{frame}
-\frametitle{Random effects}
-\begin{columns}
-\column{0.5\textwidth}
-<<histCow>>=
-hist(cowPQL$coef$random$animal, main='', breaks=10)
-@
-\column{0.5\textwidth}
-<<histPat>>=
-hist(cowPQL$coef$random$pat, main='', breaks=10)
-@
-\end{columns}
+\end{block}
 \end{frame}
 
 \begin{frame}
-\frametitle{Pat effect over time}
-<<patTime>>=
-patEffect = data.frame( patEffect = cowPQL$coef$random$pat[,1])
-thenames = gsub('\\?', '', rownames(cowPQL$coef$random$pat))
-patEffect$pat = as.integer(gsub('^[[:digit:]]+/', '', thenames))
-patEffect$animal = as.integer(gsub('/[[:digit:]]+$', '', thenames))
-
-cowRes = merge(cowPois, patEffect)
-cowRes$animal = as.integer(factor(cowRes$animal))
-plot(cowRes$time, cowRes$patEffect, col='grey', xlab='time', ylab='E(B_ij | Y)')
-
-
-for(D in 1:8) {
-	qq = cowRes[cowRes$animal == (unique(cowRes$animal)[D]),]
-	qq = qq[order(qq$time),]
- lines(qq$time , qq$patEffect, col=D)
-}
-@
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Breast Cancer Data}
-
-\begin{columns}
-\column{0.5\textwidth}
-
-\begin{align*}
-Y_{ijk\ell} \sim & \text{Bernoulli}(p_{ijk})\\
-\logit(p_{ijk}) = & X_{ijk} \beta + A_i + B_{ij}\\
-A_i \sim & \text{N}(0, \sigma^2_A)\\
-B_{ij} \sim & \text{N}(0, \sigma^2_B)
-\end{align*}
-
+\frametitle{glmmBUGS}
 \begin{itemize}
-\item Region $i$, nurse $j$ examined woman $k\ell$, with covariates $X_{ijk}$
-
-\end{itemize}
-\column{0.6\textwidth}
-\begin{scriptsize}
-<<cancerData,fig=false>>=
-load("..\\data\\cancer.RData")
-rownames(NurseReferral.Cancer) = NULL
-NurseReferral.Cancer$y = NurseReferral.Cancer$NurseReferral
-NurseReferral.Cancer[1:10,c('odense','SCRNAGE', 'NURSEID', 'siteadminregion', 'y')]
-@
-\end{scriptsize}
-\end{columns}
-\begin{itemize}
-\item $Y_{ijk\ell}=1$ if the nurse detected a cancer and referred a woman for ultrasound.
-\item All of the women were later shown to have breast cancer
-
+    \item Specify your model as an R formula, as with {\tt glmmPQL}
+    \item {\tt glmmBUGS} runs {\tt glmmPQL} to get starting values
+    \item and writes the bugs model file 
+    \item creates a function to generate random starting values
+    \item and puts the data in a format WinBUGS needs
+\item I've written this package, and it's still in development
 \end{itemize}
 \end{frame}
-
-\begin{frame}
-\frametitle{Binomial data}
-\begin{itemize}
-		\item Group women into group $k$ according to covariate values, with each group having
-\begin{itemize}
-	\item $N_{ijk}$ women total
-	\item $Y_{ijk} = \sum_\ell Y_{ijk\ell}$ of whom were referred
-\end{itemize}
-\end{itemize}
-
-\begin{itemize}
-	\item The number of referrals per group is a sufficient statistic
-	\item Using the Binomial makes the dataset smaller and the computations faster
-\end{itemize}
-\begin{align*}
-Y_{ijk} \sim & \text{Binomial}(N_{ijk},p_{ijk})\\
-\logit(p_{ijk}) = & X_{ijk} \beta + A_i + B_{ij}\\
-A_i \sim & \text{N}(0, \sigma^2_A)\\
-B_{ij} \sim & \text{N}(0, \sigma^2_B)
-\end{align*}
-
-
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Model fitting}
-\begin{verbatim}
-nurse$experience = nurse$NurseExperience - 
-  mean(nurse$NurseExperience)
-nurse$fails = nurse$Count - nurse$y 
-resp = as.matrix(nurse[,c('y', 'fails')])
-
-nursePQL = glmmPQL(resp~
-  odense + newsiteclass+ SCRNAGE + experience, 
-  random = ~1|siteadminregion/NURSEID, 
-  data=nurse, family='binomial')
-
-\end{verbatim}
-
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Results}
-\vspace*{-1in}
-
-
-<<nurseRes,fig=false>>=
-nurse = as.data.frame(NurseReferral.Cancer)
-nurse$experience = nurse$NurseExperience - mean(nurse$NurseExperience)
-nurse$fails = nurse$Count - nurse$y 
-resp = as.matrix(nurse[,c('y', 'fails')])
-
-nursePQL = glmmPQL(resp~ odense + newsiteclass+ SCRNAGE + experience, random = ~1|siteadminregion/NURSEID, data=nurse, family='binomial')
-summary(nursePQL)
-@
-\end{frame}
-
-\begin{frame}
-\frametitle{Fixed effects}
-\begin{footnotesize}
-<<nurseFixedResults,fig=false,results=tex>>=
-library(Hmisc)
-latex(summary(nursePQL)$tTable, file='',dec=2)
-@
-\end{footnotesize}
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Splines}
-\begin{itemize}
-	\item the {\tt gamm} function allows for splines to be used to model covariates
-	\item the following code uses 4 knots for each of age and experience.
-	\item {\tt s(x, fx=T, k=4) } 
-	\item the {\tt fx=T} argument tells gamm to use regression splines instead of penalised least squares.
-\end{itemize}
-\begin{verbatim}
-library(mgcv)
-nurseGAMM = gamm(resp~ 
-  odense + newsiteclass+ s(SCRNAGE,fx=T,k=4) + 
-    s(experience,fx=T,k=4), 
-    random = list(siteadminregion=~1, NURSEID=~1), 
-    data=nurse, family='binomial')
-plot(nurseGAMM$gam, pages=1)
-summary(nurseGAMM$lme)
-\end{verbatim}
-\end{frame}
-\begin{frame}[fragile]
-\frametitle{Results}
-
-<<nurseGamm,fig=false>>=
-library(mgcv)
-nurseGAMM = gamm(resp~ 
-  odense + newsiteclass+ s(SCRNAGE,fx=T,k=4) + 
-    s(experience,fx=T,k=4), 
-    random = list(siteadminregion=~1, NURSEID=~1), 
-    data=nurse, family='binomial')
-summary(nurseGAMM$lme)
-@
-\end{frame}
-\begin{frame}
-\begin{columns}
-\column{0.5\textwidth}
-<<nurseGammPlot>>=
-plot(nurseGAMM$gam, select=1)
-@
-\column{0.5\textwidth}
-<<nurseGammPlot2>>=
-plot(nurseGAMM$gam, select=2)
-@
-\end{columns}
-\end{frame}
-
-\begin{frame}
-\frametitle{Extra-Poisson variation}
-\begin{align*}
-Y_{ijk} \sim & \text{Poisson}(S_{ijk}\lambda_{ijk})\\
-\log(\lambda_{ijk}) = & X_{ijk} \beta + A_i + B_{ij} + C_{ijk}\\
-A_i \sim & \text{N}(0, \sigma^2_A)\\
-B_{ij} \sim & \text{N}(0, \sigma^2_B)\\
-C_{ijk} \sim & \text{N}(0, \sigma^2_C)
-\end{align*}
-\begin{itemize}
-	\item If $Y$ were normal, we wouldn't be able to identify $\sigma_C$ and $\var(Y_{ijk})$ 
-	\item The Poisson distribution only has one argument, the mean
-	\item so we can identify $\sigma_C$, the overdispersion
-	
-
-	\item $\sigma_C=0$ implies the only variation in $Y_{ijk}| A_i, B_{ij}$ is Poisson sampline variation
-\item $\sigma_C>0$ means the $Y$ are more variable than the Poisson would suggest
-
-
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Results}
-\vspace*{-1in}
-
-
-\begin{footnotesize}
-<<cowPQLplate,fig=false>>=
-cowPQLplate = glmmPQL(count ~ offset(logScaler) + factor(consistency), random = ~1|animal/pat/plate, data=cowPois, family='poisson')
-summary(cowPQLplate)
-@
-\end{footnotesize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Notes}
-\begin{itemize}
-	\item Using a GLMM is always preferable to doing something barbarous to the data to make it normal-ish
-	\item i.e.\ taking count/fecal volume, and logging that
-	\item 1 colony in 10 grams is less informative than 10 colonies in 100 grams.
-	\item PQL is only an approximation, MCMC is a more rigorous method.
-\end{itemize}
-\end{frame}
-
 
 \begin{frame}
 \frametitle{Example: Breast Screening Data}
@@ -448,34 +566,46 @@ A_i & \sim \text{N}(0, \sigma^2_A) \\
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{WinBUGS model file}
+\frametitle{Data in R}
 <<junk,fig=false>>=
 options(width=53)
-#load("../cancer.RData")
+library(glmmBUGS)
+load("cancer.RData")
 rownames(NurseReferral.Cancer) = NULL
 NurseReferral.Cancer$y = NurseReferral.Cancer$NurseReferral
-NurseReferral.Cancer[1:10,c('odense','SCRNAGE', 'NURSEID', 'siteadminregion', 'y')]
+NurseReferral.Cancer[1:7,c('odense','SCRNAGE', 'NURSEID', 'siteadminregion', 'y', "Count")]
 nurse = as.data.frame(NurseReferral.Cancer)
 nurse$experience = nurse$NurseExperience - mean(nurse$NurseExperience)
 nurse$fails = nurse$Count - nurse$y 
 
 @
+\begin{itemize}
+    \item Here {\tt y} is the number of successes and {\tt Count} is the total number of trials
+    \item Random effects at the {\tt NURSEID} and {\tt site} level
+
+\end{itemize}
+
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Specifying the model}
 <<cancerModel,fig=false, echo=TRUE>>= 
-library(glmmBUGS)
 nurseForBugs = glmmBUGS(y + Count ~
   odense + newsiteclass+ SCRNAGE + experience, 
   effects=c('site', 'NURSEID'), 
   data=nurse, family='binomial')
 names(nurseForBugs)
 @
+
 \begin{itemize}
-	\item Here {\tt y} is the number of successes and {\tt Count} is the total number of trials
-	\item Random effects at the {\tt NURSEID} and {\tt site} level
-	\item {\tt ragged} is the data for WinBUGS 
-	\item {\tt startingValues} is the parameter estimates and conditional expectations of random effects from {\tt glmmPQL}
-	\item {\tt pql} is the {\tt glmmPQL} result
+    \item {\tt ragged} is the data for WinBUGS 
+    \item {\tt startingValues} is the parameter estimates and conditional expectations of random effects from {\tt glmmPQL}
+    \item {\tt pql} is the {\tt glmmPQL} result
 \end{itemize}
 \end{frame}
+
 
 \begin{frame}[fragile]
 \frametitle{{\tt model.bug}}
@@ -509,25 +639,25 @@ for(Dsite in 1:Nsite) {
 \frametitle{What it means}
 \begin{block}{loops}
 \begin{itemize}
-	\item {\tt for(Dsite }, {\tt for(DNURSEID } and {\tt for(Dobservations}
-	
-	\item Loop through screening sites, nurses within screening sites, and observations within nurses.
+    \item {\tt for(Dsite }, {\tt for(DNURSEID } and {\tt for(Dobservations}
+    
+    \item Loop through screening sites, nurses within screening sites, and observations within nurses.
 
 \end{itemize}
 \end{block}
 
 \begin{block}{Random effects}
 \begin{itemize}
-	\item {\tt Rsite[Dsite]}, {\tt RNURSEID[DNURSEID}
-	\item $A_i$, $B_{ij}$ 
-	\item Random effects at the site and nurse level
+    \item {\tt Rsite[Dsite]}, {\tt RNURSEID[DNURSEID}
+    \item $A_i$, $B_{ij}$ 
+    \item Random effects at the site and nurse level
 \end{itemize}
 \end{block}
 
 \begin{block}{Covariates}
 \begin{itemize}
-	\item {\tt Xsite}, {\tt XNURSEID}, {\tt Xobservations}
-	\item covariates which vary by site, by nurse, and by observation 
+    \item {\tt Xsite}, {\tt XNURSEID}, {\tt Xobservations}
+    \item covariates which vary by site, by nurse, and by observation 
 \end{itemize}
 \end{block}
 \end{frame}
@@ -545,10 +675,10 @@ for(Dsite in 1:Nsite) {
     ...
   }
  }
-}  	
+}   
 \end{verbatim}
 \begin{itemize}
-\item Since the world is unbalanced, 	use ragged arrays
+\item Since the world is unbalanced,    use ragged arrays
 \item {\tt Dsite in 1:2}
 \item {\tt Dnurse in 1:2} then {\tt 3:5}
 \item {\tt Dobs in 1:2} then {\tt 3}, then {\tt 4:6}, then {\tt 7} then {\tt 8:10}
@@ -574,9 +704,9 @@ site & nurse & obs\\
 \begin{frame}
 \frametitle{Data For Bugs}
 \begin{itemize}
-	\item Sort the data by site and nurse within site
-	\item Store the start positions of each nurse (1, 3) {\tt Ssite}
-	\item Store the start positions of each observation (1,3,4,7,8) {\tt SNURSEID}
+    \item Sort the data by site and nurse within site
+    \item Store the start positions of each nurse (1, 3) {\tt Ssite}
+    \item Store the start positions of each observation (1,3,4,7,8) {\tt SNURSEID}
 \end{itemize}
 
 \end{frame}
@@ -588,20 +718,20 @@ Y_{ij} \sim&\text{N}(\mu + A_i, \tau^2)\\
 A_i \sim & \text{N}(0, \sigma^2)
 \end{align*}
 \begin{itemize}
-	\item The Chain could update $\mu^{(p+1)} = \mu^{(p)} + 0.1$ and $A_i^{(p+1)} = A_i^{(p)} - 0.1$ with little effect on probabilities
-	\item WinBUGS would spend a lot of time undoing with the $A_i$ any moves it made with $\mu$
-	\item $A_i$ and $\mu$ are correlated
+    \item The Chain could update $\mu^{(p+1)} = \mu^{(p)} + 0.1$ and $A_i^{(p+1)} = A_i^{(p)} - 0.1$ with little effect on probabilities
+    \item WinBUGS would spend a lot of time undoing with the $A_i$ any moves it made with $\mu$
+    \item $A_i$ and $\mu$ are correlated
 \end{itemize}
 \begin{align*}
 Y_{ij} \sim&\text{N}(\tilde A_i, \tau^2)\\
 \tilde A_i \sim & \text{N}(\mu, \sigma^2)
 \end{align*}
 \begin{itemize}
-	\item Now the dependence is broken.  
-	
+    \item Now the dependence is broken.  
+    
 \begin{itemize}
-	\item Update $\mu$ without changing the $\tilde A_i$
-	\item Updating $\tilde A_i$ will change the probabilities of the $Y_{ij}$, without $\mu$ cancelling it's effect out.
+    \item Update $\mu$ without changing the $\tilde A_i$
+    \item Updating $\tilde A_i$ will change the probabilities of the $Y_{ij}$, without $\mu$ cancelling it's effect out.
 \end{itemize}
 \end{itemize}
 \end{frame}
@@ -609,8 +739,8 @@ Y_{ij} \sim&\text{N}(\tilde A_i, \tau^2)\\
 \begin{frame}
 \frametitle{How the code works}
 \begin{itemize}
-	\item Divide the covariates $X_{ijk}$ into groups $U_i$, $V_{ij}$ and $W_{ijk}$ which change with the site, nurse, and observations respectively
-	\item Write the model as
+    \item Divide the covariates $X_{ijk}$ into groups $U_i$, $V_{ij}$ and $W_{ijk}$ which change with the site, nurse, and observations respectively
+    \item Write the model as
 \end{itemize}
 \begin{align*}
 Y_{ij} & \sim \text{Bernoulli}(N_{ij}, p_{ij})\\
@@ -619,21 +749,21 @@ Y_{ij} & \sim \text{Bernoulli}(N_{ij}, p_{ij})\\
 A_i & \sim \text{N}(\mu + U_i\beta_a, \sigma^2_A) 
 \end{align*}
 \begin{itemize}
-	\item This helps the parameters mix well
+    \item This helps the parameters mix well
 \end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{The Data}
 \begin{itemize}
-	\item Three matrices of covariates: observation level, nurse level, and site level
-	\item Here there's only one nurse level and one site level covariate, so a vector will do.
-	\item For each random effect, calculate the expected value by adding lower-level random effects and covariates
-	
-	{\tt meanNURSEID[DNURSEID] <- Rsite[Dsite] + betaNURSEID * XNURSEID[DNURSEID]}
-	\item when there's more than one covariate, use the inner product
-	
-	 {\tt       logit(meanobservations[Dobservations]) <- RNURSEID[DNURSEID] + 
+    \item Three matrices of covariates: observation level, nurse level, and site level
+    \item Here there's only one nurse level and one site level covariate, so a vector will do.
+    \item For each random effect, calculate the expected value by adding lower-level random effects and covariates
+    
+    {\tt meanNURSEID[DNURSEID] <- Rsite[Dsite] + betaNURSEID * XNURSEID[DNURSEID]}
+    \item when there's more than one covariate, use the inner product
+    
+     {\tt       logit(meanobservations[Dobservations]) <- RNURSEID[DNURSEID] + 
                   inprod2(betaobservations[] , Xobservations[Dobservations,])
  }
 \end{itemize}
@@ -647,8 +777,8 @@ names(nurseForBugs)
 names(nurseForBugs$ragged)
 @
 \begin{itemize}
-	\item A bugs model file is written in the file ``model.bug''
-	\item The file ``getInits.R'' contains code for a function to generate random starting values
+    \item A bugs model file is written in the file ``model.bug''
+    \item The file ``getInits.R'' contains code for a function to generate random starting values
 \end{itemize}
 \end{frame}
 
@@ -683,10 +813,10 @@ result[["RNURSEID"]] = rnorm(length(startingValues[["RNURSEID"]]),
 \frametitle{Starting Values}
 \begin{itemize}
 \item Edit ``getInits.R'' if you wish
-	\item Source in ``getInits.R''
-	\item This defines the function {\tt getInits()} which generates random starting values
-	\item Notice that it requires the starting values to be saved as an object called {\tt startingValues}
-	\item {\tt startingValues = nurseForBugs\$startingValues}
+    \item Source in ``getInits.R''
+    \item This defines the function {\tt getInits()} which generates random starting values
+    \item Notice that it requires the starting values to be saved as an object called {\tt startingValues}
+    \item {\tt startingValues = nurseForBugs\$startingValues}
 \end{itemize}
 
 \end{frame}
@@ -712,8 +842,8 @@ SDNURSEID ~ dunif(0, 100)
 \end{verbatim}
 \column{0.5\textwidth}
 \begin{itemize}
-	\item Edit this file as you wish
-	\item Notice that WinBUGS needs precisions instead of variances or standard deviations
+    \item Edit this file as you wish
+    \item Notice that WinBUGS needs precisions instead of variances or standard deviations
 \end{itemize}
 \end{columns}
 \end{frame}
@@ -724,7 +854,15 @@ SDNURSEID ~ dunif(0, 100)
 startingValues = nurseForBugs$startingValues
 source('getInits.R')
 library(R2WinBUGS)
-nurseFromBugs = bugs(nurseForBugs$ragged, getInits, parameters.to.save=names(getInits()), n.chains=3, n.iter=200, n.burnin=10, n.thin=2, debug=T)
+if(F){
+nurseFromBugs = bugs(nurseForBugs$ragged, 
+		getInits, parameters.to.save=names(getInits()),
+    	n.chains=3, n.iter=200, n.burnin=10, n.thin=2, 
+		debug=T,working.directory=".")
+save(nurseFromBugs, file="nurse.RData")
+} else{
+	load("nurse.RData")
+}
 names(nurseFromBugs)
 @
 \end{frame}
@@ -732,11 +870,11 @@ names(nurseFromBugs)
 \begin{frame}
 \frametitle{The Results}
 \begin{itemize}
-	\item {\tt sims.array} is an array with dimensions	
+    \item {\tt sims.array} is an array with dimensions  
 \begin{itemize}
-	\item 1- realisations from each chain
-	\item 2- chains
-	\item 3- parameters
+    \item 1- realisations from each chain
+    \item 2- chains
+    \item 3- parameters
 \end{itemize}
 %\item {\tt nurseFromBugs\$sims.array[,2,'SDNURSEID'] } is the posterior sample from chain 2 for the standard deviation of the nurse effect
 \item Remember that the random effects are reparametrised and don't have mean zero
@@ -804,5 +942,92 @@ hist(nurseSummary$Rsite[,'mean'])
 
 \end{frame}
 
+\begin{frame}
+\frametitle{Conclusions}
+\begin{itemize}
+    \item Using MCMC isn't so difficult
+    \item glmmBUGS can
+    \begin{itemize}
+    \item run random intercept models with nested random effects
+    \item write model files which can be edited to produce more complicated models
+\end{itemize}
+\item For non-Gaussian models, there are few valid reasons for not using Bayesian/MCMC inference
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{An exercise}
+\begin{itemize}
+\item Install R (from r-project.org), and the packages:
+\begin{itemize}
+\item R2WinBUGS, glmmBUGS, and MASS
+\end{itemize}
+\item look at the bacteria data, recode some variables
+\item library(MASS); data(bacteria); head(bacteria); ?bacteria
+\item \verb!bacteria$sick = bacteria$y=="y"!
+\item \verb!bacteria$weekCat = factor(bacteria$week)!
+\item \verb!summary(bacteria)!
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+$Y_{ij}$ and $X_{ij}$ are observations and covariates at time $t_j$ from subject $i$
+
+
+\begin{itemize}
+
+\item fit a logistic regression model with a treatment by times interaction model:
+\begin{align*}
+Y_{ij} \sim & \text{Bernoulli}(p_{ij}) \\
+\text{logit}(p_{ij}) = & X_{ij} \beta
+\end{align*}
+\end{itemize}
+\begin{verbatim}
+ bmodel = glm(sick ~ ap * weekCat, data=bacteria, 
+   family=binomial)
+ summary(bmodel)
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Bayesian random effect model}
+Add a subject-level random effect, use Bayesian inference:
+\begin{align*}
+Y_{ij} \sim & \text{Bernoulli}(p_{ij}) \\
+\text{logit}(p_{ij}) = & X_{ij} \beta + A_i\\
+A_i \sim & \text{N}(0,\sigma^2)
+\end{align*}
+\begin{verbatim}
+library(glmmBUGS)
+forBugs = glmmBUGS(sick ~ ap*weekCat, effects="ID", 
+  family="bernoulli",data=bacteria)
+source("getInits.R")
+startingValues = forBugs$startingValues
+\end{verbatim}
+Now change the priors in model.bug, change the file name to model2.bug
+\begin{verbatim}
+bacBugs = bugs(data=forBugs$ragged, inits=getInits, 
+  parameters.to.save=names(getInits()), 
+  model.file="model2.bug",
+  n.iter=100,n.thin=2,n.burnin=10,debug=T)
+\end{verbatim}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{verbatim}
+bacPost = restoreParams(bacBugs, forBugs$ragged)
+checkChain(bacPost)
+bacSummary = summaryChain(bacPost)
+names(bacSummary)
+bacSummary$betas[,c("mean","2.5%","97.5%")]
+hist(bacPost$SDID)
+\end{verbatim}
+
+\end{frame}
 
 \end{document}
