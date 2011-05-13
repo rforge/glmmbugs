@@ -49,6 +49,7 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
 		haveRaster = library(raster, logical.return=T)
 		
 	if(haveRaster){
+		
 		for(D in theGrids) {
 			if(!is.null(chain[[D]]$proj4string)) {
 				theCRS = chain[[D]]$proj4string
@@ -66,8 +67,11 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
 	thelist$z = sqrt((ssq-thelist$z*thelist$z)/prod( dim(chain[[D]]$z)[3:4]) ) 
 	result[[D]]$sd = raster(thelist, crs=theCRS)
 	
-	thelist$z = apply(chain[[D]]$z, 1:2, function(qq) mean(qq>0) )
+	thelist$z = apply(chain[[D]]$z>0, 1:2, mean )
 	result[[D]]$pgt0 = raster(thelist, crs=theCRS)
+	
+
+	
 }
 	
 	} else{
@@ -78,6 +82,8 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
 				mean = apply(chain[[D]]$z, 1:2, mean),
 				sd = apply(chain[[D]]$z, 1:2, sd),
 				pgt0 = apply(chain[[D]]$z, 1:2, function(qq) mean(qq>0)))
+
+	
 	}
 } # end if have grids   
 	return(result)

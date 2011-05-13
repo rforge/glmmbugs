@@ -1,0 +1,59 @@
+spatialFittedValues = function(chain) {
+	
+	result=list()
+	
+	theGrids = grep("Grid$", names(chain),value=T)
+	
+	if(length(theGrids)){
+		haveRaster = library(raster, logical.return=T)
+		
+		if(haveRaster){
+			
+			for(D in theGrids) {
+				if(!is.null(chain[[D]]$proj4string)) {
+					theCRS = chain[[D]]$proj4string
+				} else {
+					theCRS=""
+				}
+				
+				thelist = list(x=chain[[D]]$x,y=chain[[D]]$y)
+				
+	
+				expWithInt = exp(chain[[D]]$z + array(chain$intercept, dim(chain[[D]]$z)) )
+					thelist$z = apply(expWithInt, 1:2, mean)
+					
+					result[[D]]=list()
+					
+					result[[D]]$mean = raster(thelist, crs=theCRS)
+					
+					thelist$z = apply(expWithInt, 1:2, sd)
+					result[[D]]$sd = raster(thelist, crs=theCRS)
+					
+					thelist$z = apply(expWithInt>1, 1:2, mean)
+					result[[D]]$pgt1= raster(thelist, crs=theCRS)
+				
+				
+			}
+			
+		} else{
+			
+			for(D in theGrids) {
+				result[[D]] = list(
+						x=chain[[D]]$x,y=chain[[D]]$y)
+				expWithInt = exp(chain[[D]]$z + array(chain$intercept, dim(chain[[D]]$z)) )
+				
+				result[[D]]$mean= apply(expWithInt, 1:2, mean)
+				
+				result[[D]]$sd = apply(expWithInt, 1:2, sd)
+				
+				result[[D]]$pgt1 = apply(expWithInt>1, 1:2, mean)
+			}
+			
+		} # end no raster	
+	} # end if have grids   
+	
+	if(length(result)==1) result= result[[1]]
+
+	result
+
+}
