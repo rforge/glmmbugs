@@ -20,13 +20,20 @@ spatialFittedValues = function(chain) {
 				
 	
 				expWithInt = exp(chain[[D]]$z + array(chain$intercept, dim(chain[[D]]$z)) )
-					thelist$z = apply(expWithInt, 1:2, mean)
-					
+				
+				 themean = apply(expWithInt, 1:2, mean)
+				
+				 thelist$z = themean 
 					result[[D]]=list()
 					
 					result[[D]]$mean = raster(thelist, crs=theCRS)
 					
-					thelist$z = apply(expWithInt, 1:2, sd)
+					ssq = apply(expWithInt, 1:2, function(qq) sum(qq*qq))
+					
+					thesd = sqrt(ssq/prod( dim(chain[[D]]$z)[3:4]) - themean*themean)
+					
+					thelist$z = thesd 
+					
 					result[[D]]$sd = raster(thelist, crs=theCRS)
 					
 					thelist$z = apply(expWithInt>1, 1:2, mean)

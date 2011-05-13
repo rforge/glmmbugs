@@ -64,7 +64,7 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
 	
 			ssq = apply(chain[[D]]$z, 1:2, function(qq) sum(qq*qq))
 			
-	thelist$z = sqrt((ssq-thelist$z*thelist$z)/prod( dim(chain[[D]]$z)[3:4]) ) 
+	thelist$z = sqrt(ssq/prod( dim(chain[[D]]$z)[3:4])-thelist$z*thelist$z ) 
 	result[[D]]$sd = raster(thelist, crs=theCRS)
 	
 	thelist$z = apply(chain[[D]]$z>0, 1:2, mean )
