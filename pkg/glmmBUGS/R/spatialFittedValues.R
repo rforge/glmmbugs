@@ -1,4 +1,4 @@
-spatialFittedValues = function(chain) {
+spatialFittedValues = function(chain,threashold=1) {
 	
 	result=list()
 	
@@ -36,8 +36,8 @@ spatialFittedValues = function(chain) {
 					
 					result[[D]]$sd = raster(thelist, crs=theCRS)
 					
-					thelist$z = apply(expWithInt>1, 1:2, mean)
-					result[[D]]$pgt1= raster(thelist, crs=theCRS)
+					thelist$z = apply(expWithInt>threashold, 1:2, mean)
+					result[[D]]$probExc = raster(thelist, crs=theCRS)
 				
 				
 			}
@@ -53,7 +53,7 @@ spatialFittedValues = function(chain) {
 				
 				result[[D]]$sd = apply(expWithInt, 1:2, sd)
 				
-				result[[D]]$pgt1 = apply(expWithInt>1, 1:2, mean)
+				result[[D]]$probExc = apply(expWithInt>threashold, 1:2, mean)
 			}
 			
 		} # end no raster	

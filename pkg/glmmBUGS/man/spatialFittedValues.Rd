@@ -8,13 +8,14 @@ Compute summaries of fitted values for geostatistical models
 Add intercept to spatial random effects and exponentiate, compute summaries of posterior.
 }
 \usage{
-spatialFittedValues(chain)
+spatialFittedValues(chain, threashold=1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{chain}{
 output of restoreParams function
 }
+\item{threashold}{value which the posterior probability of exceeding is computed.  Defaults to 1}
 }
 \details{
 }
