@@ -10,6 +10,8 @@ CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, grid
 	thePhi = grep("^phi", names(params), value=T)[1]
 	theEffect = gsub("^phi", "",thePhi)
 	theSD = paste("SD", theEffect, sep="")
+	theEffectR = paste("R", theEffect, sep="")
+	
 	
 	if(all(paste(c("x", "y"), "Spatial", theEffect, sep="")%in% names(locations.obs))) {
 		locations.obs = cbind(x=locations.obs[[paste("xSpatial", theEffect, sep="")]],
@@ -53,7 +55,7 @@ CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, grid
 
 		result[,,Dchain, Diter]=
 			CondSimu("S", given=locations.obs, 
-				data=params$Rsite[Siter[Diter],Dchain,], 
+				data=params[[theEffectR]][Siter[Diter],Dchain,], 
     		x=xgrid, y=ygrid, grid=TRUE, model="exponential", 
     		param=c(mean=0, variance=params[[theSD]][Siter[Diter],Dchain]^2, nugget=0, 
 					scale=params[[thePhi]][Siter[Diter],Dchain]), pch="")
