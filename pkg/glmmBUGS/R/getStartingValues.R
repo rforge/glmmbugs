@@ -37,12 +37,12 @@ if(is.list(covariates)) {
 # data in the same order as the ragged array
   subdata = pql$data[,pql$effects]
   if(length(pql$effects)==1) {
-      subdata = encodeString(as.character(subdata),max(nchar(subdata)))
+      subdata = encodeString(as.character(subdata),max(nchar(as.character(subdata))))
       theorder = order(subdata)
   } else {
   # convert numerics to characters to make the order compatible with ragged array
     for(D in pql$effects)  {
-      subdata[,D] = encodeString(as.character(subdata[,D]),max(nchar(subdata[,D])))
+      subdata[,D] = encodeString(as.character(subdata[,D]),max(nchar(as.character(subdata[,D]))))
     }
     theorder = do.call(order, subdata)
   }
