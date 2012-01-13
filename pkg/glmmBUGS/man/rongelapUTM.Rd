@@ -22,8 +22,9 @@ See the help file for rongelap in geoRglm, or http://www.leg.ufpr.br/doku.php/pe
 }
 \examples{
 data(rongelapUTM)
-rongelapLL<-spTransform(rongelapUTM,CRS("+proj=longlat +datum=NAD83"))
 \dontrun{
+library(rgdal)
+rongelapLL<-spTransform(rongelapUTM,CRS("+proj=longlat +datum=NAD83"))
    load(url("http://www.gadm.org/data/rda/MHL_adm0.RData"))
    plot(rongelapLL)
    plot(gadm, add=T)    

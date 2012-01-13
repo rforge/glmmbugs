@@ -34,7 +34,7 @@ Patrick Brown
 \seealso{
 }
 \examples{
-\notrun{
+\dontrun{
     rongelapSummary$fitted = spatialFittedValues(rongelapParams)
 
   }

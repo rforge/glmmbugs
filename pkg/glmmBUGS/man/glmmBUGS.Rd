@@ -86,12 +86,22 @@ muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gau
 startingValues = muscleRagged$startingValues
 
 \dontrun{
+# run with winbugs
 source("getInits.R")
-require(BRugs)
 require(R2WinBUGS)  
 muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
                 model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
                              program="winbugs", working.directory=getwd()) 
+
+# a jags example
+require(R2jags)
+muscleResultJags = jags(
+muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
+                model.file="model.bug", n.chain=3, n.iter=1000, 
+                n.burnin=100, n.thin=10,
+                working.directory=getwd()) 
+
+
 }
  
 data(muscleResult)
@@ -211,5 +221,5 @@ rongelapSummary=summaryChain(rongelapParams)
 image(rongelapSummary$siteGrid$pgt0)
 
 
-}
+
 

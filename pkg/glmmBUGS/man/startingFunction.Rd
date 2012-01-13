@@ -2,8 +2,8 @@
 \alias{startingFunction}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Write a function to generate random MCMC starting values}
-\description{this is a function to generate ramdom MCMC starting values
-  
+\description{The code for the resulting function is saved in a file, 
+to be edited and sourced in before calling WinBUGS.
 }
 \usage{
 startingFunction(startingValues, file = "getInits.R")
