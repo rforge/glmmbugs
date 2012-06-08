@@ -29,7 +29,7 @@ usually not called by a user.
 }
 \references{Also see the geoBUGS manual}
 \author{ Patrick Brown}
-\seealso{   }
+ 
 \examples{
 
 # get a winbugs model and data ready, without a spatial effect
@@ -66,4 +66,4 @@ popResult = bugs(raggedWithSpatial, getInits, parameters.to.save = names(getInit
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ }
+ 

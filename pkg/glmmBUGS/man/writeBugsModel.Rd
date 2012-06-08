@@ -58,15 +58,11 @@ section of the bugs manual, at \url{http://mathstat.helsinki.fi/openbugs/data/Do
 \author{
 Patrick Brown, \email{patrick.brown@utoronto.ca}
 }
-\note{
-%%  ~~further notes~~
-}
+ 
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 \section{Warning }{You are strongly encouraged to modify the model file prior to using it.}
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
+ 
 \examples{
 writeBugsModel("model.bug", effects="Strip",  observations="conc",
   covariates=list(observations="length"),

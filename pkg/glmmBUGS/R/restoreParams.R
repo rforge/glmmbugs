@@ -160,8 +160,8 @@ if(is.null(ragged)) {
         
 	theX = t(ragged[[DX]])
 	# if only one covariate at this level
-	if(D %in% betanames){
-		theseBetas =  result$betas[,,D,drop=F]		
+	if(Dbeta %in% betanames){
+		theseBetas =  result$betas[,,Dbeta,drop=F]		
 	} else { # more than one covariate, have matrices
 	    if(all(rownames(theX) %in% dimnames(result$betas)[[3]]) ) {
 			theseBetas = result$betas[,,rownames(theX),drop=F]

@@ -48,6 +48,5 @@ Patrick Brown
 \seealso{
 The Rongelap example in \code{\link{glmmBUGS}}
 }
-\examples{
-}
+ 
 

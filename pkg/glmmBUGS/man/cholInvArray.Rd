@@ -23,11 +23,7 @@ An array with the third dimension's precision matrix entries changed to
   \item{"covT[i,j]"}{for the covariance between i and j}
     \item{"corrT[i,j]"}{for the correlations between i and j}
 }
-\references{}
-\author{}
-\note{
-}
-\seealso{ }
+ 
 \examples{
 # create a random positive definite matrix by 
 # generating a lower triangle
@@ -54,5 +50,5 @@ An array with the third dimension's precision matrix entries changed to
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{}
+ 
 

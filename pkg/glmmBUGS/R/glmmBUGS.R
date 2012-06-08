@@ -1,6 +1,7 @@
-glmmBUGS <- function (formula, data, effects, modelFile = "model.bug", initFile = "getInits.R", 
+glmmBUGS <- function (formula, data, effects, modelFile = "model.txt", initFile = "getInits.R", 
 		family = c("bernoulli", "binomial", "poisson", "gaussian"), 
-    spatial = NULL, spatialEffect = NULL, reparam = NULL, prefix=NULL, priors=NULL) 
+    spatial = NULL, spatialEffect = NULL, reparam = NULL, prefix=NULL, priors=NULL,
+	brugs=.Platform$OS.type=="unix") 
 {
 
     data = getDesignMatrix(formula, data, effects)
@@ -43,7 +44,7 @@ glmmBUGS <- function (formula, data, effects, modelFile = "model.bug", initFile 
     writeBugsModel(file=modelFile, effects = effects, covariates = covariates, 
         observations = observations, family = family, spatial = spatialEffect,
 		geostat=geostat,
-        prefix= attributes(ragged)$prefix, reparam =reparam, priors=priors)
+        prefix= attributes(ragged)$prefix, reparam =reparam, priors=priors, brugs=brugs)
 
          return(list(ragged = ragged, startingValues = startingValues, 
         pql = thepql))

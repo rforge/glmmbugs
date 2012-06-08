@@ -14,8 +14,7 @@ restoreParams(bugsResult, ragged = NULL,extraX=NULL)
   \item{ragged}{The ragged array used to call \code{\link[R2WinBUGS:bugs]{bugs}}}
 \item{extraX}{Possible extra covariates for spatial regions with no data but do have predicted spatial effects.}
 }
-\details{
- }
+ 
 \value{
   A list where each element is a matrix or an array.  
   The first dimension is the number of realisations, 
@@ -30,7 +29,7 @@ the result will have list entries the following:
 \item{ReffectSpatial}{The spatial random effect for each region, if any}
 \item{FittedReffect}{The predicted values on the link scale, being the random effect plus intercept and effect of covariates.}
 }
-\references{}
+ 
 \author{Patrick Brown \code{patrick.brown@utoronto.ca}}
 \note{For spatial models, one fitted rate is computed 
 for each region in the adjacency matrix, even though some of these regions may not have spatial or non-spatial random 
@@ -39,6 +38,4 @@ added.  If a non-spatial random effect is missing (as happens when a regions doe
 unconditionally from each iteration's intercept and standard deviation for that effect.  Note that this does not add 
 on the effect of possible covariates for that region.  This can be added via the extraX argument.}
 \seealso{\code{\link[R2WinBUGS:bugs]{bugs}}}
-\examples{
-                        
-}
+ 

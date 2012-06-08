@@ -12,16 +12,12 @@ getRaggedSeq(data)
 \arguments{
   \item{data}{a data frame with two columns}
 }
-\details{
-  
-}
+ 
 \value{
  The ragged sequence
 }
-\references{}
+ 
 \author{Patrick Brown \email{patrick.brown@utoronto.ca}}
-\note{
-}
+ 
 \seealso{\code{\link{winBugsRaggedArray}}}
-\examples{
-}
+ 

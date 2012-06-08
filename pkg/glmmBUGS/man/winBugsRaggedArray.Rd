@@ -36,7 +36,7 @@ A list with the following components
 "Tricks: Advanced Use of the BUGS Language" section of the bugs manual, at 
 \url{http://mathstat.helsinki.fi/openbugs/data/Docu/Tricks.html}}
 \author{Patrick Brown, \email{patrick.brown@utoronto.ca}}
-\note{}
+ 
 \seealso{\code{\link[R2WinBUGS:bugs]{bugs}} }
 \examples{
 library(nlme)

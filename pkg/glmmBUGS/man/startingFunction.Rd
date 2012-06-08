@@ -22,9 +22,9 @@ startingFunction(startingValues, file = "getInits.R")
 \value{
   A file, with the name given by the 'file' argument, is written.
 }
-\references{}
+ 
 \author{Patrick Brown, \code{patrick.brown@utoronto.ca}}
-\note{}
+ 
 \section{Warning }{You are strongly encouraged to edit the file to ensure the result is sensible} 
 
 \seealso{\link{getStartingValues}, \code{\link[R2WinBUGS:bugs]{bugs}}}

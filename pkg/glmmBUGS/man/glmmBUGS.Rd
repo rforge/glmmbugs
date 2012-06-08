@@ -6,9 +6,9 @@
   Creates ragged arrays, writes a model file, and generates sensible starting estimates.
 }
 \usage{
-glmmBUGS(formula, data, effects, modelFile = "model.bug", initFile = "getInits.R", 
+glmmBUGS(formula, data, effects, modelFile = "model.txt", initFile = "getInits.R", 
 family = c("bernoulli", "binomial", "poisson", "gaussian"), spatial=NULL, spatialEffect = NULL,
-reparam=NULL, prefix=NULL, priors=NULL)
+reparam=NULL, prefix=NULL, priors=NULL, brugs=.Platform$OS.type=="unix")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +26,7 @@ reparam=NULL, prefix=NULL, priors=NULL)
     \item{prefix}{string to append to object names}
     \item{priors}{List or vector where names refer to parameters and elements are prior distributions, 
     for example \code{list(SDsite="dunif(0,10)")}.}
+    \item{brugs}{compatiblity with OpenBUGS, using the inprod function in place of inprod2, defaults to FALSE on windows and TRUE on unix platforms.}
 }
 \details{
 
@@ -221,5 +222,5 @@ rongelapSummary=summaryChain(rongelapParams)
 image(rongelapSummary$siteGrid$pgt0)
 
 
-
+}
 

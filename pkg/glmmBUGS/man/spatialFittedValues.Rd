@@ -22,17 +22,11 @@ output of restoreParams function
 \value{A list with posterior mean, posterior standard deviation, and posterior probability of
 exceeding 1 for exp(mu + U(s))
 }
-\references{
-}
+ 
 \author{
 Patrick Brown
 }
-\note{
-}
-
-
-\seealso{
-}
+ 
 \examples{
 \dontrun{
     rongelapSummary$fitted = spatialFittedValues(rongelapParams)
@@ -41,5 +35,4 @@ Patrick Brown
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+ 

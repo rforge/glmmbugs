@@ -17,9 +17,9 @@ checkChain(chain, parameters=NULL)
 \value{
    Plots are produced, nothing is returned
 }
-\references{}
+ 
 \author{Patrick Brown}
-\note{}
+ 
 \seealso{ \code{\link{restoreParams}},  \code{\link{summaryChain}}  }
 \examples{
 % create a sample MCMC result

@@ -12,12 +12,7 @@
 See \code{\link{glmmBUGS}} and \code{\link[nlme:Muscle]{Muscle}}
 
 }
-\source{
-
-}
-\references{
-  
-}
+ 
 \examples{
 data(muscleResult)
 
