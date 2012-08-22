@@ -104,13 +104,13 @@ function(data,
 reparamName = reparam
 reparam = list()
 for(D in reparamName)
-reparam[[D]] = NULL
+reparam[[D]] = list()
  } 
  
 for(D in names(reparam)){
      if(D %in% names(covariates)){
        theXname= paste("X", D, "reparam", sep="")  
-       if(!is.null(reparam[[D]])){
+       if(length(reparam[[D]])){
          result[[theXname]] = reparam[[D]]
          }else{result[[theXname]] = apply(as.matrix(data[, covariates[[D]]]), 2, mean) }
        

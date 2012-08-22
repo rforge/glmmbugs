@@ -191,18 +191,18 @@ if(!is.null(file)) {
   
   # the priors
   cat("\n\n# priors\n\n")
-   cat(paste("intercept", prefix, sep=""), "~ dflat()\n")
+   cat(paste("intercept", prefix, sep=""), "~ dunif(-1000,1000)\n")
   for(Deffect in names(covariates)) {
     thiscov = covariates[[Deffect]]
     if(length(thiscov)==1) {
-        cat("beta", Deffect, " ~ dflat()\n", sep="")
+        cat("beta", Deffect, " ~ dunif(-1000,1000)\n", sep="")
     } else if(length(thiscov)>1) {
       for(Dpar in 1:length(covariates[[Deffect]])) {
           parName = paste("beta", Deffect, "[", Dpar, "]", sep="")
           if(any(names(priors)==parName)) {
            cat(parName, "~", priors[parName], "\n")
           } else {     
-          cat(parName,  " ~ dflat()\n",sep="")
+          cat(parName,  " ~ dunif(-1000,1000)\n",sep="")
         }
     }
   }
@@ -211,7 +211,7 @@ if(!is.null(file)) {
   
 if(length(reparam)){ 
  cat("interceptUnparam", prefix, "<- intercept", prefix, sep="")
- for(Deffect in names(covariates)){
+ for(Deffect in reparam) { #names(covariates)){
    if(length(covariates[[Deffect]])==1) {
    # add prefix here
      cat("- beta", Deffect, " * X", Deffect, "reparam", sep="")
