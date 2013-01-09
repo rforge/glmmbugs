@@ -177,7 +177,7 @@ spplot(ontario, "postProb")
 \dontrun{
 library(geoRglm)
 data(rongelap)
-}
+
 rongelap= read.table(url("http://www.leg.ufpr.br/lib/exe/fetch.php/pessoais:paulojus:mbgbook:datasets:rongelap.txt"),header=TRUE)
 
 library(spdep)
@@ -197,7 +197,7 @@ startingValues$phi$site = 100
 
 source("getInits.R")
 
-\dontrun{
+
 
 rongelapResult = bugs(forBugs$ragged, getInits, 
   parameters.to.save = names(getInits()),
@@ -206,7 +206,6 @@ rongelapResult = bugs(forBugs$ragged, getInits,
       working.directory=getwd())
 
 % save(rongelapResult, file="pkg/glmmBUGS/data/rongelapResult.RData")
-}
 
 data(rongelapResult)
 
@@ -220,7 +219,7 @@ rongelapSummary=summaryChain(rongelapParams)
 
 # plot posterior probabilities of being above average
 image(rongelapSummary$siteGrid$pgt0)
-
+}
 
 }
 
