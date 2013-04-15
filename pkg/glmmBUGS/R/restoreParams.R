@@ -172,7 +172,7 @@ if(is.null(ragged)) {
 	
     for(Dchain in 1:Nchain) {
         themean[,Dchain,] = themean[,Dchain,] + 
-            	theseBetas[,Dchain,] %*% theX
+            	theseBetas[,Dchain,,drop=F] %*% theX
     } 
 	}	# end there are covariates here
 	
