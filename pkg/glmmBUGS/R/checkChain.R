@@ -1,4 +1,4 @@
-checkChain = function(chain, parameters=NULL) {
+checkChain = function(chain, parameters=NULL, oneFigure=TRUE) {
 if(is.array(chain))
   chain = list(beta=chain)
 if(is.null(parameters)) {
@@ -26,8 +26,9 @@ if(is.null(parameters)) {
   }
 
 
-  par(mfrow=c(ceiling(length(thepars)/4),min(c(4, length(thepars)))), mar=c(2,2,1,0))
-  
+  if(oneFigure) {
+	  par(mfrow=c(ceiling(length(thepars)/4),min(c(4, length(thepars)))), mar=c(2,2,1,0))
+  }
   
   for(Dbeta in betas) {
      if(length(dim(chain[[Dbeta]])) == 2) {

@@ -11,10 +11,13 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
       thep = mean(qq>0)
       thep = min(thep, 1-thep)
    
-      c(mean = mean(qq), 
+      res = c(mean = mean(qq), 
         pval = thep,
         sd = sd(c(qq)),
         quantile(qq, probs = probs))
+
+		names(res) = gsub("\\%", "pct", names(res))
+		res
    }
 
     result = list(scalars = matrix(NA, sum(themat), length(getRes(1)),
@@ -46,7 +49,7 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
    # geostatistical variables on a grid
 	theGrids = grep("Grid$", names(chain),value=T)
 	if(length(theGrids)){
-		haveRaster = library(raster, logical.return=T)
+		haveRaster = require('raster')
 		
 	if(haveRaster){
 		

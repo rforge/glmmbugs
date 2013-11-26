@@ -9,7 +9,8 @@ After having obtained a posterior sample of model parameters and spatial random 
 this function will simulate from the posterior of the random effects on a grid of locations.
 }
 \usage{
-CondSimuPosterior(params, locations.obs, xgrid = NULL, ygrid = NULL, gridSize = NULL,thin=1)
+CondSimuPosterior(params, locations.obs, xgrid = NULL, 
+ygrid = NULL, gridSize = NULL,thin=1)
 }
 
 \arguments{

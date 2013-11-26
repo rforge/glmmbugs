@@ -32,36 +32,39 @@ usually not called by a user.
  
 \examples{
 
+\dontrun{
+
 # get a winbugs model and data ready, without a spatial effect
 data(ontario)
 
 forBugs = glmmBUGS(formula=observed + logExpected ~ 1,
   effects="CSDUID",   family="poisson",
-  data=ontario)
+  data=data.frame(ontario))
 
 # now add a spatial effect.  
 # first, compute the adjacency matrix 
 # if region ID's are stored as factors, make sure to convert
 # them to characters rather than the default of converting them
 # to integers
-\dontrun{
-#library(spdep)
-#library(diseasemapping)
-#data(popdata)
+library(diseasemapping)
+data(popdata)
 popDataAdjMat = poly2nb(popdata,row.names=as.character(popdata[["CSDUID"]]) )
-}
+
 data(popDataAdjMat)
 
 # add the adjacency matrix to the ragged array  
 raggedWithSpatial = addSpatial(popDataAdjMat, forBugs$ragged, "CSDUID")
 
 # write a new bugs model with a spatial effect
-writeBugsModel("model.bug", "CSDUID", NULL, c("count", "expected"), "poisson", spatial="CSDUID")
+writeBugsModel("model.bug", "CSDUID", NULL, c("count", "expected"), 
+"poisson", spatial="CSDUID")
 startingValues = forBugs$startingValues
 source("getInits.R")
-\dontrun{
+
 library(R2WinBUGS)
-popResult = bugs(raggedWithSpatial, getInits, parameters.to.save = names(getInits()), model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10, program="winbugs")   
+popResult = bugs(raggedWithSpatial, getInits, 
+parameters.to.save = names(getInits()), model.file="model.bug", 
+n.chain=3, n.iter=1000, n.burnin=100, n.thin=10, program="winbugs")   
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

@@ -48,8 +48,7 @@ CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, grid
 	names(Siter) = as.character(1:length(Siter))
 	result = array(NA, c(length(xgrid), length(ygrid), Nchain, length(Siter)))
 
-	library(RandomFields)
-	
+	require('RandomFields')
 	for(Dchain in 1:Nchain){
 		for(Diter in Siter2){
 

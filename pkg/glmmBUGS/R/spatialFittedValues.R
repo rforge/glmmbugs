@@ -5,7 +5,7 @@ spatialFittedValues = function(chain,threashold=1) {
 	theGrids = grep("Grid$", names(chain),value=T)
 	
 	if(length(theGrids)){
-		haveRaster = library(raster, logical.return=T)
+		haveRaster = require(raster)
 		
 		if(haveRaster){
 			

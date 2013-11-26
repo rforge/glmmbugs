@@ -30,7 +30,7 @@ spatialBugs = function(map, raggedArray, effect, prefix, regionID) {
 
 spatialBugs.SpatialPolygons <- function(map, raggedArray=NULL, effect, prefix=NULL, regionID=NULL) {
 	
-    map = poly2nb(map,row.names=regionID)
+    map = spdep::poly2nb(map,row.names=regionID)
 	spatialBugs(map, raggedArray, effect, prefix, regionID)
 }
 
@@ -38,7 +38,7 @@ spatialBugs.nb<- function(map, raggedArray=NULL, effect, prefix=NULL, regionID=N
     if(is.null(regionID))
 		regionID = attributes(map)$region.id
 
-	map=nb2WB(map)	
+	map=spdep::nb2WB(map)	
     names(map$num) = regionID
 	spatialBugs.list(map, raggedArray, effect, prefix, regionID)
 }

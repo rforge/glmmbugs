@@ -17,8 +17,7 @@ output of restoreParams function
 }
 \item{threashold}{value which the posterior probability of exceeding is computed.  Defaults to 1}
 }
-\details{
-}
+
 \value{A list with posterior mean, posterior standard deviation, and posterior probability of
 exceeding 1 for exp(mu + U(s))
 }

@@ -1,7 +1,7 @@
 `writeBugsModel` <-
 function(file, effects, covariates, observations, 
   family=c("bernoulli", "binomial", "poisson", "normal",  "other"),
-  spatial=NULL, geostat=FALSE, prefix="", reparam=NULL, brugs=FALSE, priors=NULL) {
+  spatial=NULL, geostat=FALSE, prefix="", reparam=NULL, brugs=TRUE, priors=NULL) {
 
 # spatial is a character string of names of random effects
  if(!length(reparam)) {

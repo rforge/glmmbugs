@@ -9,6 +9,7 @@ vecPars = grep("\\[[[:digit:]]+\\]$", parnames, value=TRUE)
 matPars =  grep("[[:digit:]+],[[:digit:]]+\\]$", parnames, value=TRUE)
 # scalar parameters
 scPars = parnames[! parnames %in% c(vecPars, matPars)]
+scPars = scPars[grep("^beta",scPars,invert=TRUE)]
 
 
 result = list()
@@ -60,7 +61,7 @@ for(D in scPars)
   fixedEffects = grep("^X", names(ragged), value=TRUE)
 
   betas=NULL
-  library(abind)
+ 
   
   # extract betas 
 for(D in fixedEffects) {
@@ -74,12 +75,11 @@ for(D in fixedEffects) {
 	if(length(newnames)== (dim(tobind)[3]) )
 		dimnames(tobind)[[3]] = newnames
 
-	betas = abind(betas, tobind, along=3)
+	betas = abind::abind(betas, tobind, along=3)
 	
 }  
 
-if(!is.null(betas))
-	result$betas = betas
+result$betas = betas
   
 
 
@@ -164,7 +164,8 @@ if(is.null(ragged)) {
 		theseBetas =  result$betas[,,Dbeta,drop=F]		
 	} else { # more than one covariate, have matrices
 	    if(all(rownames(theX) %in% dimnames(result$betas)[[3]]) ) {
-			theseBetas = result$betas[,,rownames(theX),drop=F]
+			theseBetas = result$betas[,,
+					rownames(theX),drop=FALSE]
 		} else {
 			warning("cannot find ",D," , ", DX)
 		}		
@@ -172,7 +173,9 @@ if(is.null(ragged)) {
 	
     for(Dchain in 1:Nchain) {
         themean[,Dchain,] = themean[,Dchain,] + 
-            	theseBetas[,Dchain,,drop=F] %*% theX
+            	abind::adrop(
+					theseBetas[,Dchain,,drop=FALSE], drop=2
+				)%*% theX
     } 
 	}	# end there are covariates here
 	

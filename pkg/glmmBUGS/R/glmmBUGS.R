@@ -1,9 +1,13 @@
-glmmBUGS <- function (formula, data, effects, modelFile = "model.txt", initFile = "getInits.R", 
+glmmBUGS <- function (formula, data, effects, modelFile = "model.txt", 
+			initFile = "getInits.R", 
 		family = c("bernoulli", "binomial", "poisson", "gaussian"), 
-    spatial = NULL, spatialEffect = NULL, reparam = NULL, prefix=NULL, priors=NULL,
-	brugs=.Platform$OS.type=="unix") 
+    spatial = NULL, spatialEffect = NULL, reparam = NULL, 
+	prefix=NULL, priors=NULL,
+	brugs=length(grep("unix|linux",
+					.Platform$OS.type,
+					ignore.case=TRUE))
+)
 {
-
     data = getDesignMatrix(formula, data, effects)
     data = na.omit(data)
     covariates = attributes(data)$covariates

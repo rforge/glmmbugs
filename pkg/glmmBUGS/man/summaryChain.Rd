@@ -27,7 +27,9 @@ summaryChain(chain, probs = c(0.005, 0.025, 0.05, 0.5))
 \seealso{ \code{\link{restoreParams}} }
 \examples{
 # create a simple chain
-thechain = list(beta = array(1, c(10, 3,4), dimnames = list(NULL, NULL, paste("beta[", 1:4, "]", sep=""))), intercept = matrix(1, 10, 3))
+thechain = list(beta = array(1, c(10, 3,4), 
+dimnames = list(NULL, NULL, paste("beta[", 1:4, "]", sep=""))), 
+intercept = matrix(1, 10, 3))
 
 summaryChain(thechain)
 }

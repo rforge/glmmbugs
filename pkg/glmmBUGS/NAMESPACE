@@ -6,3 +6,6 @@ export( checkChain, cholInvArray, getDesignMatrix, getRaggedSeq,
        glmmBUGS, glmmPQLstrings, restoreParams, startingFunction, 
        summaryChain, 
        winBugsRaggedArray, writeBugsModel, CondSimuPosterior)
+
+import(nlme, abind)
+

@@ -13,8 +13,7 @@ binToBinom(obs, covariates)
   \item{obs}{logical vector of observations}
   \item{covariates}{Data frame or matrix of covariates}
 }
-\details{
-}
+
 \value{
   A data frame with one row for each unique value for the covariates, including the covariates and the following additional columns:
 
