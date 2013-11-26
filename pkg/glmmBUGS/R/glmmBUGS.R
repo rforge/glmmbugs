@@ -35,7 +35,7 @@ glmmBUGS <- function (formula, data, effects, modelFile = "model.txt",
         observations = observations, data = data, family = family)
     startingValues = getStartingValues(pql = thepql, ragged = ragged, prefix=prefix, reparam = reparam )
     
-    startingFunction(startingValues, file="getInits.R")
+    startingFunction(startingValues, file=initFile)
 
     spatialEffect = grep("^N[[:graph:]]+Spatial$", names(ragged), 
         value = T)
