@@ -1,24 +1,25 @@
-CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, gridSize=NULL, thin=1) {
+CondSimuPosterior = function(params, locations.obs, 
+		xgrid=NULL, ygrid=NULL, gridSize=NULL, thin=1) {
 	
 	
-	if(any(slotNames(locations.obs)=="proj4string")) {
-		theproj4string = locations.obs@proj4string
-	} else {
-		theproj4string=NULL
-	}
+
+	theproj4string=projection(locations.obs)
 	
-	thePhi = grep("^phi", names(params), value=T)[1]
-	theEffect = gsub("^phi", "",thePhi)
+	thePhi = grep("^range", names(params), value=T)[1]
+	theEffect = gsub("^range", "",thePhi)
 	theSD = paste("SD", theEffect, sep="")
 	theEffectR = paste("R", theEffect, sep="")
 	
 	
-	if(all(paste(c("x", "y"), "Spatial", theEffect, sep="")%in% names(locations.obs))) {
-		locations.obs = cbind(x=locations.obs[[paste("xSpatial", theEffect, sep="")]],
+	if(all(paste(c("x", "y"), "Spatial", theEffect, sep="") %in% 
+					names(locations.obs))) {
+		locations.obs = cbind(
+				x=locations.obs[[paste("xSpatial", theEffect, sep="")]],
 				y=locations.obs[[paste("ySpatial", theEffect, sep="")]])
 	}
+
 	if(length(grep("^SpatialPoints", class(locations.obs))))
-		locations.obs = locations.obs@coords
+		locations.obs = coordinates(locations.obs)
 
 	
 	
@@ -55,12 +56,16 @@ CondSimuPosterior = function(params, locations.obs, xgrid=NULL, ygrid=NULL, grid
 		result[,,Dchain, Diter]=
 			CondSimu("S", given=locations.obs, 
 				data=params[[theEffectR]][Siter[Diter],Dchain,], 
-    		x=xgrid, y=ygrid, grid=TRUE, model="exponential", 
-    		param=c(mean=0, variance=params[[theSD]][Siter[Diter],Dchain]^2, nugget=0, 
-					scale=params[[thePhi]][Siter[Diter],Dchain]), pch="")
-	
+    			x=xgrid, y=ygrid, grid=TRUE, model="exponential", 
+    			param=c(mean=0, 
+					variance=params[[theSD]][Siter[Diter],Dchain]^2, 
+					nugget=0, 
+					scale=params[[thePhi]][Siter[Diter],Dchain]), 
+			pch="")
 		}
 	}
+	
+	
 
 	result = list(x=xgrid, y=ygrid, z=result, proj4string=theproj4string)
 	
