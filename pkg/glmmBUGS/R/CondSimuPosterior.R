@@ -82,6 +82,9 @@ CondSimuPosterior = function(params, locations.obs,
 	if(class(resultRaster)=="try-error") {
 		result = list(x=xgrid, y=ygrid, z=result, proj4string=theproj4string)
 	} else {
+		names(resultRaster) = paste("sim.chain.", 
+				rep(1:Nchain, length(Siter2)), ".iter.",
+				rep(Siter2, rep(Nchain, length(Siter2))),sep="")
 		result = resultRaster
 	}
 	
