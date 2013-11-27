@@ -47,7 +47,8 @@ CondSimuPosterior = function(params, locations.obs,
 	Siter = seq(from=1, to=Niter, by=thin)
 	Siter2 = seq(1, length(Siter))
 	names(Siter) = as.character(1:length(Siter))
-	result = array(NA, c(length(xgrid), length(ygrid), Nchain, length(Siter)))
+	result = array(NA, 
+			c(length(xgrid), length(ygrid), Nchain, length(Siter)))
 
 	require('RandomFields')
 	for(Dchain in 1:Nchain){
@@ -61,13 +62,28 @@ CondSimuPosterior = function(params, locations.obs,
 					variance=params[[theSD]][Siter[Diter],Dchain]^2, 
 					nugget=0, 
 					scale=params[[thePhi]][Siter[Diter],Dchain]), 
-			pch="")
+			pch=" ")
 		}
 	}
 	
-	
+	# convert to raster
+	# combine chains and iterations into a single dimension
+	result = array(result, c(dim(result)[1:2], prod(dim(result)[3:4]))) 
+	# make x's columns and y's rows
+	result = aperm(result, c(2,1,3))
+	# make cell 1,1 the top left corner
+	result = result[dim(result)[1]:1,,]
+	resultRaster = try(raster::brick(result,
+			xmn=min(xgrid), xmx=max(xgrid), 
+			ymn=min(ygrid), ymx=max(ygrid),
+			crs=theproj4string
+	),  silent=TRUE)
 
-	result = list(x=xgrid, y=ygrid, z=result, proj4string=theproj4string)
+	if(class(resultRaster)=="try-error") {
+		result = list(x=xgrid, y=ygrid, z=result, proj4string=theproj4string)
+	} else {
+		result = resultRaster
+	}
 	
 #	return(list(result, stuff))
 	return(result)
