@@ -51,12 +51,25 @@ vecPars = grep("\\[[[:digit:]]+\\]$", parnames, value=TRUE)
 } #end matPars
 
 
-if(!length(scPars))
-  warning("no parameter names")
-
+# if it's a geostatistical model, convert phi to range
+	thephi = grep("^phi", scPars,value=TRUE)
+	for(D in thephi) {
+		thesd = gsub("^phi", "SD", D)
+		if(thesd %in% scPars){
+			# get rid of phi
+			scPars = grep(D, scPars, invert=TRUE,value=TRUE)
+			# and add range
+			therange = gsub("^phi", "range", D)
+			result[[therange]] = thearray[,,D] / thearray[,,thesd]			
+		}
+		
+	}
 
 for(D in scPars)
   result[[D]] = thearray[,,D]
+
+if(!length(scPars))
+	warning("no parameter names")
 
   fixedEffects = grep("^X", names(ragged), value=TRUE)
 

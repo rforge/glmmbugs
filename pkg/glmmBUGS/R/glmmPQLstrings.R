@@ -37,7 +37,8 @@ function(effects, covariates, observations, data=NULL,
 
 #return(list(theformula, therandom, data, theresp))
 
-thepql = glmmPQL(theformula, random = therandom, family=family, data=data, ...)
+thepql = MASS::glmmPQL(theformula, random = therandom, family=family,
+		data=data, verbose=FALSE,...)
 
 thepql$effects = effects
 thepql$covariates = covariates

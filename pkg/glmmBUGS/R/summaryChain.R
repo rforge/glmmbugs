@@ -5,7 +5,7 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
    themat = unlist(lapply(chain[thenames], is.matrix))
    
    
-   probs = unique(sort(c(probs, 1-probs)))
+   probs = unique(signif(sort(c(probs, 1-probs)),5))
    
    getRes = function(qq) {
       thep = mean(qq>0)

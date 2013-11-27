@@ -167,20 +167,24 @@ if(!is.null(file)) {
     }
 
     cat("\n\n")
-    
+
   # the spatial distributions
 	if(geostat){
 	    for(Deffect in spatial) {  
         	cat("R", Deffect, "[1:N", Deffect, "Spatial] ~ spatial.exp(",sep="")
-			cat("mean", Deffect, "[1:N", Deffect, "Spatial], xSpatial", Deffect, "[1:N", Deffect, "Spatial], 
-				ySpatial",Deffect, "[1:N", Deffect, "Spatial], T", Deffect,
-					", phi", Deffect,", 1)\n", sep="")  
+			cat("mean", Deffect, "[1:N", Deffect, "Spatial], xSpatial", Deffect, 
+				"[1:N", Deffect, "Spatial],\n    ySpatial",
+				Deffect, "[1:N", Deffect, "Spatial], T", prefix, Deffect,
+					", range",prefix,  Deffect,", 1)\n", sep="")  
 		# prior on phi
-		parName = paste("phi", Deffect,sep="")
+		parName = paste("phi", prefix,Deffect, sep="")
 		if(parName %in% names(priors))
-			cat(parName, "~", priors[[parName]], "\n")
+			cat(parName, " ~ ", unlist(priors[parName]), "\n")
 		else
-		 cat(parName, "~ dgamma(0.01, 0.01)")
+		 cat(parName, " ~ dgamma(0.01, 0.01)")
+	 	# transform phi to range
+		cat("range", prefix, Deffect, " <- ", 
+				parName,  "/SD", prefix,Deffect,sep="")
 		}
 	} else { # a BYM model
 	  for(Deffect in spatial) {  
@@ -188,10 +192,16 @@ if(!is.null(file)) {
           "[], weights", Deffect, "[], num", Deffect, "[], T", Deffect, "Spatial)\n", sep="")  
       }  
 }
-  
+
   # the priors
-  cat("\n\n# priors\n\n")
-   cat(paste("intercept", prefix, sep=""), "~ dunif(-1000,1000)\n")
+  cat("\n\n# priors\n\n")  
+  
+  intName = paste("intercept", prefix, sep="")
+  if(intName %in% names(priors)) {
+	  cat(intName, " ~ ", unlist(priors[intName]), "\n")
+  } else {
+   cat(intName, " ~ dunif(-1000,1000)\n")
+  }
   for(Deffect in names(covariates)) {
     thiscov = covariates[[Deffect]]
     if(length(thiscov)==1) {
@@ -200,7 +210,7 @@ if(!is.null(file)) {
       for(Dpar in 1:length(covariates[[Deffect]])) {
           parName = paste("beta", Deffect, "[", Dpar, "]", sep="")
           if(any(names(priors)==parName)) {
-           cat(parName, "~", priors[parName], "\n")
+           cat(parName, " ~ ", unlist(priors[parName]), "\n")
           } else {     
           cat(parName,  " ~ dunif(-1000,1000)\n",sep="")
         }
@@ -222,24 +232,26 @@ if(length(reparam)){
    }
  }
 }
-  
-  cat("\n")
+ 
+cat("\n")
   if(! family %in% c("normal", "gaussian"))
     effects = effects[-length(effects)]
   for(Deffect in effects) {
-    cat("T", Deffect, " <- pow(SD", Deffect, ", -2)\n", sep="")
-     parName = paste("SD", Deffect, sep="")
+	  parName = paste("SD", prefix, Deffect, sep="")
+    cat("T", prefix, Deffect, " <- pow(", parName, ", -2)\n", sep="")
      if(any(names(priors) == parName)){
-         cat(parName, "~", priors[parName], "\n", sep="")
+         cat(parName, "~", unlist(priors[parName]), "\n", sep="")
      }else{
      cat(parName, " ~ dunif(0, 100)\n", sep="")
      }
   }
+ 
 	# if a BYM model, add prior for standard deviation of spatial effect
   if (length(spatial) & !geostat) {
   for(Deffect in spatial) {
-       cat("T", Deffect, "Spatial <- pow(SD", Deffect, "Spatial, -2)\n", sep="")
-       parName = paste("SD", Deffect, "Spatial", sep="")
+	  parName = paste("SD", prefix, Deffect, "Spatial", sep="")
+	  cat("T", prefix, Deffect, "Spatial <- pow(", 
+			   parName, "-2)\n", sep="")
        if(any(names(priors) == parName)){
        cat(parName, "~", priors[parName], "\n", sep="")
        }else{
@@ -253,5 +265,5 @@ if(!is.null(file)) {
 
   sink()
 }
-
+ return(invisible(scan(file, what='a', sep="\n",quiet=TRUE)))
 }

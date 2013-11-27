@@ -42,7 +42,19 @@ function(startingValues, file="getInits.R") {
     cat("result[[\"", theR, 
       "\"]] = rnorm(length(", theSV, "),\n ", indent, 
       theSV, ", startingValues$vars[[\"", Dvar, "\"]]/SDscale)\n\n",sep="")
-    
+   
+	# if it's a spatial random effect, make it sum to zero
+	if(length(grep("Spatial$", Dvar))) {
+		cat("
+		if(all(abs(result[[ \"", theR, "\" ]])<0.1)){
+			result[[ \"", theR, "\" ]] = rep(0, 
+					length(result[[ \"", theR, "\" ]] ))
+		} else {	
+			result[[ \"", theR, "\" ]] = result[[ \"", theR, "\" ]] -
+					mean(result[[ \"", theR, "\" ]])
+		}",sep="")
+	}
+
   }
  
   # range parameters for geostatiatical models

@@ -141,11 +141,14 @@ if(any(names(ragged) == paste("adj",effectVec[D], sep=""))) {
         startingValues$vars[[spatialEffectIndepVar[D] ]]^2*(1-spatialFactor)
       )
 
- } else if (paste("xSpatial",effectVec[D], sep="" ) %in% names(ragged)) { # this is a geostatistical model
+ } else if (paste("xSpatial",effectVec[D], sep="" ) %in% names(ragged)) { 
+	 # this is a geostatistical model
 	startingValues$phi[[effectVec[D] ]] = sqrt(
 			diff(range(ragged[[paste("xSpatial",effectVec[D], sep="" )]]))^2 + 
 	    			diff(range(ragged[[paste("ySpatial",effectVec[D], sep="" )]]))^2 
 	)/20
+	startingValues$phi[[effectVec[D] ]] * 
+			pmax(0.01^2, startingValues$vars[[paste("SD", D, sep="")]])
 } else {
 	 warning(spatialEffectPlain[D], " not sure what to do with this spatial random effect")
 	 

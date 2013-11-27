@@ -4,9 +4,9 @@ Title: Generalised Linear Mixed Models and Spatial Models with WinBUGS, BRugs, o
 Version: 2.3
 Date: 2013-11-26
 Depends: R (>= 3.0.0)
-Imports: MASS, nlme, abind, 
+Imports: MASS, abind, 
 Suggests: RandomFields, spdep, raster
-Enhances: R2WinBUGS, R2OpenBUGS, BRugs, R2jags, sp
+Enhances: R2WinBUGS, R2OpenBUGS, BRugs, R2jags, sp, nlme
 Author: Patrick Brown
 Maintainer: Patrick Brown <patrick.brown@utoronto.ca>
 Description: Write bugs model files for hierarchical and spatial models, arranges unbalanced data in ragged arrays, and creates starting values.
