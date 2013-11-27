@@ -16,7 +16,7 @@ if( "R2OpenBUGS" %in% rownames(installed.packages)) {
 	bacrag <- glmmBUGS(formula = yInt ~ trt + week, 
 			data = bacterianew,
 			effects = "ID", modelFile = "bacteria.txt",
-			family = "bernoulli")
+			family = "bernoulli",brugs=TRUE)
 	
 	
 	source("getInits.R")
