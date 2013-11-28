@@ -175,7 +175,7 @@ if(!is.null(file)) {
 			cat("mean", Deffect, "[1:N", Deffect, "Spatial], xSpatial", Deffect, 
 				"[1:N", Deffect, "Spatial],\n    ySpatial",
 				Deffect, "[1:N", Deffect, "Spatial], T", prefix, Deffect,
-					", range",prefix,  Deffect,", 1)\n", sep="")  
+					", scale",prefix,  Deffect,", 1)\n", sep="")  
 		# prior on phi
 		parName = paste("phi", prefix,Deffect, sep="")
 		if(parName %in% names(priors))
@@ -183,7 +183,7 @@ if(!is.null(file)) {
 		else
 		 cat(parName, " ~ dgamma(0.01, 0.01)")
 	 	# transform phi to range
-		cat("range", prefix, Deffect, " <- ", 
+		cat("scale", prefix, Deffect, " <- 2*", 
 				parName,  "/SD", prefix,Deffect,sep="")
 		}
 	} else { # a BYM model
