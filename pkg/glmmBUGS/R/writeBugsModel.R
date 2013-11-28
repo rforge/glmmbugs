@@ -251,7 +251,7 @@ cat("\n")
   for(Deffect in spatial) {
 	  parName = paste("SD", prefix, Deffect, "Spatial", sep="")
 	  cat("T", prefix, Deffect, "Spatial <- pow(", 
-			   parName, "-2)\n", sep="")
+			   parName, ", -2)\n", sep="")
        if(any(names(priors) == parName)){
        cat(parName, "~", priors[parName], "\n", sep="")
        }else{
