@@ -32,11 +32,11 @@ if(is.null(parameters)) {
   
   for(Dbeta in betas) {
      if(length(dim(chain[[Dbeta]])) == 2) {
-        plotOne(chain[[Dbeta]], Dbeta)
+        plotOne(chain[[Dbeta]], Dbeta,oneFigure)
      } else {
         thenames =dimnames(chain[[Dbeta]])[[3]] 
         for(Dpar in thenames[thenames %in% thepars] ) {
-          plotOne(chain[[Dbeta]][,,Dpar], Dpar)
+          plotOne(chain[[Dbeta]][,,Dpar], Dpar,oneFigure)
         }
      }   
   }
@@ -46,7 +46,8 @@ if(is.null(parameters)) {
   invisible() 
 }
 
-plotOne = function(mat, main=NULL) {
+plotOne = function(mat, main=NULL, oneFigure=TRUE) {
 
+	if(!oneFigure) main = NULL
  matplot(mat, lty=1, type="l", main=main)
 }
