@@ -174,17 +174,26 @@ if(!is.null(file)) {
         	cat("R", Deffect, "[1:N", Deffect, "Spatial] ~ spatial.exp(",sep="")
 			cat("mean", Deffect, "[1:N", Deffect, "Spatial], xSpatial", Deffect, 
 				"[1:N", Deffect, "Spatial],\n    ySpatial",
-				Deffect, "[1:N", Deffect, "Spatial], T", prefix, Deffect,
-					", scale",prefix,  Deffect,", 1)\n", sep="")  
+				Deffect, "[1:N", Deffect, "Spatial],",sep="")
+			if(brugs) {
+				cat("V",prefix,  Deffect,", ",
+					"scale", prefix, Deffect, ", ", 
+					"1)\n", sep="")
+				cat("V",prefix,  Deffect," <- ",
+					"pow(SD",prefix,  Deffect,",2)\n", sep="") 					
+			} else {
+			cat("T", prefix, Deffect,
+					", scale",prefix,  Deffect,", 1)\n", sep="")
+		}
 		# prior on phi
-		parName = paste("phi", prefix,Deffect, sep="")
+		parName = paste("phi", prefix, Deffect, sep="")
 		if(parName %in% names(priors))
 			cat(parName, " ~ ", unlist(priors[parName]), "\n")
 		else
 		 cat(parName, " ~ dgamma(0.01, 0.01)")
 	 	# transform phi to range
 		cat("scale", prefix, Deffect, " <- 2*", 
-				parName,  "/SD", prefix,Deffect,sep="")
+				"SD", prefix,Deffect,"/",parName,sep="")
 		}
 	} else { # a BYM model
 	  for(Deffect in spatial) {  
@@ -205,10 +214,15 @@ if(!is.null(file)) {
   for(Deffect in names(covariates)) {
     thiscov = covariates[[Deffect]]
     if(length(thiscov)==1) {
-        cat("beta", Deffect, " ~ dunif(-1000,1000)\n", sep="")
+		betaName = paste("beta", prefix, Deffect, sep="")
+	  if(betaName %in% names(priors)) {
+		 cat(betaName, " ~ ", unlist(priors[betaName]), "\n")
+	  } else {
+        	cat(betaName, " ~ dunif(-1000,1000)\n", sep="")
+	  }
     } else if(length(thiscov)>1) {
       for(Dpar in 1:length(covariates[[Deffect]])) {
-          parName = paste("beta", Deffect, "[", Dpar, "]", sep="")
+          parName = paste("beta", prefix, Deffect, "[", Dpar, "]", sep="")
           if(any(names(priors)==parName)) {
            cat(parName, " ~ ", unlist(priors[parName]), "\n")
           } else {     

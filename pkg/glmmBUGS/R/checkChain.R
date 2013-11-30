@@ -27,16 +27,16 @@ if(is.null(parameters)) {
 
 
   if(oneFigure) {
-	  par(mfrow=c(ceiling(length(thepars)/4),min(c(4, length(thepars)))), mar=c(2,2,1,0))
+	  par(mfrow=c(ceiling(length(thepars)/4),min(c(4, length(thepars)))), mar=c(2,2,0.1,0.1))
   }
   
   for(Dbeta in betas) {
      if(length(dim(chain[[Dbeta]])) == 2) {
-        plotOne(chain[[Dbeta]], Dbeta,oneFigure)
+        plotOne(chain[[Dbeta]], Dbeta)
      } else {
         thenames =dimnames(chain[[Dbeta]])[[3]] 
         for(Dpar in thenames[thenames %in% thepars] ) {
-          plotOne(chain[[Dbeta]][,,Dpar], Dpar,oneFigure)
+          plotOne(chain[[Dbeta]][,,Dpar])
         }
      }   
   }
@@ -46,8 +46,6 @@ if(is.null(parameters)) {
   invisible() 
 }
 
-plotOne = function(mat, main=NULL, oneFigure=TRUE) {
-
-	if(!oneFigure) main = NULL
- matplot(mat, lty=1, type="l", main=main)
+plotOne = function(mat, main=NULL) {
+ matplot(mat, lty=1, type="l", main=main, xlab='iteration', ylab=main)
 }
