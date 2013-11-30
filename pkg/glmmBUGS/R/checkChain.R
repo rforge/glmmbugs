@@ -47,5 +47,5 @@ if(is.null(parameters)) {
 }
 
 plotOne = function(mat, main=NULL) {
- matplot(mat, lty=1, type="l", main=main, xlab='iteration', ylab=main)
+ matplot(mat, lty=1, type="l", xlab='iteration', ylab=main)
 }

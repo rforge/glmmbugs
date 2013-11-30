@@ -180,7 +180,7 @@ abline(v=myLgcp$par$fixed["layer"])
 \section{OpenBUGS}
 Convert the data to geostatistical data
 <<dataframe>>=
-myraster = raster(extent(torontoBorderR), crs=projection(torontoBorderR),
+myraster = raster(extent(myLgcp$raster), crs=projection(myLgcp$raster),
 		ncol=20)
 myraster = squareRaster(myraster)
 counts = rasterize(myLgcp$events, myraster,fun='count')
@@ -198,45 +198,46 @@ data[1:4,]
 <<glmmBUGS>>=
 library(glmmBUGS)
 data$offset = log(data$area)
-forBugs = glmmBUGS(counts +offset ~night,
+forBugs = glmmBUGS(counts +offset ~ night,
 		family="poisson",
 		data=data.frame(data), 
 		modelFile="theModel.txt",
 		initFile="theInit.R",
 		effects="cell", spatial=data,
-		priors=c(phicell="dunif(2000,100000)", 
-				intercept="dunif(-18, -14)",
-				sdcell = "dunif(0.1,2)",
-				betacell = "dunif(-0.2,0.2)"))
+		priors=c(phicell="dunif(5000,40000)", 
+				intercept="dunif(-20, -10)",
+				SDcell = "dunif(0.1, 4)",
+				betacell = "dunif(-0.1,0.1)"))
 @
 
 
-<<loaloaStarting,echo=TRUE>>=
+<<startingValues,echo=TRUE>>=
 getInits = function() { 
 	list(
-		intercept = runif(1,-17,-15),
+		intercept = forBugs$startingValues$intercept + runif(1,-1,1),
 		betacell =runif(1, -0.05, 0.05),
-		SDcell = runif(1, 0.5, 1.5),
-		phicell = runif(1, 8000, 15000),
-		Rcell = rnorm(length(forBugs$startingValues[["Rcell"]]),
-				forBugs$startingValues[["Rcell"]], 
-				abs(diff(range(forBugs$startingValues[["Rcell"]])))/10)
+		SDcell = runif(1, 0.9, 1.1),
+		phicell = runif(1, 19000, 21000),
+		Rcell = rnorm(length(forBugs$startingValues$Rcell),
+				0, sqrt(0.1))
 		)
 }
 @
 
 Run OpenBUGS
-<<loaloaOpenbugseval=!file.exists("bugsFit.RData")>>=
+<<runOpenbugs,eval=!file.exists("bugsFit.RData")>>=
 library(R2OpenBUGS)
-d1 = date()
+d1=date()
 bugsFit = bugs(forBugs$ragged, inits=getInits,
 		  model.file = "theModel.txt", n.chain = 3,
-		  n.iter = 20, n.burnin = 5,
-		  parameters = names(getInits()),
-		  n.thin = 2, over.relax=FALSE)
+		  n.iter = 60, n.burnin = 10,
+		  parameters = c(names(getInits())),
+		  n.thin = 5) 
 d2=date()
 save(d1, d2,bugsFit,myLgcp,file="bugsFit.RData",compress="xz")
 @
+
+
 <<loadBugsResults,eval=file.exists("bugsFit.RData"),echo=FALSE>>=
 load(file="bugsFit.RData")
 @
@@ -248,15 +249,14 @@ file.copy("bugsFit.RData", "../inst/extdata/bugsFit.RData",overwrite=TRUE)
 @
 
 
-
 <<bugsRestore,echo=TRUE>>=
 theParams = restoreParams(bugsFit, forBugs$ragged)     
-names(bugsFit)[c(1,3,6,7)]
-dim(bugsFit$Rcell)
+names(theParams)[c(1,3,6,7)]
+dim(theParams$Rcell)
 @
 
 <<bugsCheck,fig.cap="Trace plots",fig.subcap=c('range','sd','intercept'),out.width="0.3\\textwidth">>=
-checkChain(theParams, c("rangevillageID","SDvillageID","intercept"), one=FALSE)
+checkChain(theParams, c("rangecell","SDcell","intercept"), one=FALSE)
 @
 
 <<bugsSummary,echo=TRUE>>=
@@ -272,33 +272,77 @@ rownames(toplot) = gsub("rangecell","range(km)", rownames(toplot))
 library(Hmisc)
 latex(toplot[,c("mean","2.5pct","97.5pct")],dec=2,file='', 
 		caption="Parameter posterior distributisons", where="H",
-		caption.loc="bottom",title='',label="tab:btable")
-
-
+		caption.loc="bottom",title='',label="tab:simPostTable")
 @
 
 
 Simulate on the grid conditional on the MCMC samples at data locations
-<<condSimuLoa,echo=TRUE,cache=TRUE>>=
-loaParams$raster = 
+<<condSimuLoa,echo=TRUE,cache=TRUE,eval=FALSE>>=
+theParams$raster = 
 		grfConditional(
-		data=loaloa,
-		y =loaParams$RvillageID,
+		data=data,
+		y =theParams$RvillageID,
 		param=list(
-				range=loaParams$rangevillageID,
-				sd=loaParams$SDvillageID,
+				range=theParams$rangecell,
+				sd=loaParams$SDcell,
 				shape=0.5),
 		locations=50, Nsim=20)
-class(loaParams$raster)
-dim(loaParams$raster)
+class(theParams$raster)
+dim(theParams$raster)
 @
 
-<<gridCmean,echo=TRUE>>=
-loaGridPmean = overlay(loaParams$raster, fun=mean)
-loaGridPmean
+<<gridCmeanSim,echo=TRUE,eval=FALSE>>=
+simGridPmean = overlay(theParams$raster, fun=mean)
+simGridPmean
 @
 
 
+<<bugsResPlot,fig.cap="Surfaces from Bugs",fig.subcap=c("Rand eff true", "Rand eff post mean", "One post'r sample","another sample"),out.width="0.45\\textwidth">>=
+mycol = rev(heat.colors(100))
+map.new(torontoBorderR,legendRight=TRUE)
+plot(torontoTilesR,add=TRUE)
+plot(myLgcp$raster[['random']],add=TRUE,alpha=0.8,col=mycol)
+points(myLgcp$events, col='#00000060',cex=0.25)
+plot(torontoBorder,add=TRUE)
+
+
+map.new(torontoBorderR,legendRight=TRUE)
+plot(torontoTilesR,add=TRUE)
+plot(simGridPmean,add=TRUE,alpha=0.6,col=mycol)
+plot(torontoBorder,add=TRUE)
+
+map.new(torontoBorderR,legendRight=TRUE)
+plot(torontoTilesR,add=TRUE)
+plot(theParams$raster[[1]],add=TRUE,alpha=0.6,col=mycol)
+plot(torontoBorder,add=TRUE)
+
+map.new(torontoBorderR,legendRight=TRUE)
+plot(torontoTilesR,add=TRUE)
+plot(theParams$raster[[10]],add=TRUE,alpha=0.6,col=mycol)
+plot(torontoBorder,add=TRUE)
+@
+
+TODO, Figure \ref{fig:bugsResPlot} with the intensity surface
+
+
+<<bugsPostr,fig.cap='parameter distributions from Openbugs',fig.subcap=c('range','sd','night'),out.width='0.3\\textwidth',fig.height=4,fig.width=5,echo=FALSE>>=
+
+
+# range
+plot(density(simParams$rangecell),main='',col='red', 
+		xlab='range', ylab='density')
+abline(v=myLgcp$par$random["range"])
+
+# sd
+plot(density(simParams$SDcell),main='',col='red', 
+		xlab='range', ylab='density')
+abline(v=sqrt(myLgcp$par$random["variance"]))
+
+# coefficient
+plot(density(simParams$betacell),main='',col='red', 
+		xlab='range', ylab='density')
+abline(v=myLgcp$par$fixed["layer"])
+@
 
 
 \end{document}
