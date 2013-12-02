@@ -21,8 +21,10 @@
 library('knitr')
 opts_chunk$set(echo=TRUE,message=FALSE,
 		dev='png', 
-		fig.align='center',fig.pos='H',width=60,
-		fig.height=3,fig.width=5,out.width="0.45\\textwidth"
+		fig.align='center',fig.pos='H',
+		fig.height=3,fig.width=5,out.width="0.45\\textwidth",
+		tidy=TRUE,
+		tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60)
 )
 par(bg="white")
 library('rgdal')
@@ -114,6 +116,7 @@ if(is.null(fit$raster)) {
 	load(resfile)
 }
 @
+
 <<inlaRes,results='asis',echo=FALSE>>=
 library('Hmisc')
 latex(fit$par$summary[,c("mean","0.025quant","0.975quant")],
@@ -204,9 +207,9 @@ forBugs = glmmBUGS(counts +offset ~ night,
 		modelFile="theModel.txt",
 		initFile="theInit.R",
 		effects="cell", spatial=data,
-		priors=c(phicell="dunif(5000,40000)", 
+		priors=c(phicell="dunif(10000,40000)", 
 				intercept="dunif(-20, -10)",
-				SDcell = "dunif(0.1, 4)",
+				SDcell = "dunif(0.5, 2)",
 				betacell = "dunif(-0.1,0.1)"))
 @
 
@@ -214,7 +217,7 @@ forBugs = glmmBUGS(counts +offset ~ night,
 <<startingValues,echo=TRUE>>=
 getInits = function() { 
 	list(
-		intercept = forBugs$startingValues$intercept + runif(1,-1,1),
+		intercept =  runif(1,-17,-15),
 		betacell =runif(1, -0.05, 0.05),
 		SDcell = runif(1, 0.9, 1.1),
 		phicell = runif(1, 19000, 21000),
@@ -230,7 +233,7 @@ library(R2OpenBUGS)
 d1=date()
 bugsFit = bugs(forBugs$ragged, inits=getInits,
 		  model.file = "theModel.txt", n.chain = 3,
-		  n.iter = 60, n.burnin = 10,
+		  n.iter = 100, n.burnin = 5,
 		  parameters = c(names(getInits())),
 		  n.thin = 5) 
 d2=date()
@@ -240,7 +243,9 @@ save(d1, d2,bugsFit,myLgcp,file="bugsFit.RData",compress="xz")
 
 <<loadBugsResults,eval=file.exists("bugsFit.RData"),echo=FALSE>>=
 load(file="bugsFit.RData")
+difftime(strptime(d2,"%c"), strptime(d1,"%c"))
 @
+
 <<saveSystemFileBugs,eval=FALSE,echo=FALSE>>=
 file.copy("bugsFit.RData", "../inst/extdata/bugsFit.RData",overwrite=TRUE)
 @
@@ -277,22 +282,22 @@ latex(toplot[,c("mean","2.5pct","97.5pct")],dec=2,file='',
 
 
 Simulate on the grid conditional on the MCMC samples at data locations
-<<condSimuLoa,echo=TRUE,cache=TRUE,eval=FALSE>>=
+<<condSimuLoa,echo=TRUE,cache=TRUE,eval=TRUE>>=
 theParams$raster = 
 		grfConditional(
 		data=data,
-		y =theParams$RvillageID,
+		y =theParams$Rcell,
 		param=list(
 				range=theParams$rangecell,
-				sd=loaParams$SDcell,
+				sd=theParams$SDcell,
 				shape=0.5),
 		locations=50, Nsim=20)
 class(theParams$raster)
 dim(theParams$raster)
 @
 
-<<gridCmeanSim,echo=TRUE,eval=FALSE>>=
-simGridPmean = overlay(theParams$raster, fun=mean)
+<<gridCmeanSim,echo=TRUE,eval=TRUE>>=
+simGridPmean = raster::overlay(theParams$raster, fun=mean)
 simGridPmean
 @
 
@@ -329,17 +334,17 @@ TODO, Figure \ref{fig:bugsResPlot} with the intensity surface
 
 
 # range
-plot(density(simParams$rangecell),main='',col='red', 
+plot(density(theParams$rangecell),main='',col='red', 
 		xlab='range', ylab='density')
 abline(v=myLgcp$par$random["range"])
 
 # sd
-plot(density(simParams$SDcell),main='',col='red', 
+plot(density(theParams$SDcell),main='',col='red', 
 		xlab='range', ylab='density')
 abline(v=sqrt(myLgcp$par$random["variance"]))
 
 # coefficient
-plot(density(simParams$betacell),main='',col='red', 
+plot(density(theParams$beta),main='',col='red', 
 		xlab='range', ylab='density')
 abline(v=myLgcp$par$fixed["layer"])
 @
