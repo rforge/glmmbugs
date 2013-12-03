@@ -1,47 +1,42 @@
 checkChain = function(chain, parameters=NULL, oneFigure=TRUE) {
-if(is.array(chain))
-  chain = list(beta=chain)
-if(is.null(parameters)) {
-  betas = grep("^beta", names(chain), value=TRUE)
-  betas = c( grep("intercept", names(chain), value=TRUE), betas)
-  betas  = c(grep("^SD", names(chain), value=TRUE), betas)
-  betas  = c(grep("^phi", names(chain), value=TRUE), betas)
-  
- 
-  if(length(betas) > 100)
-    betas = betas[1:100]
- 
 
+	if(is.array(chain))
+  chain = list(beta=chain)
+
+if(is.null(parameters)) {
+	parameters = grep("^sd|range|intercept|betas",
+			names(chain),value=TRUE,ignore.case=TRUE)
+}
+
+if(!all(parameters %in% names(chain)))
+	warning("parameter ", parameters[!parameters %in% names(chain)], 
+			"not found")
 
   # find out the number of parameters
-  themat = unlist(lapply(chain[betas], is.matrix))
-
-  thepars = c(betas[themat], 
-    unlist(lapply(chain[betas[!themat]], function(qq)
-      dimnames(qq)[[3]])))
-
-  } else {
-   thepars = parameters 
-   betas=c(parameters, "betas")
-  }
+  	scalars = unlist(lapply(chain[parameters], is.matrix))
+	notScalars = parameters[!scalars]
+	scalars = parameters[scalars]
 
 
-  if(oneFigure) {
-	  par(mfrow=c(ceiling(length(thepars)/4),min(c(4, length(thepars)))), mar=c(2,2,0.1,0.1))
+	
+	if(oneFigure) {
+		Nplots = length(scalars)
+
+		for(Dbeta in notScalars)
+			Nplots = Nplots + dim(chain[[Dbeta]])[3]
+
+	  par(mfrow=c(ceiling(Nplots/4),min(c(4, Nplots))))
   }
   
-  for(Dbeta in betas) {
-     if(length(dim(chain[[Dbeta]])) == 2) {
-        plotOne(chain[[Dbeta]], Dbeta)
-     } else {
-        thenames =dimnames(chain[[Dbeta]])[[3]] 
-        for(Dpar in thenames[thenames %in% thepars] ) {
-          plotOne(chain[[Dbeta]][,,Dpar])
-        }
-     }   
-  }
-
-
+  for(Dbeta in parameters) {
+	  if(Dbeta %in% scalars) {
+		  plotOne(chain[[Dbeta]], Dbeta)
+	  } else {
+		  for(D2 in dimnames(chain[[Dbeta]])[[3]])
+			  plotOne(chain[[Dbeta]][,,D2], 
+					  D2)
+		  }
+	 }
   
   invisible() 
 }

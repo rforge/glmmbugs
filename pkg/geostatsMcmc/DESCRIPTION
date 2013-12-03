@@ -6,7 +6,7 @@ Date: 2013-11-28
 Depends: sp, raster, geostatsp 
 Imports:  spdep geostatsinla
 Suggests: rgdal
-Enhances: INLA, mapmisc, lgcp, glmmBUGS
+Enhances: INLA, mapmisc, lgcp, glmmBUGS, xtable
 Author: Patrick Brown <patrick.brown@utoronto.ca>
 Maintainer: Patrick Brown <patrick.brown@utoronto.ca>
 Description: This package provides a number of MCMC methods for geostatistical problems using a common interface to a number of packages.
