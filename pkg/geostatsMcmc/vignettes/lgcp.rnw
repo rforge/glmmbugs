@@ -190,15 +190,15 @@ abline(v=myLgcp$par$fixed["layer"])
 Convert the data to geostatistical data
 <<dataframe>>=
 myraster = raster(extent(myLgcp$raster), crs=projection(myLgcp$raster),
-		ncol=20)
+		ncol=10)
 myraster = squareRaster(myraster)
 counts = rasterize(myLgcp$events, myraster,fun='count')
 counts = reclassify(counts, matrix(c(NA, 0),ncol=2))
 data = stackRasterList(list(counts=counts, night=torontoNightR), template=counts)
 data = as.data.frame(data,xy=TRUE)
 data = data[!is.na(data$night),]
-data$area = prod(res(counts))
 data$cell = seq(1,dim(data)[1])
+data$offset = sum(log(res(myraster)))
 data = SpatialPointsDataFrame(data[,c("x","y")], 
 		data=data[,-grep("^x$|^y$", names(data))])
 data[1:4,]
@@ -206,42 +206,45 @@ data[1:4,]
 
 <<glmmBUGS>>=
 library(glmmBUGS)
-data$offset = log(data$area)
-forBugs = glmmBUGS(counts +offset ~ night,
+forBugs = glmmBUGS(counts ~1,#+offset ~ 1,#night,
 		family="poisson",
 		data=data.frame(data), 
 		modelFile="theModel.txt",
 		initFile="theInit.R",
 		effects="cell", spatial=data,
-		priors=c(phicell="dunif(10000,40000)", 
-				intercept="dunif(-20, -10)",
-				SDcell = "dunif(0.25, 2)",
-				betacell = "dunif(-0.1,0.1)"))
+		priors=c(phicell="dunif(8000,12000)", 
+				intercept="dunif(-2, 2)",
+#				betacell = "dunif(-0.1,0.1)",
+				SDcell = "dunif(0.75, 1.5)"),
+		brugs=FALSE)
 @
 
 
 <<startingValues,echo=TRUE>>=
 getInits = function() { 
 	list(
-		intercept =  runif(1,-17,-15),
-		betacell =runif(1, -0.05, 0.05),
+		intercept =  runif(1,-1,1),
+#		betacell =runif(1, -0.05, 0.05),
 		SDcell = runif(1, 0.9, 1.1),
-		phicell = runif(1, 19000, 21000),
+		phicell = runif(1, 9000, 10000),
 		Rcell = rnorm(length(forBugs$startingValues$Rcell),
-				0, sqrt(0.1))
+				forBugs$startingValues$Rcell, sqrt(0.1))
 		)
 }
 @
 
-Run OpenBUGS
+Run WinBUGS
 <<runOpenbugs,eval=!file.exists("bugsFit.RData")>>=
-library(R2OpenBUGS)
+library(R2WinBUGS)
 d1=date()
 bugsFit = bugs(forBugs$ragged, inits=getInits,
 		  model.file = "theModel.txt", n.chain = 3,
-		  n.iter = 100, n.burnin = 5,
-		  parameters = names(getInits()),
-		  n.thin = 5) 
+		  n.iter = 10, n.burnin = 5,
+		  parameters = 
+				  names(getInits()),
+		  n.thin = 2,
+ 	 bugs.directory="/store/patrick/spatialData/WinBUGS14",
+	 debug=TRUE) 
 d2=date()
 save(d1, d2,bugsFit,myLgcp,file="bugsFit.RData",compress="xz")
 @
@@ -272,6 +275,18 @@ checkChain(theParams,
 		c("rangecell","SDcell","betas","intercept"), 
 		one=FALSE)
 @
+
+<<include=FALSE>>=
+Scell = round(seq(1, dim(theParams$Rcell)[3], len=6))
+@
+<<bugsCheckCell,fig.cap="Trace plots of random effects",fig.subcap=Scell,out.width="0.45\\textwidth">>=
+
+for(D in Scell) {
+	matplot(theParams$Rcell[,,D],type='l',lty=1,xlab='iteration',ylab='U')
+}
+
+@
+
 
 <<bugsSummary,echo=TRUE>>=
 theSummary=summaryChain(theParams)
@@ -339,7 +354,7 @@ plot(torontoBorder,add=TRUE)
 TODO, Figure \ref{fig:bugsResPlot} with the intensity surface
 
 
-<<bugsPostr,fig.cap='parameter distributions from Openbugs',fig.subcap=c('range','sd','night','intercept'),out.width='0.45\\textwidth',fig.height=4,fig.width=5,echo=FALSE,dev='pdf'>>=
+<<bugsPostr,fig.cap='posterior distributions from Openbugs',fig.subcap=c('range','sd','night','intercept'),out.width='0.45\\textwidth',fig.height=4,fig.width=5,echo=FALSE,dev='pdf'>>=
 
 # range
 plot(density(theParams$rangecell),main='',col='red', 
@@ -359,7 +374,7 @@ abline(v=myLgcp$par$fixed["layer"])
 # coefficient
 plot(density(theParams$intercept),main='',col='red', 
 		xlab='intercept', ylab='density')
-abline(v=myLgcp$par$fixed["layer"])
+abline(v=myLgcp$par$random["mean"])
 @
 
 
