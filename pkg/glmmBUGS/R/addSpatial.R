@@ -139,8 +139,8 @@ spatialBugs.matrix=function(map, raggedArray=NULL, effect=NULL, prefix=NULL, reg
 	}
 	
 	# add to ragged array
-	raggedArray[[paste("xSpatial", effect, sep="")]] = map[,"x"]
-	raggedArray[[paste("ySpatial", effect, sep="")]] = map[,"y"]
+	raggedArray[[paste("xSpatial", effect, sep="")]] = map[,"x"] - mean(map[,'x'])
+	raggedArray[[paste("ySpatial", effect, sep="")]] = map[,"y"] - mean(map[,"y"])
 	
 	raggedArray[[paste("N", effect, "Spatial", sep="")]] = dim(map)[1]
 

@@ -88,27 +88,32 @@ library(nlme)
 data(Muscle)
 
 
-muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gaussian")
+muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gaussian",modelFile='model.bug',
+reparam='Strip')
 startingValues = muscleRagged$startingValues
 
 \dontrun{
 # run with winbugs
 source("getInits.R")
-require(R2WinBUGS)  
+require('R2WinBUGS')  
 muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
                 model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
                              program="winbugs", working.directory=getwd()) 
 
 # a jags example
-require(R2jags)
+require('R2jags')
 muscleResultJags = jags(
 muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
                 model.file="model.bug", n.chain=3, n.iter=1000, 
                 n.burnin=100, n.thin=10,
                 working.directory=getwd()) 
 
-
+muscleParamsJags = restoreParams(
+	muscleResultJags$BUGSoutput, 
+	muscleRagged$ragged) 
+checkChain(muscleParamsJags)
 }
+
  
 data(muscleResult)
 

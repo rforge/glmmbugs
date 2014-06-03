@@ -93,8 +93,6 @@ for(D in fixedEffects) {
 }  
 
 result$betas = betas
-  
-
 
 #the random effects
 # find grouping variables, all the variables with one dimensional indices
@@ -278,6 +276,10 @@ haveBeta = colnames(extraX)[colnames(extraX) %in% rownames(theBeta)]
        
 }   #end for D in spatialEffects
      
+
+if(dim(result$betas)[3]==1) {
+	result$betas = result$betas[,,1] 
+}
 
 
   return(result)
