@@ -1,47 +1,43 @@
+library('MASS')
+data('bacteria')
+bacterianew <- bacteria
+bacterianew$yInt = as.integer(bacterianew$y == "y")
+levels(bacterianew$trt) <- c("placebo",
+    "drug", "drugplus")
+
+library('glmmBUGS')
+bacrag <- glmmBUGS(formula = yInt ~ trt + week, 
+    data = bacterianew,
+    effects = "ID", modelFile = "bacteria.txt",
+    family = "bernoulli",brugs=TRUE)
 
 
-if( "R2OpenBUGS" %in% rownames(installed.packages)) {
-	
-	
-	
-	library(MASS)
-	data(bacteria)
-	
-	bacterianew <- bacteria
-	bacterianew$yInt = as.integer(bacterianew$y == "y")
-	levels(bacterianew$trt) <- c("placebo",
-			"drug", "drugplus")
-	
-	library(glmmBUGS)
-	bacrag <- glmmBUGS(formula = yInt ~ trt + week, 
-			data = bacterianew,
-			effects = "ID", modelFile = "bacteria.txt",
-			family = "bernoulli",brugs=TRUE)
-	
-	
-	source("getInits.R")
-	startingValues = bacrag$startingValues
-	
-	library(R2OpenBUGS)
-	
-	bacResult = bugs(bacrag$ragged, inits=getInits,
+source("getInits.R")
+startingValues = bacrag$startingValues
+
+if( require("R2OpenBUGS", quietly=TRUE)) {
+  
+  # find patrick's OpenBUGS executable file
+  if(Sys.info()['user'] =='patrick') {	 
+    obExec = system(
+      "find /store/patrick/ -name OpenBUGS",
+    TRUE)
+    obExec = obExec[length(obExec)]
+  } else {
+    obExec = NULL
+  }
+  
+	bacResult = R2OpenBUGS::bugs(bacrag$ragged, inits=getInits,
 			model.file = "bacteria.txt", n.chain = 3,
-			n.iter = 200, n.burnin = 10,
+			n.iter = 600, n.burnin = 10,
 			parameters = names(getInits()),
-			n.thin = 4)
+			n.thin = 4, OpenBUGS.pgm = obExec)
 	
 	bacParams = restoreParams(bacResult,
 			bacrag$ragged)
 	bacsummary = summaryChain(bacParams)
 	
-	
-	bacsummary$betas
-	
-	
-	checkChain(bacParams, c("intercept", "SDID"),oneFigure=FALSE)
-	
-	
-	
-	
-	
+		bacsummary$betas[,c('mean', 'sd')]
+		
+	checkChain(bacParams, c("intercept", "SDID"),oneFigure=TRUE)
 }

@@ -149,12 +149,20 @@ forBugs = glmmBUGS(formula=observed + logExpected ~ 1,
 startingValues = forBugs$startingValues
 
 source("getInits.R")
+  # find patrick's OpenBUGS executable file
+  if(Sys.info()['user'] =='patrick') {	 
+    obExec = system(
+      "find /store/patrick/ -name OpenBUGS",
+    TRUE)
+    obExec = obExec[length(obExec)]
+  } else {
+    obExec = NULL
+  }
 
- 
-library(R2WinBUGS)
-ontarioResult = bugs(forBugs$ragged, getInits, 
+bugsResult = bugs(forBugs$ragged, getInits, 
   parameters.to.save = names(getInits()),
-    model.file="model.bug", n.chain=3, n.iter=50, n.burnin=10, n.thin=2,
+    model.file="model.bug", n.chain=3, n.iter=50, n.burnin=10, 
+    n.thin=2,
       program="winbugs", debug=T,working.directory=getwd())
 
 

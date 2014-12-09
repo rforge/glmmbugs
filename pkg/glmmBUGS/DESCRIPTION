@@ -1,13 +1,13 @@
 Package: glmmBUGS
 Type: Package
-Title: Generalised Linear Mixed Models and Spatial Models with WinBUGS, BRugs, or OpenBUGS
-Version: 2.3
-Date: 2013-11-26
+Title: Generalised Linear Mixed Models with BUGS and JAGS
+Version: 2.3.1
+Date: 2014-12-09
 Depends: R (>= 3.0.0)
 Imports: MASS, abind, 
 Suggests: spdep
-Enhances: R2WinBUGS, R2OpenBUGS, BRugs, R2jags, sp, nlme
+Enhances: R2WinBUGS, R2OpenBUGS, BRugs, R2jags, sp, nlme,diseasemapping
 Author: Patrick Brown
 Maintainer: Patrick Brown <patrick.brown@utoronto.ca>
-Description: Write bugs model files for hierarchical and spatial models, arranges unbalanced data in ragged arrays, and creates starting values.
+Description: Automates running Generalized Linear Mixed Models, including spatial models, with WinBUGS, OpenBUGS and JAGS.  Models are specified with formulas, with the package writings model files, arranging unbalanced data in ragged arrays, and creating starting values.  The model is reprametrized, and functions are provided for converting model outputs to the original parametrization.
 License: GPL
