@@ -7,7 +7,7 @@ Rongelap data
 \description{
 A SpatialPointsDataFrame containing the Rongelap data, in a UTM projection.
 }
-\usage{data(rongelapUTM)}
+\usage{data('rongelapUTM')}
  
 \details{
 These coordinates were obtained by translating and rotating the original Rongelap data
@@ -15,17 +15,19 @@ until all the coordinates fit into the Rongelap border given by www.gadm.org.
 So they are not exact.
 }
 \source{
-See the help file for rongelap in geoRglm, or http://www.leg.ufpr.br/doku.php/pessoais:paulojus:mbgbook:datasets
+See the help file for \code{\link[geoRglm]{rongelap}, or 
+\url{http://www.leg.ufpr.br/doku.php/pessoais:paulojus:mbgbook:datasets}
 }
- 
 \examples{
-data(rongelapUTM)
+data('rongelapUTM')
+plot(rongelapUTM)
 \dontrun{
-library(rgdal)
-rongelapLL<-spTransform(rongelapUTM,CRS("+proj=longlat +datum=NAD83"))
-   load(url("http://www.gadm.org/data/rda/MHL_adm0.RData"))
-   plot(rongelapLL)
-   plot(gadm, add=T)    
+library('raster')
+rongelapBorderLL = getData('GADM', country='MHL',level=0) 
+library('rgdal')
+rongelapBorderUTM = spTransform(rongelapBorderLL, 
+	CRS(proj4string(rongelapUTM)))
+plot(rongelapBorderUTM, add=TRUE)
 }
 }
 \keyword{datasets}

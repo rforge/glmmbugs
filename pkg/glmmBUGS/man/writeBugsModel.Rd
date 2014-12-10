@@ -10,10 +10,10 @@ Given a list of effect groups, and the covariates associated with each level, a 
 }
 \usage{
 writeBugsModel(file, effects, covariates, observations, 
-family = c("bernoulli", "binomial", "poisson", "normal", "other"), spatial = NULL, 
-geostat=FALSE, 
+family = c("bernoulli", "binomial", "poisson", "normal", "other"), 
+spatial = NULL,  geostat=FALSE, 
 prefix = "",reparam=NULL, brugs=TRUE, priors=NULL)
-}
+	}
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{file}{
@@ -66,6 +66,9 @@ Patrick Brown, \email{patrick.brown@utoronto.ca}
 \examples{
 writeBugsModel("model.bug", effects="Strip",  observations="conc",
   covariates=list(observations="length"),
-  family="normal", priors=c(intercept="dunif(-10,10)") ) 
+  family="normal", priors=c(intercept="dunif(-10,10)") )
+
+cat(scan("model.bug", "a",sep='\n'),sep='\n')
+
 }
 

@@ -45,7 +45,9 @@ Consider the following model, where \eqn{Y_{ijk}}{Y_ijk} is the number of absenc
 
 Here there are covariates which apply to each of the three levels, and random effects at the school and class level. If \code{data} is a data frame with one line per individual, the following would impliment this model: 
 
-\code{glmmBUGS(data, effects=c("school","class"), covariates = list(school="schoolCategory", class="classSize", observations="age"), observations = "absences"), family="poisson")}
+\code{glmmBUGS(data, effects=c("school","class"),}
+\code{  covariates = list(school="schoolCategory", class="classSize", observations="age"),}
+\code{  observations = "absences"), family="poisson")}
 
 To aid in convergence, the bugs model is actually the following:
 
@@ -96,9 +98,12 @@ startingValues = muscleRagged$startingValues
 # run with winbugs
 source("getInits.R")
 require('R2WinBUGS')  
-muscleResult = bugs(muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
-                model.file="model.bug", n.chain=3, n.iter=1000, n.burnin=100, n.thin=10,
-                             program="winbugs", working.directory=getwd()) 
+muscleResult = bugs(muscleRagged$ragged, getInits, 
+	parameters.to.save = names(getInits()),
+	model.file="model.bug", n.chain=3, n.iter=1000, 
+	n.burnin=100, n.thin=10, program="winbugs", 
+	working.directory=getwd()
+) 
 
 # a jags example
 require('R2jags')
@@ -127,19 +132,18 @@ checkChain(muscleParams)
 \dontrun{
 library(diseasemapping)
 
-data(popdata)
-data(casedata)
+data('popdata')
+data('casedata')
 
 model = getRates(casedata, popdata, ~age*sex)
 ontario = getSMR(popdata, model, casedata)
 ontario = ontario@data[,c("CSDUID","observed","logExpected")]
 
-library(spdep)
-popDataAdjMat = poly2nb(popdata,row.names=as.character(popdata[["CSDUID"]]))
+popDataAdjMat = spdep::poly2nb(popdata,
+	row.names=as.character(popdata[["CSDUID"]]))
 
-
-data(popDataAdjMat)
-data(ontario)
+data('popDataAdjMat')
+data('ontario')
 
 forBugs = glmmBUGS(formula=observed + logExpected ~ 1,
   effects="CSDUID",   family="poisson", spatial=popDataAdjMat,
@@ -166,7 +170,7 @@ bugsResult = bugs(forBugs$ragged, getInits,
       program="winbugs", debug=T,working.directory=getwd())
 
 
-data(ontarioResult)
+data('ontarioResult')
 
 ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
 
@@ -196,10 +200,13 @@ library(geoRglm)
 data(rongelap)
 
 rongelap= read.table(url(
-"http://www.leg.ufpr.br/lib/exe/fetch.php/pessoais:paulojus:mbgbook:datasets:rongelap.txt"
-),header=TRUE)
+	paste("http://www.leg.ufpr.br/lib/exe/fetch.php/",
+	"pessoais:paulojus:mbgbook:datasets:rongelap.txt",
+	sep="")
+	),header=TRUE
+)
 
-library(spdep)
+library('spdep')
 coordinates(rongelap) = ~cX+cY
 
 
@@ -216,23 +223,20 @@ startingValues$phi$site = 100
 
 source("getInits.R")
 
-
-
 rongelapResult = bugs(forBugs$ragged, getInits, 
   parameters.to.save = names(getInits()),
     model.file="model.bug", n.chain=2, n.iter=20, n.burnin=4, n.thin=2,
       program="winbugs", debug=TRUE,
       working.directory=getwd())
 
-% save(rongelapResult, file="pkg/glmmBUGS/data/rongelapResult.RData")
-
-data(rongelapResult)
+data('rongelapResult')
 
 rongelapParams = restoreParams(rongelapResult, forBugs$ragged)      
       
 checkChain(rongelapParams)
 
-rongelapParams$siteGrid = CondSimuPosterior(rongelapParams, rongelap,gridSize=100) 
+rongelapParams$siteGrid = CondSimuPosterior(rongelapParams, rongelap,
+	gridSize=100) 
 
 rongelapSummary=summaryChain(rongelapParams)
 
