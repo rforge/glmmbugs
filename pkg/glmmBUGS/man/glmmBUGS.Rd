@@ -87,9 +87,9 @@ section of the bugs manual, at \url{http://mathstat.helsinki.fi/openbugs/data/Do
 library(nlme)
 data(Muscle)
 
-
-muscleRagged = glmmBUGS(conc ~ length, data=Muscle, effects="Strip", family="gaussian",modelFile='model.bug',
-reparam='Strip')
+muscleRagged = glmmBUGS(conc ~ length, data=Muscle, 
+	effects="Strip", family="gaussian",
+	modelFile='model.bug', reparam='Strip')
 startingValues = muscleRagged$startingValues
 
 \dontrun{
