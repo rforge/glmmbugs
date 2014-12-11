@@ -15,7 +15,7 @@ if(require('diseasemapping', quietly=TRUE)&
 kentucky = getSMR(kentucky, larynxRates, larynx,
     regionCode="County")
 
-kAdjMat = poly2nb(kentucky,
+kAdjMat = spdep::poly2nb(kentucky,
     row.names=as.character(kentucky$County))
 
 library('glmmBUGS')
@@ -58,19 +58,22 @@ kResult = R2OpenBUGS::bugs(forBugs$ragged,
   n.thin = 10, OpenBUGS.pgm = obExec
 )
 
-
 kParams = restoreParams(kResult,
     forBugs$ragged)
 kSummary = summaryChain(kParams)
 
 kSummary$scalars[,c('mean', 'sd')]
 
-checkChain(kParams, c("intercept", "SDCountySpatial"),oneFigure=TRUE)
-
+pdf("checkChainBym.pdf",height=4,width=8)
+checkChain(kParams, c("intercept", "SDCountySpatial"))
+dev.off()
 
 kentucky = mergeBugsData(kentucky, kSummary)
 
-if(require('sp', quietly=TRUE))
-  spplot(kentucky, "FittedRateCounty.mean")
+if(require('sp', quietly=TRUE)) {
+  pdf("spplotBym.pdf",height=4,width=8)
+  print(spplot(kentucky, "FittedRateCounty.mean"))
+  dev.off()
+}
 
 }

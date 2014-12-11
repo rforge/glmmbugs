@@ -28,5 +28,7 @@ if( require("R2jags", quietly=TRUE)) {
   
   bacsummary$betas[,c('mean', 'sd')]
   
+  pdf("checkChainJags.pdf",height=4,width=8)
   checkChain(bacParams, c("intercept", "SDID"),oneFigure=TRUE)
+  dev.off()
 }

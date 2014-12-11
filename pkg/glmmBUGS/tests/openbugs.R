@@ -37,7 +37,9 @@ if( require("R2OpenBUGS", quietly=TRUE)) {
 			bacrag$ragged)
 	bacsummary = summaryChain(bacParams)
 	
-		bacsummary$betas[,c('mean', 'sd')]
-		
+	bacsummary$betas[,c('mean', 'sd')]
+
+  pdf("checkChainOpenbugs.pdf",height=4,width=8)
 	checkChain(bacParams, c("intercept", "SDID"),oneFigure=TRUE)
+  dev.off()
 }
