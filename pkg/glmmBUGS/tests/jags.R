@@ -1,11 +1,7 @@
-havePackages = c('R2jags'=NA)
-
-for(D in names(havePackages)){
-  havePackages[D] = require(D, quietly=TRUE)
-}
-
+havePackages = c(
+    'R2jags'= require('R2jags', quietly=TRUE)
+)
 print(havePackages)
-
 
 library('MASS')
 data('bacteria')

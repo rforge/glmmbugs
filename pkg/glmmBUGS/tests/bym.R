@@ -1,9 +1,8 @@
-havePackages = c('diseasemapping'=NA, "spdep"=NA, 
-      'R2OpenBUGS'=NA)
-
-for(D in names(havePackages)){
-  havePackages[D] = require(D, quietly=TRUE)
-}
+havePackages = c(
+    'diseasemapping'=require('diseasemapping', quietly=TRUE), 
+    "spdep"=require('spdep', quietly=TRUE), 
+    'R2OpenBUGS'=require('R2OpenBUGS', quietly=TRUE)
+)
 
 print(havePackages)
 

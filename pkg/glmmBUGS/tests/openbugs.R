@@ -1,8 +1,6 @@
-havePackages = c('R2OpenBUGS'=NA)
-
-for(D in names(havePackages)){
-  havePackages[D] = require(D, quietly=TRUE)
-}
+havePackages = c(
+    'R2OpenBUGS'= require('R2OpenBUGS', quietly=TRUE)
+)
 
 print(havePackages)
 
