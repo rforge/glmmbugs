@@ -1,7 +1,13 @@
-if(require('diseasemapping', quietly=TRUE)&
-    require("spdep", quietly=TRUE) &
-    require('R2OpenBUGS', quietly=TRUE)
-){
+havePackages = c('diseasemapping'=NA, "spdep"=NA, 
+      'R2OpenBUGS'=NA)
+
+for(D in names(havePackages)){
+  havePackages[D] = require(D, quietly=TRUE)
+}
+
+print(havePackages)
+
+if(all(havePackages)){
   data('kentucky')
   larynxRates = structure(c(0, 0, 0, 0, 1e-06, 6e-06, 2.3e-05, 4.5e-05, 9.9e-05, 
           0.000163, 0.000243, 0.000299, 0.000343, 0.000308, 0.000291, 0.000217, 

@@ -1,3 +1,12 @@
+havePackages = c('R2jags'=NA)
+
+for(D in names(havePackages)){
+  havePackages[D] = require(D, quietly=TRUE)
+}
+
+print(havePackages)
+
+
 library('MASS')
 data('bacteria')
 bacterianew <- bacteria
@@ -14,7 +23,7 @@ bacrag <- glmmBUGS(formula = yInt ~ trt + week,
 source("getInits.R")
 startingValues = bacrag$startingValues
 
-if( require("R2jags", quietly=TRUE)) {
+if(all(havePackages)) {
   bacResult = jags(bacrag$ragged, 
       inits=getInits,
       model.file = "bacteria.txt", n.chain = 3,

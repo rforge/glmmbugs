@@ -1,3 +1,11 @@
+havePackages = c('R2OpenBUGS'=NA)
+
+for(D in names(havePackages)){
+  havePackages[D] = require(D, quietly=TRUE)
+}
+
+print(havePackages)
+
 library('MASS')
 data('bacteria')
 bacterianew <- bacteria
@@ -15,7 +23,7 @@ bacrag <- glmmBUGS(formula = yInt ~ trt + week,
 source("getInits.R")
 startingValues = bacrag$startingValues
 
-if( require("R2OpenBUGS", quietly=TRUE)) {
+if(all(havePackages)) {
   
   # find patrick's OpenBUGS executable file
   if(Sys.info()['user'] =='patrick') {	 
