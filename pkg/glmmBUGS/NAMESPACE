@@ -9,3 +9,5 @@ export( checkChain, cholInvArray, getDesignMatrix, getRaggedSeq,
 
 import(abind)
 
+
+export(mergeBugsData)
