@@ -53,7 +53,7 @@ A file, suitable for passing to the \code{\link[R2WinBUGS:bugs]{bugs}} function 
 }
 \references{
 "Handling unbalanced datasets" in the "Tricks: Advanced Use of the BUGS Language" 
-section of the bugs manual, at \url{http://mathstat.helsinki.fi/openbugs/data/Docu/Tricks.html}
+section of the bugs manual, at \url{http://www.openbugs.net/Manuals/Tricks.html}
 }
 \author{
 Patrick Brown, \email{patrick.brown@utoronto.ca}

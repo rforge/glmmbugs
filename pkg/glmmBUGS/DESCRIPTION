@@ -6,7 +6,7 @@ Date: 2015-08-28
 Depends: R (>= 3.0.0)
 Imports: MASS, abind, methods
 Suggests: spdep
-Enhances: R2WinBUGS, R2OpenBUGS, BRugs, R2jags, sp, nlme,diseasemapping,geoRglm
+Enhances: R2WinBUGS, R2OpenBUGS, BRugs, R2jags, sp, nlme, diseasemapping, geoRglm
 Author: Patrick Brown
 Maintainer: Patrick Brown <patrick.brown@utoronto.ca>
 Description: Automates running Generalized Linear Mixed Models, including spatial models, with WinBUGS, OpenBUGS and JAGS.  Models are specified with formulas, with the package writings model files, arranging unbalanced data in ragged arrays, and creating starting values.  The model is reprametrized, and functions are provided for converting model outputs to the original parametrization.

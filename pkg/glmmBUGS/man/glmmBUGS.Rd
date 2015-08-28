@@ -77,7 +77,7 @@ Returns a list with the ragged array, from  \code{\link{winBugsRaggedArray}}, an
 }
 
 \references{"Handling unbalanced datasets" in the "Tricks: Advanced Use of the BUGS Language" 
-section of the bugs manual, at \url{http://mathstat.helsinki.fi/openbugs/data/Docu/Tricks.html}}
+section of the bugs manual, at \url{http://www.openbugs.net/Manuals/Tricks.html}}
 \author{Patrick Brown, \email{patrick.brown@utoronto.ca}}
 
 \note{glmmBUGS uses the \code{inprod2} function, which isn't implimented in OpenBugs, the model file will have to be modified for use with OpenBUGS.}

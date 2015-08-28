@@ -30,44 +30,10 @@ x, bugsSummary, by.x = NULL, newcol = "mean", ...
 
 
 \examples{
-library('diseasemapping')
-data('popdata')
-newdata = c("3560102"=2, "3560104"=3)
-popdatatry = mergeBugsData(popdata, newdata, by.x="CSDUID")
-
-# if the data set is a spatial polygons data frame: 
-#popdatatry = mergeBugsData.SpatialPolygonsDataFrame(popdata, newdata, by.x="CSDUID")
-
-# if the data set is a data frame
-#popdatatry = mergeBugsData.data.frame(popdata, newdata, by.x="CSDUID")
-
-\dontrun{
-library(glmmBUGS)
-data(popdata)
-data(casedata)
-
-therates = getRates(casedata, popdata, ~age*sex)
-ontario = getSMR(popdata, therates, casedata)
-ontario@data = ontario@data[,c("CSDUID","observed","logExpected")]
-library(spdep)
-popDataAdjMat = poly2nb(ontario, ontario[["CDSUID"]])
-library(glmmBUGS)
-forBugs = glmmBUGS(formula=observed + logExpected ~ 1,
-  effects="CSDUID", family="poisson", spatial=popDataAdjMat,
-  data=ontario@data)
-
-startingValues = forBugs$startingValues
-
-source("getInits.R")
-library(R2WinBUGS)
-ontarioResult = bugs(forBugs$ragged, getInits, parameters.to.save = names(getInits()),
-    model.file="model.bug", n.chain=3, n.iter=100, n.burnin=10, n.thin=2,
-      program="winbugs", debug=TRUE)
-
-data(ontarioResult)
-ontarioParams = restoreParams(ontarioResult, forBugs$ragged)
-ontarioSummary = summaryChain(ontarioParams)
-ontario = mergeBugsData(ontario, ontarioSummary)
+if(require('diseasemapping')){
+	data('popdata')
+	newdata = c("3560102"=2, "3560104"=3)
+	popdatatry = mergeBugsData(popdata, newdata, by.x="CSDUID")
 }
 
 }
