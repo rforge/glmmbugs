@@ -8,6 +8,7 @@ export( checkChain, cholInvArray, getDesignMatrix, getRaggedSeq,
        winBugsRaggedArray, writeBugsModel)
 
 import(abind)
+import(methods)
 
 
 export(mergeBugsData)

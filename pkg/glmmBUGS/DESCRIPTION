@@ -4,7 +4,7 @@ Title: Generalised Linear Mixed Models with BUGS and JAGS
 Version: 2.3.2
 Date: 2015-08-28
 Depends: R (>= 3.0.0)
-Imports: MASS, abind
+Imports: MASS, abind, methods
 Suggests: spdep
 Enhances: R2WinBUGS, R2OpenBUGS, BRugs, R2jags, sp, nlme,diseasemapping,geoRglm
 Author: Patrick Brown
