@@ -42,14 +42,18 @@ if(haveR2jags) {
 ```
 
 ```{r postprocess}  
+if(haveR2jags) {
 bacParams = restoreParams(bacResult$BUGSoutput,
      bacrag$ragged)
+}
 ```
 
 ```{r results}
+if(haveR2jags) {
 bacsummary = summaryChain(bacParams)
   
 bacsummary$betas[,c('mean', 'sd')]
 
 checkChain(bacParams, c("intercept", "SDID"),oneFigure=TRUE)
+}
 ```
