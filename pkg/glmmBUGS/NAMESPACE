@@ -9,5 +9,7 @@ export( checkChain, cholInvArray, getDesignMatrix, getRaggedSeq,
 import(abind)
 import(methods)
 
+importClassesFrom(sp, SpatialPolygonsDataFrame)
+
 
 export(mergeBugsData)
