@@ -9,7 +9,7 @@ glmmBUGS <- function (formula, data, effects, modelFile = "model.txt",
 )
 {
     data = getDesignMatrix(formula, data, effects)
-    data = na.omit(data)
+    data = stats::na.omit(data)
     covariates = attributes(data)$covariates
     observations = attributes(data)$response
     

@@ -62,7 +62,7 @@ for(Deffect in seq(length(pql$effects), 1)) {
 
   thedata = thedata[theS,]
   # get predicted values
-  thepred = predict(pql, level=Deffect, newdata=thedata)#[theorder]
+  thepred = stats::predict(pql, level=Deffect, newdata=thedata)#[theorder]
   
   # strip white space to make sure everything's compatible
   names(theS) = gsub(" ", "", names(theS))

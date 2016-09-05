@@ -1,5 +1,5 @@
 plotOne = function(mat, main=NULL) {
-	matplot(mat, lty=1, type="l",  ylab=main)
+	graphics::matplot(mat, lty=1, type="l",  ylab=main)
 }
 
 checkChain = function(chain, parameters=NULL, oneFigure=TRUE) {
@@ -39,7 +39,7 @@ if(is.null(parameters)) {
 		if(Nplots==0) warning("Nothing to plot")
 		if(Nplots > 16) warning("Creating", Nplots, "plots, this might not work")
 		
-	  par(mfrow=c(ceiling(Nplots/4),min(c(4, Nplots))),
+	  graphics::par(mfrow=c(ceiling(Nplots/4),min(c(4, Nplots))),
 			  mar=c(1.5,2.5,0,0), mgp=c(1.5, 0.5, 0))
   }
   

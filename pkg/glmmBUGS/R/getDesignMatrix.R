@@ -56,11 +56,11 @@ getCovList = function(covariates, data, effects) {
  
  getDesignMatrix = function(formula, data, effects=NULL) {
 
-  covariates = attr(terms(formula), "term.labels")
+  covariates = attr(stats::terms(formula), "term.labels")
   interactions = grep(":", covariates, value=TRUE)
   mainEffects = covariates[! covariates %in% interactions]
   
-  response = as.character(attributes(terms(formula))$variables)[2]
+  response = as.character(attributes(stats::terms(formula))$variables)[2]
   response = unlist(strsplit(response, "\\+"))
   response=gsub("[[:space:]]", "", response)
 
@@ -73,7 +73,7 @@ getCovList = function(covariates, data, effects) {
   # make the most populous category the baseline
   bases = getBases(covList, data, effects)
 
-  designMatrix = model.matrix(formula, data, contrast.arg=bases)
+  designMatrix = stats::model.matrix(formula, data, contrast.arg=bases)
   # get rid of intercept column
   designMatrix = designMatrix[,dimnames(designMatrix)[[2]] != "(Intercept)", drop=FALSE]
 
@@ -119,7 +119,7 @@ getBases = function(covariates, data,  effects=NULL) {
       # remove spaces from labels
       levels(data[[D]]) <- gsub("[[:space:]]", "", levels(data[[D]]))
     
-      bases[[D]] = contr.treatment(levels(data[[D]]), 
+      bases[[D]] = stats::contr.treatment(levels(data[[D]]), 
     order(table(data[[D]]), decreasing=TRUE)[1])
     
    } 
@@ -141,7 +141,7 @@ getBases = function(covariates, data,  effects=NULL) {
        thecov = thecov[thecov %in% allfactors]
 
        for(D in thecov)
-             bases[[D]] = contr.treatment(levels(data[[D]]), 
+             bases[[D]] = stats::contr.treatment(levels(data[[D]]), 
                 order(table(data[[D]]), decreasing=TRUE)[1])
     }
     }

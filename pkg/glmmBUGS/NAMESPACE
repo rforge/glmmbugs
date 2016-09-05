@@ -1,4 +1,3 @@
-importFrom(MASS, glmmPQL)
 export(addSpatial)
 export( binToBinom)
 export( checkChain, cholInvArray, getDesignMatrix, getRaggedSeq,

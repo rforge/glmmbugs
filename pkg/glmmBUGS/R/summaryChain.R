@@ -13,8 +13,8 @@ summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
    
       res = c(mean = mean(qq), 
         pval = thep,
-        sd = sd(c(qq)),
-        quantile(qq, probs = probs))
+        sd = stats::sd(c(qq)),
+        stats::quantile(qq, probs = probs))
 
 		names(res) = gsub("\\%", "pct", names(res))
 		res

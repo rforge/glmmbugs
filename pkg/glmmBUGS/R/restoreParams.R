@@ -240,7 +240,7 @@ if(is.null(ragged)) {
        sdBig = array(result[[paste("SD",Dsub,sep="")]], dimNoV)
 
        # realisations of spatially independent effect for regions without Rstuff
-       VfornoV =  rnorm(prod(dim(sdBig)), 0, sdBig)
+       VfornoV =  stats::rnorm(prod(dim(sdBig)), 0, sdBig)
        # convert to an array       
        VfornoV = array(VfornoV, dimNoV) 
        # add names
