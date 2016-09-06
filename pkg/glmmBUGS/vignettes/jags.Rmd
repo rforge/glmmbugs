@@ -3,6 +3,7 @@
 %\VignetteEngine{knitr::knitr}
 -->
 
+# Jags example
 
 ```{r setup}
 haveR2jags = require('R2jags', quietly=TRUE)
