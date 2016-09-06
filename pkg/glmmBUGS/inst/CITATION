@@ -7,7 +7,7 @@ lz = utils::person("L","Zhou")
 utils::bibentry(
   key = 'glmmBUGS',
 	bibtype = "Article",
-  title        = "MCMC for Generalized Linear Mixed Models with glmmBUGS",
+  title        = "{MCMC} for Generalized Linear Mixed Models with {glmmBUGS}",
   author       = c(pb, lz),
   journal      = "R-journal",
   year         = "2010",
@@ -19,11 +19,10 @@ utils::bibentry(
 utils::bibentry(
 	key = 'glmmBUGSPackage',
 	bibtype = "Manual",
-         title = "glmmBUGS: Generalised Linear Mixed Models and Spatial Models with WinBUGS,
-BRugs, or OpenBUGS",
-         author =c(pb, lz),
-         year = year,
-         note = note,
-         url = "http://CRAN.R-project.org/package=glmmBUGS"
+  title = "{glmmBUGS}: Generalised Linear Mixed Models and Spatial Models with {WinBUGS}, {Jags}, and {OpenBUGS}",
+  author =c(pb, lz),
+  year = year,
+  note = note,
+  url = "http://CRAN.R-project.org/package=glmmBUGS"
 )
          
