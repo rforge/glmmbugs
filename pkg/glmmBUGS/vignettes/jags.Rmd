@@ -1,6 +1,7 @@
+
 <!--
+%\VignetteEngine{knitr::rmarkdown}
 %\VignetteIndexEntry{Jags example}
-%\VignetteEngine{knitr::knitr}
 -->
 
 # Jags example
