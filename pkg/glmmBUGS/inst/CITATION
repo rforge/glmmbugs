@@ -23,6 +23,6 @@ utils::bibentry(
   author =c(pb, lz),
   year = year,
   note = note,
-  url = "http://CRAN.R-project.org/package=glmmBUGS"
+  url = "https://CRAN.R-project.org/package=glmmBUGS"
 )
          
