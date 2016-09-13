@@ -5,7 +5,7 @@ setGeneric('mergeBugsData',
     }
 )
 
- 
+#' @importClassesFrom sp SpatialPolygonsDataFrame
  setMethod("mergeBugsData", 
         signature("SpatialPolygonsDataFrame"),
         function(x, bugsSummary, by.x=NULL, newcol="mean", ...) {
