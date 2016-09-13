@@ -1,6 +1,6 @@
 
 <!--
-%\VignetteEngine{knitr::rmarkdown}
+%\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{Jags example}
 -->
 
@@ -21,7 +21,7 @@ levels(bacterianew$trt) <- c("placebo", "drug", "drugplus")
 
 ```{r glmmBUGS}
 require('glmmBUGS')
-bacrag <- glmmBUGS(formula = yInt ~ trt + week, 
+bacrag <- glmmBUGS::glmmBUGS(formula = yInt ~ trt + week, 
     data = bacterianew,
     effects = "ID", modelFile = "bacteria.txt",
     family = "bernoulli",brugs=TRUE)

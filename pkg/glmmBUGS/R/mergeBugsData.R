@@ -1,3 +1,4 @@
+#' @export
 setGeneric('mergeBugsData', 
     function(x, bugsSummary, by.x = NULL, newcol="mean", ...) {
       standardGeneric("mergeBugsData")
@@ -9,7 +10,7 @@ setGeneric('mergeBugsData',
         signature("SpatialPolygonsDataFrame"),
         function(x, bugsSummary, by.x=NULL, newcol="mean", ...) {
     res = x
-		res@data = callGeneric(x@data, bugsSummary, by.x, newcol, ...)
+		res@data = methods::callGeneric(x@data, bugsSummary, by.x, newcol, ...)
 		res
 }
 )

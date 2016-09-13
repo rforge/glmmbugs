@@ -2,6 +2,7 @@ plotOne = function(mat, main=NULL) {
 	graphics::matplot(mat, lty=1, type="l",  ylab=main)
 }
 
+#' @export
 checkChain = function(chain, parameters=NULL, oneFigure=TRUE) {
 
 if(is.array(chain)) {

@@ -1,3 +1,4 @@
+#' @export 
 `addSpatial` <- function(map, raggedArray=NULL, effect=NULL, prefix=NULL) {
 	# find the name of the effect if it isn't specified
     if(is.null(effect)) {

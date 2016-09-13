@@ -1,3 +1,4 @@
+#' @export
 glmmBUGS <- function (formula, data, effects, modelFile = "model.txt", 
 			initFile = "getInits.R", 
 		family = c("bernoulli", "binomial", "poisson", "gaussian"), 

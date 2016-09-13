@@ -1,3 +1,4 @@
+#' @export
 cholInvArray = function(x, prefix="T", chol=FALSE) {
 
 

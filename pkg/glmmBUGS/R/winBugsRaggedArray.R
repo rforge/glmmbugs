@@ -1,3 +1,4 @@
+#' @export 
 `winBugsRaggedArray` <-
 function(data, 
     effects = names(data)[-length(names(data))], 

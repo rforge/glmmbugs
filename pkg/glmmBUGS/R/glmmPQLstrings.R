@@ -1,3 +1,4 @@
+#' @export
 `glmmPQLstrings` <-
 function(effects, covariates, observations, data=NULL, 
   family=c("bernoulli", "binomial", "poisson", "gaussian"), ...) {

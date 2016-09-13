@@ -1,3 +1,4 @@
+#' @export
 `getStartingValues` <-
 function(pql, ragged, prefix=NULL, reparam=NULL) {
 # make a vector of starting values

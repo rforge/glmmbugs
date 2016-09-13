@@ -1,3 +1,4 @@
+
 getCovList = function(covariates, data, effects) {
 
   if(is.list(covariates)) covariates = unique(unlist(covariates))
@@ -53,7 +54,7 @@ getCovList = function(covariates, data, effects) {
   return(covList)
 }
  
- 
+#' @export 
  getDesignMatrix = function(formula, data, effects=NULL) {
 
   covariates = attr(stats::terms(formula), "term.labels")

@@ -1,3 +1,4 @@
+#' @export
 binToBinom = function(obs, covariates) {
 # make sure covariates is a matrix
 if(is.vector(covariates))

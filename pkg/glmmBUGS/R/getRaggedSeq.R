@@ -1,3 +1,4 @@
+#' @export 
 `getRaggedSeq` <-
 function(data) {
   if( dim(data)[2]!=2)

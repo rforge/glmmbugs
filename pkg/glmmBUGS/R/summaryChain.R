@@ -1,3 +1,4 @@
+#' @export 
 summaryChain = function(chain, probs = c(0.005, 0.025, 0.05, 0.5)) {
    thenames = names(chain)
   thenames = thenames[! thenames %in% "deviance"]

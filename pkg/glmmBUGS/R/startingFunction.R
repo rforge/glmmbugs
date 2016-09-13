@@ -1,3 +1,4 @@
+#' @export
 `startingFunction` <-
 function(startingValues, file="getInits.R") {
     

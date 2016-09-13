@@ -1,3 +1,4 @@
+#' @export 
 `restoreParams` <-
 function(bugsResult, ragged=NULL,extraX=NULL) {
                               
@@ -255,7 +256,7 @@ if(is.null(ragged)) {
             result[[DsubSpatial]][,,withSpatial]
         
       # put these results into the posterior simulations array
-      result[[DsubR]] = abind(result[[DsubR]], VfornoV, along=3)
+      result[[DsubR]] = abind::abind(result[[DsubR]], VfornoV, along=3)
       fittedForNoV = VfornoV + array(result$intercept, dimNoV)
 # add covariates if we have them
 if(!is.null(extraX)) {
@@ -268,7 +269,7 @@ haveBeta = colnames(extraX)[colnames(extraX) %in% rownames(theBeta)]
     }
 } #end extraX loop
 
-      result[[Dfitted]] = abind(result[[Dfitted]], fittedForNoV, along=3)
+      result[[Dfitted]] = abind::abind(result[[Dfitted]], fittedForNoV, along=3)
   
       result[[DsubR]] = result[[DsubR]][,,thenames]
       result[[Dfitted]] = result[[Dfitted]][,,thenames]
