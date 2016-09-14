@@ -1,10 +1,10 @@
+# Jags example
 
 <!--
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{Jags example}
 -->
 
-# Jags example
 
 ```{r setup}
 haveR2jags = require('R2jags', quietly=TRUE)
