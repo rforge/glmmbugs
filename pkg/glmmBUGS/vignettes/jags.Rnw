@@ -13,8 +13,9 @@
 library('glmmBUGS')
 haveR2jags = require('R2jags', quietly=TRUE)  
 print(haveR2jags)
+requireNamespace('rjags', quietly=TRUE)
 haveRjags = try(
-		require('rjags'),
+		loadNamespace('rjags'),
   	silent=TRUE)
 if(class(haveRjags) == 'try-error') {
 	haveR2jags = FALSE
@@ -36,28 +37,28 @@ startingValues = muscleRagged$startingValues
 
 <<jagsM>>=
 source("getInits.R")
-
 if(haveR2jags) {
-	
 	muscleResult = jags(
 			muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
       model.file="model.bug", n.chain=3, n.iter=1000, 
       n.burnin=100, n.thin=10, refresh=200,
       working.directory=getwd()) 
-} else {
-	data('muscleResult')
-}
+} 
 @
 
 <<restoreParamsM>>=
-muscleParams = restoreParams(
+if(haveR2jags) {
+	muscleParams = restoreParams(
 	muscleResult$BUGSoutput, 
 	muscleRagged$ragged) 
 summaryChain(muscleParams)$scalars[,c('mean','2.5pct','97.5pct')]
+}
 @
 
 <<checkChainM, fig=TRUE>>=
-checkChain(muscleParams)
+if(haveR2jags) {
+	checkChain(muscleParams)
+}
 @
  
 
