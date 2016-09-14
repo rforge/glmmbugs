@@ -5,8 +5,12 @@ Version: 2.3.3
 Date: 2016-09-13
 Depends: R (>= 3.0.0)
 Imports: abind, methods, MASS, sp, graphics, stats
-Suggests: spdep, R2jags
-Enhances: R2WinBUGS, R2OpenBUGS, BRugs, nlme, diseasemapping, geoRglm
+Suggests: spdep
+Enhances: 
+	nlme, diseasemapping, geoRglm,
+	R2WinBUGS, 
+	R2OpenBUGS, BRugs,  
+	R2jags, rjags
 Author: Patrick Brown, Lutong Zhou
 Maintainer: Patrick Brown <patrick.brown@utoronto.ca>
 Description: Automates running Generalized Linear Mixed Models, including
@@ -15,6 +19,7 @@ Description: Automates running Generalized Linear Mixed Models, including
     in ragged arrays, and creating starting values. The model is reprametrized,
     and functions are provided for converting model outputs to the original
     parametrization.
+SystemRequirements: Compiling vignette requires JAGS (http://mcmc-jags.sourceforge.net)
 License: GPL
 RoxygenNote: 5.0.1
 NeedsCompilation: no

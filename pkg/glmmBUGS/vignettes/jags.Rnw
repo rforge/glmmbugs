@@ -8,10 +8,17 @@
 
 \begin{document}
 \maketitle
+
 <<setup, echo=TRUE>>=
 library('glmmBUGS')
-haveR2jags = require('R2jags', quietly=TRUE)
+haveR2jags = require('R2jags', quietly=TRUE)  
 print(haveR2jags)
+haveRjags = try(
+		require('rjags'),
+  	silent=TRUE)
+if(class(haveRjags) == 'try-error') {
+	haveR2jags = FALSE
+}
 @
 
 \section{Muscle data}
