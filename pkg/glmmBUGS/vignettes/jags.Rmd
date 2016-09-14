@@ -1,8 +1,8 @@
 # Jags example
 
 <!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Jags example}
+% \VignetteEngine{knitr::knitr}
+% \VignetteIndexEntry{Jags example}
 -->
 
 
