@@ -5,9 +5,8 @@ Version: 2.3.3
 Date: 2016-09-13
 Depends: R (>= 3.0.0)
 Imports: abind, methods, MASS, sp, graphics, stats
-Suggests: spdep, knitr
-Enhances: R2WinBUGS, R2OpenBUGS, BRugs, R2jags, nlme, diseasemapping,
-        geoRglm
+Suggests: spdep, R2jags
+Enhances: R2WinBUGS, R2OpenBUGS, BRugs, nlme, diseasemapping, geoRglm
 Author: Patrick Brown, Lutong Zhou
 Maintainer: Patrick Brown <patrick.brown@utoronto.ca>
 Description: Automates running Generalized Linear Mixed Models, including
@@ -17,7 +16,6 @@ Description: Automates running Generalized Linear Mixed Models, including
     and functions are provided for converting model outputs to the original
     parametrization.
 License: GPL
-VignetteBuilder: knitr
 RoxygenNote: 5.0.1
 NeedsCompilation: no
 Packaged: 2016-09-13 21:00:38 UTC; PBrown

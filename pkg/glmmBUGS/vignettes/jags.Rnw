@@ -1,0 +1,118 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+
+\title{Jags example}
+%\VignetteIndexEntry{Jags example}
+\author{Patrick Brown}
+\date{Wednesday 14 September 2016}
+
+\begin{document}
+\maketitle
+<<setup, echo=TRUE>>=
+library('glmmBUGS')
+haveR2jags = require('R2jags', quietly=TRUE)
+print(haveR2jags)
+@
+
+\section{Muscle data}
+
+<<loadDataM>>=
+data('Muscle', package='nlme')
+@
+
+<<glmmbugsM>>=
+muscleRagged = glmmBUGS(conc ~ length, data=Muscle, 
+	effects="Strip", family="gaussian",
+	modelFile='model.bug', reparam='Strip')
+startingValues = muscleRagged$startingValues
+@
+
+<<jagsM>>=
+source("getInits.R")
+
+if(haveR2jags) {
+	
+	muscleResult = jags(
+			muscleRagged$ragged, getInits, parameters.to.save = names(getInits()),
+      model.file="model.bug", n.chain=3, n.iter=1000, 
+      n.burnin=100, n.thin=10, refresh=200,
+      working.directory=getwd()) 
+} else {
+	data('muscleResult')
+}
+@
+
+<<restoreParamsM>>=
+muscleParams = restoreParams(
+	muscleResult$BUGSoutput, 
+	muscleRagged$ragged) 
+summaryChain(muscleParams)$scalars[,c('mean','2.5pct','97.5pct')]
+@
+
+<<checkChainM, fig=TRUE>>=
+checkChain(muscleParams)
+@
+ 
+
+
+
+\section{Bacteria}
+
+<<formatData, echo=TRUE>>=
+data('bacteria', package='MASS')
+bacterianew <- bacteria
+bacterianew$yInt = as.integer(bacterianew$y == "y")
+levels(bacterianew$trt) <- c("placebo", "drug", "drugplus")
+@
+
+
+<<glmmBUGS>>=
+bacrag <- glmmBUGS(formula = yInt ~ trt + week, 
+    data = bacterianew,
+    effects = "ID", modelFile = "bacteria.txt",
+    family = "bernoulli",brugs=TRUE)
+
+source("getInits.R")
+startingValues = bacrag$startingValues
+@
+
+<<runjags>>=
+if(haveR2jags) {
+  bacResult = R2jags::jags(bacrag$ragged, 
+      inits=getInits,
+      model.file = "bacteria.txt", n.chain = 3,
+      n.iter = 600, n.burnin = 10, refresh=200,
+      parameters = names(getInits()),
+      n.thin = 4)
+} else {
+	bacResult = list()
+}
+@
+
+<<postprocess>>=
+if(haveR2jags) {
+bacParams = restoreParams(bacResult$BUGSoutput,
+     bacrag$ragged)
+}
+@
+
+<<results>>=
+if(haveR2jags) {
+bacsummary = summaryChain(bacParams)
+  
+bacsummary$betas[,c('mean', 'sd')]
+}
+@
+
+<<checkChain, fig=TRUE>>=
+if(haveR2jags) {
+	checkChain(bacParams, c("intercept", "SDID"),oneFigure=TRUE)
+}
+@
+
+
+
+
+
+
+\end{document}
