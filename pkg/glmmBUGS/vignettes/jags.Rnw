@@ -9,6 +9,7 @@
 \begin{document}
 \maketitle
 
+
 <<setup, echo=TRUE>>=
 library('glmmBUGS')
 haveR2jags = require('R2jags', quietly=TRUE)  
@@ -21,6 +22,10 @@ if(class(haveRjags) == 'try-error') {
 	haveR2jags = FALSE
 }
 @
+
+If Jags isn't available, the  {\tt rjags} namespace will give an error when
+loaded.
+
 
 \section{Muscle data}
 
