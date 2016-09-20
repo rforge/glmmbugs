@@ -18,7 +18,7 @@ Description: Automates running Generalized Linear Mixed Models, including
     formulas, with the package writings model files, arranging unbalanced data
     in ragged arrays, and creating starting values. The model is reparametrize,
     and functions are provided for converting model outputs to the original
-    parametrization.
+    parameterization.
 SystemRequirements: Compiling vignette requires JAGS (http://mcmc-jags.sourceforge.net)
 License: GPL
 RoxygenNote: 5.0.1
