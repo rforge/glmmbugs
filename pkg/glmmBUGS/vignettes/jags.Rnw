@@ -121,6 +121,8 @@ bacsummary$betas[,c('mean', 'sd')]
 <<checkChain, fig=TRUE>>=
 if(haveR2jags) {
 	checkChain(bacParams, c("intercept", "SDID"),oneFigure=TRUE)
+} else {
+	plot(1, main='Not run, some packages missing')
 }
 @
 
