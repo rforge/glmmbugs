@@ -113,7 +113,6 @@ bacParams = restoreParams(bacResult$BUGSoutput,
 <<results>>=
 if(haveR2jags) {
 bacsummary = summaryChain(bacParams)
-  
 bacsummary$betas[,c('mean', 'sd')]
 }
 @
@@ -125,10 +124,6 @@ if(haveR2jags) {
 	plot(1, main='Not run, some packages missing')
 }
 @
-
-
-
-
 
 
 \end{document}
