@@ -1,6 +1,7 @@
 
 \documentclass[12pt]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
 
 \title{Jags example}
 \author{Patrick Brown}

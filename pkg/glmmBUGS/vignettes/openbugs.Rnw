@@ -2,6 +2,7 @@
 
 \documentclass[12pt]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
 
 \title{OpenBUGS example}
 \author{Patrick Brown}
