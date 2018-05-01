@@ -18,7 +18,11 @@ until all the coordinates fit into the Rongelap border given by www.gadm.org.
 So they are not exact.
 }
 \source{
-See the help file for \code{\link[geoRglm]{rongelap}}, or 
+See the help file for 
+\Sexpr[results=rd]{c(
+  '\\\\code{rongelap} in the \\\\CRANpkg{geoRglm} package', 
+  '\\\\code{\\\\link[geoRglm]{rongelap}}'
+  )[1+requireNamespace('geoRglm', quietly=TRUE)]}, or 
 \url{http://www.leg.ufpr.br/doku.php/pessoais:paulojus:mbgbook:datasets}
 }
 \examples{
