@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{OpenBUGS example}
+% \VignetteIndexEntry{OpenBUGS example}
 
 \documentclass[12pt]{article}
 \usepackage[margin=1in]{geometry}

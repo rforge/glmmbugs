@@ -1,4 +1,3 @@
-%\VignetteIndexEntry{Jags example}
 
 \documentclass[12pt]{article}
 \usepackage[margin=1in]{geometry}
@@ -6,6 +5,8 @@
 \title{Jags example}
 \author{Patrick Brown}
 \date{Wednesday 14 September 2016}
+
+% \VignetteIndexEntry{Jags example}
 
 \begin{document}
 \maketitle
