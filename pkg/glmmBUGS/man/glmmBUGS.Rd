@@ -196,9 +196,6 @@ spplot(ontario, "postProb")
 # geostatistical example
 
 \dontrun{
-library(geoRglm)
-data(rongelap)
-
 rongelap= read.table(url(
 	paste("http://www.leg.ufpr.br/lib/exe/fetch.php/",
 	"pessoais:paulojus:mbgbook:datasets:rongelap.txt",
