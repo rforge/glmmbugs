@@ -52,7 +52,7 @@ if(haveBugs) {
 					n.chain = 3,
 					n.iter = 600, n.burnin = 10,
 					parameters = names(getInits()),
-					n.thin = 4, OpenBUGS.pgm = obExec),
+					n.thin = 4),
 			silent=TRUE)
 	if(class(bacResult)=='try-error') {
 		bacResult = NULL
@@ -147,9 +147,9 @@ if(all(havePackages)){
 			n.chain = 2,
 			n.iter = 500, n.burnin = 10,
 			parameters = names(int2()),
-			n.thin = 10, OpenBUGS.pgm = obExec
-			), silent=TRUE)
-	if(class(bacResult)=='try-error') {
+			n.thin = 10), 
+			silent=TRUE)
+	if(class(kResult)=='try-error') {
 		kResult = NULL
 	}
 }
