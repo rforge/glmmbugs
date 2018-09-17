@@ -43,8 +43,6 @@ startingValues = bacrag$startingValues
 @
 
 <<runbugs>>=
-bacResult = NULL
-if(haveBugs) {
  	bacResult = try(
 			R2OpenBUGS::bugs(
 					bacrag$ragged, inits=getInits,
@@ -57,7 +55,6 @@ if(haveBugs) {
 	if(class(bacResult)=='try-error') {
 		bacResult = NULL
 	}
-}
 @
 
 <<postprocess>>=
@@ -88,13 +85,14 @@ if(!is.null(bacResult)) {
 havePackages = c(
     'diseasemapping'=require('diseasemapping', quietly=TRUE), 
     "spdep"=require('spdep', quietly=TRUE), 
-    'R2OpenBUGS'= haveBugs
+    'R2OpenBUGS'= haveBugs 
 )
 print(havePackages)
 @
 
 <<kentuckyData>>=
-if(all(havePackages)){
+kentucky = kAdjMat = list()
+if(require('diseasemapping', quietly=TRUE)){
   data('kentucky', package='diseasemapping')
   larynxRates = structure(c(0, 0, 0, 0, 1e-06, 6e-06, 2.3e-05, 4.5e-05, 9.9e-05, 
           0.000163, 0.000243, 0.000299, 0.000343, 0.000308, 0.000291, 0.000217, 
@@ -108,13 +106,15 @@ if(all(havePackages)){
 	kentucky = getSMR(kentucky, larynxRates, larynx,
     	regionCode="County")
 	
+if(require('spdep', quietly=TRUE)){
 	kAdjMat = spdep::poly2nb(kentucky,
     	row.names=as.character(kentucky$County))
+}
 }
 @
 
 <<glmmBUGSkentucky>>=
-if(all(havePackages)){
+if(!is.null(kAdjMat)){
 	forBugs = glmmBUGS(observed + logExpected ~ poverty,
     	effects="County", family="poisson", 
     	spatial=kAdjMat,
@@ -134,12 +134,14 @@ if(all(havePackages)){
 				length(res$RCountySpatial))
   	res
 	}
+} else {
+	forBugs = NULL
 }
 @
 
 <<runBUGSkentucky>>=
 kResult = NULL
-if(all(havePackages)){
+if(requireNamespace('R2OpenBUGS', quietly=TRUE) & ! is.null(forBugs)) {
 	kResult = try(
 		R2OpenBUGS::bugs(forBugs$ragged, 
 			inits=int2,
@@ -156,14 +158,14 @@ if(all(havePackages)){
 @
 
 <<postprocessKentucky>>=
-if(!is.null(kResult)){
+if(!is.null(kResult) ) {
 	kParams = restoreParams(kResult,
     	forBugs$ragged)
 }
 @
 
 <<resultsKentucky>>=
-if(!is.null(kResult)){
+if(!is.null(kResult)) {
 	kSummary = summaryChain(kParams)
 	kSummary$scalars[,c('mean', 'sd')]
 }
